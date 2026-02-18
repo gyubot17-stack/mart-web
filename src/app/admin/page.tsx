@@ -40,6 +40,8 @@ export default function AdminPage() {
   const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState('')
   const [role, setRole] = useState<'admin' | 'super' | null>(null)
+  const [menuLabels, setMenuLabels] = useState<Record<string, string>>({})
+  const [menuSaving, setMenuSaving] = useState(false)
 
   async function loadContent(key: string) {
     const res = await fetch(`/api/content?key=${encodeURIComponent(key)}`, { cache: 'no-store' })
@@ -55,6 +57,17 @@ export default function AdminPage() {
     }
   }
 
+  async function loadMenuConfig() {
+    const res = await fetch('/api/content?key=menu_config', { cache: 'no-store' })
+    const json = await res.json()
+    try {
+      const parsed = JSON.parse(json?.data?.body || '{}')
+      setMenuLabels(parsed && typeof parsed === 'object' ? parsed : {})
+    } catch {
+      setMenuLabels({})
+    }
+  }
+
   useEffect(() => {
     ;(async () => {
       const me = await fetch('/api/admin/me', { cache: 'no-store' })
@@ -63,7 +76,7 @@ export default function AdminPage() {
         setRole(meJson?.role ?? null)
       }
 
-      await loadContent('home')
+      await Promise.all([loadContent('home'), loadMenuConfig()])
       setLoading(false)
     })()
   }, [])
@@ -90,6 +103,29 @@ export default function AdminPage() {
       setMessage('저장 완료 ✅')
     }
     setSaving(false)
+  }
+
+  async function saveMenuLabels() {
+    setMenuSaving(true)
+    const res = await fetch('/api/content', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        key: 'menu_config',
+        title: 'menu config',
+        subtitle: '',
+        body: JSON.stringify(menuLabels),
+        hero_image_url: '',
+      }),
+    })
+
+    if (res.ok) {
+      setMessage('메뉴명 저장 완료 ✅')
+    } else {
+      const json = await res.json()
+      setMessage(`메뉴명 저장 실패: ${json?.error ?? 'unknown'}`)
+    }
+    setMenuSaving(false)
   }
 
   async function handleUpload(file: File) {
@@ -120,11 +156,9 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen p-8 max-w-3xl mx-auto space-y-6">
+    <main className="min-h-screen p-8 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Admin - 콘텐츠 관리</h1>
-        </div>
+        <h1 className="text-2xl font-bold">Admin - 콘텐츠 관리</h1>
         <div className="flex items-center gap-2">
           {role === 'super' ? (
             <a href="/admin/system" className="px-3 py-2 text-sm rounded border">
@@ -143,83 +177,85 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">편집할 페이지</label>
-        <select
-          className="w-full border rounded px-3 py-2"
-          value={selectedKey}
-          onChange={async (e) => {
-            const key = e.target.value
-            setSelectedKey(key)
-            setLoading(true)
-            await loadContent(key)
-            setMessage('')
-            setLoading(false)
-          }}
-        >
-          {sections.map((section) => (
-            <option key={section.key} value={section.key}>
-              {section.label}
-            </option>
+      <section className="border rounded-xl p-5 space-y-4">
+        <h2 className="text-lg font-semibold">상단 메뉴명 편집</h2>
+        <div className="grid md:grid-cols-2 gap-3">
+          {sections.filter((s) => s.key !== 'home').map((section) => (
+            <label key={section.key} className="space-y-1 block">
+              <span className="text-sm text-gray-600">{section.key}</span>
+              <input
+                className="w-full border rounded px-3 py-2"
+                value={menuLabels[section.key] ?? section.label}
+                onChange={(e) => setMenuLabels((prev) => ({ ...prev, [section.key]: e.target.value }))}
+              />
+            </label>
           ))}
-        </select>
-      </div>
+        </div>
+        <button className="px-4 py-2 rounded border" disabled={menuSaving} onClick={saveMenuLabels}>
+          {menuSaving ? '메뉴 저장 중...' : '메뉴명 저장'}
+        </button>
+      </section>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">제목</label>
-        <input
-          className="w-full border rounded px-3 py-2"
-          value={content.title}
-          onChange={(e) => setContent({ ...content, title: e.target.value })}
-        />
-      </div>
+      <section className="border rounded-xl p-5 space-y-4">
+        <h2 className="text-lg font-semibold">페이지 콘텐츠 편집</h2>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">편집할 페이지</label>
+          <select
+            className="w-full border rounded px-3 py-2"
+            value={selectedKey}
+            onChange={async (e) => {
+              const key = e.target.value
+              setSelectedKey(key)
+              setLoading(true)
+              await loadContent(key)
+              setMessage('')
+              setLoading(false)
+            }}
+          >
+            {sections.map((section) => (
+              <option key={section.key} value={section.key}>
+                {section.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">부제목</label>
-        <input
-          className="w-full border rounded px-3 py-2"
-          value={content.subtitle}
-          onChange={(e) => setContent({ ...content, subtitle: e.target.value })}
-        />
-      </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">제목</label>
+          <input className="w-full border rounded px-3 py-2" value={content.title} onChange={(e) => setContent({ ...content, title: e.target.value })} />
+        </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">본문</label>
-        <textarea
-          className="w-full border rounded px-3 py-2 min-h-40"
-          value={content.body}
-          onChange={(e) => setContent({ ...content, body: e.target.value })}
-        />
-      </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">부제목</label>
+          <input className="w-full border rounded px-3 py-2" value={content.subtitle} onChange={(e) => setContent({ ...content, subtitle: e.target.value })} />
+        </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">대표 이미지</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => {
-            const file = e.target.files?.[0]
-            if (file) handleUpload(file)
-          }}
-        />
-        {content.hero_image_url ? (
-          <img
-            src={content.hero_image_url}
-            alt="hero"
-            className="w-full max-h-72 object-cover rounded border"
+        <div className="space-y-2">
+          <label className="text-sm font-medium">본문</label>
+          <textarea className="w-full border rounded px-3 py-2 min-h-40" value={content.body} onChange={(e) => setContent({ ...content, body: e.target.value })} />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">대표 이미지</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) handleUpload(file)
+            }}
           />
-        ) : (
-          <p className="text-sm text-gray-500">이미지 없음</p>
-        )}
-      </div>
+          {content.hero_image_url ? (
+            <img src={content.hero_image_url} alt="hero" className="w-full max-h-72 object-cover rounded border" />
+          ) : (
+            <p className="text-sm text-gray-500">이미지 없음</p>
+          )}
+        </div>
 
-      <button
-        className="px-4 py-2 rounded bg-black text-white disabled:opacity-50"
-        disabled={saving || uploading}
-        onClick={handleSave}
-      >
-        {saving ? '저장 중...' : '저장'}
-      </button>
+        <button className="px-4 py-2 rounded bg-black text-white disabled:opacity-50" disabled={saving || uploading} onClick={handleSave}>
+          {saving ? '저장 중...' : '저장'}
+        </button>
+      </section>
 
       {message ? <p className="text-sm text-gray-700">{message}</p> : null}
     </main>

@@ -3,7 +3,7 @@ export type SiteSection = {
   slug: string
 }
 
-export const siteSections: SiteSection[] = [
+export const defaultSiteSections: SiteSection[] = [
   { label: '회사소개', slug: 'company' },
   { label: '콤프레샤', slug: 'compressor' },
   { label: '에어크리닝시스템', slug: 'air-cleaning' },
@@ -16,6 +16,24 @@ export const siteSections: SiteSection[] = [
   { label: '고객센터', slug: 'support' },
 ]
 
-export function getSectionLabel(slug: string) {
-  return siteSections.find((s) => s.slug === slug)?.label ?? slug
+export function buildSiteSections(menuLabels?: Record<string, string>): SiteSection[] {
+  return defaultSiteSections.map((section) => ({
+    ...section,
+    label: menuLabels?.[section.slug]?.trim() || section.label,
+  }))
+}
+
+export function getSectionLabel(slug: string, menuLabels?: Record<string, string>) {
+  return buildSiteSections(menuLabels).find((s) => s.slug === slug)?.label ?? slug
+}
+
+export function parseMenuLabels(rawBody?: string | null): Record<string, string> {
+  if (!rawBody) return {}
+  try {
+    const parsed = JSON.parse(rawBody)
+    if (!parsed || typeof parsed !== 'object') return {}
+    return parsed as Record<string, string>
+  } catch {
+    return {}
+  }
 }

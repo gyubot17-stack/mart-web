@@ -1,12 +1,21 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { getSectionLabel, siteSections } from '@/lib/site-sections'
+import { buildSiteSections, getSectionLabel, parseMenuLabels } from '@/lib/site-sections'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+
+  const { data: menuConfig } = await supabaseAdmin
+    .from('site_content')
+    .select('body')
+    .eq('key', 'menu_config')
+    .maybeSingle()
+
+  const menuLabels = parseMenuLabels(menuConfig?.body)
+  const siteSections = buildSiteSections(menuLabels)
 
   const exists = siteSections.some((s) => s.slug === slug)
   if (!exists) notFound()
@@ -17,7 +26,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
     .eq('key', slug)
     .maybeSingle()
 
-  const title = data?.title || getSectionLabel(slug)
+  const title = data?.title || getSectionLabel(slug, menuLabels)
   const subtitle = data?.subtitle || ''
   const body = data?.body || '이 섹션의 상세 내용은 관리자 페이지에서 입력할 수 있습니다.'
   const image = data?.hero_image_url || ''
@@ -58,6 +67,33 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
         )}
 
         <article className="whitespace-pre-wrap leading-7 text-gray-700">{body}</article>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-6 pb-8 space-y-4">
+        <h2 className="text-2xl font-bold">갤러리</h2>
+        <div className="grid md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((n) => (
+            <div key={n} className="min-h-40 rounded-lg border border-dashed flex items-center justify-center text-gray-400">
+              갤러리 이미지 {n}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="max-w-6xl mx-auto px-6 pb-16 space-y-4">
+        <h2 className="text-2xl font-bold">제품 카드</h2>
+        <div className="grid md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((n) => (
+            <article key={n} className="rounded-lg border p-4 space-y-3">
+              <div className="min-h-32 rounded border border-dashed flex items-center justify-center text-gray-400">
+                제품 이미지 {n}
+              </div>
+              <h3 className="font-semibold">제품명 {n}</h3>
+              <p className="text-sm text-gray-600">제품 설명을 입력할 수 있는 영역입니다.</p>
+              <button className="px-3 py-2 text-sm rounded bg-black text-white">문의하기</button>
+            </article>
+          ))}
+        </div>
       </section>
     </main>
   )
