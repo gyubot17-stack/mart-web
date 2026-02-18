@@ -10,15 +10,21 @@ type Content = {
   hero_image_url: string
 }
 
+type GalleryItem = {
+  url: string
+  visible: boolean
+}
+
 type Product = {
   name: string
   desc: string
   image: string
   link: string
+  visible: boolean
 }
 
 type SectionExtra = {
-  gallery: string[]
+  gallery: GalleryItem[]
   products: Product[]
 }
 
@@ -46,31 +52,35 @@ const initial: Content = {
 
 const defaultExtra: SectionExtra = {
   gallery: [],
-  products: [
-    { name: '', desc: '', image: '', link: '' },
-    { name: '', desc: '', image: '', link: '' },
-    { name: '', desc: '', image: '', link: '' },
-  ],
+  products: [],
 }
 
 function createEmptyProduct(): Product {
-  return { name: '', desc: '', image: '', link: '' }
+  return { name: '', desc: '', image: '', link: '', visible: true }
+}
+
+function createEmptyGalleryItem(): GalleryItem {
+  return { url: '', visible: true }
 }
 
 function parseExtra(raw?: string | null): SectionExtra {
   if (!raw) return defaultExtra
   try {
-    const parsed = JSON.parse(raw) as Partial<SectionExtra>
+    const parsed = JSON.parse(raw) as any
     const gallery = Array.isArray(parsed.gallery)
-      ? parsed.gallery.map((g) => String(g || ''))
+      ? parsed.gallery.map((g: any) => {
+          if (typeof g === 'string') return { url: g, visible: true }
+          return { url: String(g?.url || ''), visible: g?.visible !== false }
+        })
       : defaultExtra.gallery
 
-    const products = Array.isArray(parsed.products) && parsed.products.length > 0
-      ? parsed.products.map((p) => ({
+    const products = Array.isArray(parsed.products)
+      ? parsed.products.map((p: any) => ({
           name: p?.name || '',
           desc: p?.desc || '',
           image: p?.image || '',
           link: p?.link || '',
+          visible: p?.visible !== false,
         }))
       : defaultExtra.products
 
@@ -217,7 +227,7 @@ export default function AdminPage() {
     } else if (target === 'gallery' && typeof index === 'number') {
       setExtra((prev) => {
         const next = [...prev.gallery]
-        next[index] = upJson.url
+        next[index] = { ...next[index], url: upJson.url }
         return { ...prev, gallery: next }
       })
       setMessage('갤러리 이미지 업로드 완료. 갤러리/제품카드 저장 버튼을 눌러 반영하세요.')
@@ -336,7 +346,7 @@ export default function AdminPage() {
               <button
                 type="button"
                 className="px-3 py-1.5 text-sm rounded border"
-                onClick={() => setExtra((prev) => ({ ...prev, gallery: [...prev.gallery, ""] }))}
+                onClick={() => setExtra((prev) => ({ ...prev, gallery: [...prev.gallery, createEmptyGalleryItem()] }))}
               >
                 + 갤러리 추가
               </button>
@@ -349,28 +359,65 @@ export default function AdminPage() {
                 <div key={i} className="space-y-2 border rounded p-3">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">갤러리 {i + 1}</p>
-                    <button
-                      type="button"
-                      className="px-2 py-1 text-xs rounded border text-red-600"
-                      onClick={() => {
-                        setExtra((prev) => ({
-                          ...prev,
-                          gallery: prev.gallery.filter((_, idx) => idx !== i),
-                        }))
-                      }}
-                    >
-                      삭제
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        className="px-2 py-1 text-xs rounded border"
+                        disabled={i === 0}
+                        onClick={() => {
+                          setExtra((prev) => {
+                            if (i === 0) return prev
+                            const next = [...prev.gallery]
+                            ;[next[i - 1], next[i]] = [next[i], next[i - 1]]
+                            return { ...prev, gallery: next }
+                          })
+                        }}
+                      >↑</button>
+                      <button
+                        type="button"
+                        className="px-2 py-1 text-xs rounded border"
+                        disabled={i === extra.gallery.length - 1}
+                        onClick={() => {
+                          setExtra((prev) => {
+                            if (i >= prev.gallery.length - 1) return prev
+                            const next = [...prev.gallery]
+                            ;[next[i + 1], next[i]] = [next[i], next[i + 1]]
+                            return { ...prev, gallery: next }
+                          })
+                        }}
+                      >↓</button>
+                      <button
+                        type="button"
+                        className="px-2 py-1 text-xs rounded border"
+                        onClick={() => {
+                          setExtra((prev) => {
+                            const next = [...prev.gallery]
+                            next[i] = { ...next[i], visible: !next[i].visible }
+                            return { ...prev, gallery: next }
+                          })
+                        }}
+                      >{url.visible ? '숨김' : '표시'}</button>
+                      <button
+                        type="button"
+                        className="px-2 py-1 text-xs rounded border text-red-600"
+                        onClick={() => {
+                          setExtra((prev) => ({
+                            ...prev,
+                            gallery: prev.gallery.filter((_, idx) => idx !== i),
+                          }))
+                        }}
+                      >삭제</button>
+                    </div>
                   </div>
                   <input
                     className="w-full border rounded px-3 py-2 text-sm"
                     placeholder={`갤러리 이미지 ${i + 1} URL`}
-                    value={url}
+                    value={url.url}
                     onChange={(e) => {
                       const val = e.target.value
                       setExtra((prev) => {
                         const next = [...prev.gallery]
-                        next[i] = val
+                        next[i] = { ...next[i], url: val }
                         return { ...prev, gallery: next }
                       })
                     }}
@@ -407,18 +454,55 @@ export default function AdminPage() {
                 <div key={i} className="border rounded p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <p className="font-medium text-sm">제품 {i + 1}</p>
-                    <button
-                      type="button"
-                      className="px-2 py-1 text-xs rounded border text-red-600"
-                      onClick={() => {
-                        setExtra((prev) => ({
-                          ...prev,
-                          products: prev.products.filter((_, idx) => idx !== i),
-                        }))
-                      }}
-                    >
-                      삭제
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        className="px-2 py-1 text-xs rounded border"
+                        disabled={i === 0}
+                        onClick={() => {
+                          setExtra((prev) => {
+                            if (i === 0) return prev
+                            const next = [...prev.products]
+                            ;[next[i - 1], next[i]] = [next[i], next[i - 1]]
+                            return { ...prev, products: next }
+                          })
+                        }}
+                      >↑</button>
+                      <button
+                        type="button"
+                        className="px-2 py-1 text-xs rounded border"
+                        disabled={i === extra.products.length - 1}
+                        onClick={() => {
+                          setExtra((prev) => {
+                            if (i >= prev.products.length - 1) return prev
+                            const next = [...prev.products]
+                            ;[next[i + 1], next[i]] = [next[i], next[i + 1]]
+                            return { ...prev, products: next }
+                          })
+                        }}
+                      >↓</button>
+                      <button
+                        type="button"
+                        className="px-2 py-1 text-xs rounded border"
+                        onClick={() => {
+                          setExtra((prev) => {
+                            const next = [...prev.products]
+                            next[i] = { ...next[i], visible: !next[i].visible }
+                            return { ...prev, products: next }
+                          })
+                        }}
+                      >{product.visible ? '숨김' : '표시'}</button>
+                      <button
+                        type="button"
+                        className="px-2 py-1 text-xs rounded border text-red-600"
+                        onClick={() => {
+                          setExtra((prev) => ({
+                            ...prev,
+                            products: prev.products.filter((_, idx) => idx !== i),
+                          }))
+                        }}
+                      >삭제</button>
+                    </div>
                   </div>
                   <input
                     className="w-full border rounded px-3 py-2 text-sm"

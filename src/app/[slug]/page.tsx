@@ -6,15 +6,21 @@ import { buildSiteSections, getSectionLabel, parseMenuLabels } from '@/lib/site-
 
 export const dynamic = 'force-dynamic'
 
+type GalleryItem = {
+  url: string
+  visible: boolean
+}
+
 type Product = {
   name: string
   desc: string
   image: string
   link: string
+  visible: boolean
 }
 
 type SectionExtra = {
-  gallery: string[]
+  gallery: GalleryItem[]
   products: Product[]
 }
 
@@ -28,7 +34,13 @@ function parseExtra(raw?: string | null): SectionExtra {
   try {
     const parsed = JSON.parse(raw) as Partial<SectionExtra>
     const gallery = Array.isArray(parsed.gallery)
-      ? parsed.gallery.map((g) => String(g || ''))
+      ? parsed.gallery.map((g) => {
+          if (typeof g === 'string') return { url: g, visible: true }
+          return {
+            url: String((g as any)?.url || ''),
+            visible: (g as any)?.visible !== false,
+          }
+        })
       : defaultExtra.gallery
 
     const products = Array.isArray(parsed.products)
@@ -37,6 +49,7 @@ function parseExtra(raw?: string | null): SectionExtra {
           desc: p?.desc || '제품 설명을 입력할 수 있는 영역입니다.',
           image: p?.image || '',
           link: p?.link || '',
+          visible: (p as any)?.visible !== false,
         }))
       : defaultExtra.products
 
@@ -67,6 +80,8 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
   const body = data?.body || '이 섹션의 상세 내용은 관리자 페이지에서 입력할 수 있습니다.'
   const image = data?.hero_image_url || ''
   const extra = parseExtra(extraData?.body)
+  const visibleGallery = extra.gallery.filter((g) => g.visible)
+  const visibleProducts = extra.products.filter((p) => p.visible)
 
   let footer = {
     companyName: 'mrtc.kr',
@@ -123,14 +138,14 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
         <article className="whitespace-pre-wrap leading-7 text-gray-700">{body}</article>
       </section>
 
-      {extra.gallery.length > 0 ? (
+      {visibleGallery.length > 0 ? (
         <section className="max-w-6xl mx-auto px-6 pb-8 space-y-4">
           <h2 className="text-2xl font-bold">갤러리</h2>
           <div className="grid md:grid-cols-3 gap-4">
-            {extra.gallery.map((url, i) => (
+            {visibleGallery.map((item, i) => (
               <div key={i} className="min-h-40 rounded-lg border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
-                {url ? (
-                  <img src={url} alt={`gallery-${i + 1}`} className="w-full h-40 object-cover" />
+                {item.url ? (
+                  <img src={item.url} alt={`gallery-${i + 1}`} className="w-full h-40 object-cover" />
                 ) : (
                   `갤러리 이미지 ${i + 1}`
                 )}
@@ -140,11 +155,11 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
         </section>
       ) : null}
 
-      {extra.products.length > 0 ? (
+      {visibleProducts.length > 0 ? (
         <section className="max-w-6xl mx-auto px-6 pb-16 space-y-4">
           <h2 className="text-2xl font-bold">제품 카드</h2>
           <div className="grid md:grid-cols-3 gap-4">
-            {extra.products.map((product, i) => (
+            {visibleProducts.map((product, i) => (
               <article key={i} className="rounded-lg border p-4 space-y-3">
                 <div className="min-h-32 rounded border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
                   {product.image ? (
