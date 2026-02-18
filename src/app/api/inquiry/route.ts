@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     key,
     title: `문의 - ${name}`,
     subtitle: phone,
-    body: JSON.stringify({ name, phone, message, createdAt: new Date().toISOString() }),
+    body: JSON.stringify({ name, phone, message, status: 'new', createdAt: new Date().toISOString() }),
     hero_image_url: '',
   }
 

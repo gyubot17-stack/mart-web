@@ -123,52 +123,50 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
         <article className="whitespace-pre-wrap leading-7 text-gray-700">{body}</article>
       </section>
 
-      <section className="max-w-6xl mx-auto px-6 pb-8 space-y-4">
-        <h2 className="text-2xl font-bold">갤러리</h2>
-        <div className="grid md:grid-cols-3 gap-4">
-          {extra.gallery.length === 0 ? (
-            <p className="text-sm text-gray-500 md:col-span-3">등록된 갤러리가 없습니다.</p>
-          ) : null}
-          {extra.gallery.map((url, i) => (
-            <div key={i} className="min-h-40 rounded-lg border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
-              {url ? (
-                <img src={url} alt={`gallery-${i + 1}`} className="w-full h-40 object-cover" />
-              ) : (
-                `갤러리 이미지 ${i + 1}`
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="max-w-6xl mx-auto px-6 pb-16 space-y-4">
-        <h2 className="text-2xl font-bold">제품 카드</h2>
-        <div className="grid md:grid-cols-3 gap-4">
-          {extra.products.length === 0 ? (
-            <p className="text-sm text-gray-500 md:col-span-3">등록된 제품 카드가 없습니다.</p>
-          ) : null}
-          {extra.products.map((product, i) => (
-            <article key={i} className="rounded-lg border p-4 space-y-3">
-              <div className="min-h-32 rounded border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
-                {product.image ? (
-                  <img src={product.image} alt={product.name} className="w-full h-32 object-cover" />
+      {extra.gallery.length > 0 ? (
+        <section className="max-w-6xl mx-auto px-6 pb-8 space-y-4">
+          <h2 className="text-2xl font-bold">갤러리</h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            {extra.gallery.map((url, i) => (
+              <div key={i} className="min-h-40 rounded-lg border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
+                {url ? (
+                  <img src={url} alt={`gallery-${i + 1}`} className="w-full h-40 object-cover" />
                 ) : (
-                  `제품 이미지 ${i + 1}`
+                  `갤러리 이미지 ${i + 1}`
                 )}
               </div>
-              <h3 className="font-semibold">{product.name || `제품명 ${i + 1}`}</h3>
-              <p className="text-sm text-gray-600">{product.desc || '제품 설명을 입력할 수 있는 영역입니다.'}</p>
-              {product.link ? (
-                <a href={product.link} className="inline-block px-3 py-2 text-sm rounded bg-black text-white">
-                  문의하기
-                </a>
-              ) : (
-                <button className="px-3 py-2 text-sm rounded bg-black text-white">문의하기</button>
-              )}
-            </article>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {extra.products.length > 0 ? (
+        <section className="max-w-6xl mx-auto px-6 pb-16 space-y-4">
+          <h2 className="text-2xl font-bold">제품 카드</h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            {extra.products.map((product, i) => (
+              <article key={i} className="rounded-lg border p-4 space-y-3">
+                <div className="min-h-32 rounded border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
+                  {product.image ? (
+                    <img src={product.image} alt={product.name} className="w-full h-32 object-cover" />
+                  ) : (
+                    `제품 이미지 ${i + 1}`
+                  )}
+                </div>
+                <h3 className="font-semibold">{product.name || `제품명 ${i + 1}`}</h3>
+                <p className="text-sm text-gray-600">{product.desc || '제품 설명을 입력할 수 있는 영역입니다.'}</p>
+                {product.link ? (
+                  <a href={product.link} className="inline-block px-3 py-2 text-sm rounded bg-black text-white">
+                    문의하기
+                  </a>
+                ) : (
+                  <button className="px-3 py-2 text-sm rounded bg-black text-white">문의하기</button>
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {slug === 'support' ? (
         <section className="max-w-6xl mx-auto px-6 pb-12">
