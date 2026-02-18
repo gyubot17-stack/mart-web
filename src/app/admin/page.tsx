@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 type Content = {
   key: string
@@ -8,6 +8,18 @@ type Content = {
   subtitle: string
   body: string
   hero_image_url: string
+}
+
+type Product = {
+  name: string
+  desc: string
+  image: string
+  link: string
+}
+
+type SectionExtra = {
+  gallery: string[]
+  products: Product[]
 }
 
 const sections = [
@@ -32,6 +44,38 @@ const initial: Content = {
   hero_image_url: '',
 }
 
+const defaultExtra: SectionExtra = {
+  gallery: ['', '', ''],
+  products: [
+    { name: '', desc: '', image: '', link: '' },
+    { name: '', desc: '', image: '', link: '' },
+    { name: '', desc: '', image: '', link: '' },
+  ],
+}
+
+function parseExtra(raw?: string | null): SectionExtra {
+  if (!raw) return defaultExtra
+  try {
+    const parsed = JSON.parse(raw) as Partial<SectionExtra>
+    const gallery = Array.isArray(parsed.gallery)
+      ? [parsed.gallery[0] || '', parsed.gallery[1] || '', parsed.gallery[2] || '']
+      : defaultExtra.gallery
+
+    const products = Array.isArray(parsed.products)
+      ? [0, 1, 2].map((i) => ({
+          name: parsed.products?.[i]?.name || '',
+          desc: parsed.products?.[i]?.desc || '',
+          image: parsed.products?.[i]?.image || '',
+          link: parsed.products?.[i]?.link || '',
+        }))
+      : defaultExtra.products
+
+    return { gallery, products }
+  } catch {
+    return defaultExtra
+  }
+}
+
 export default function AdminPage() {
   const [content, setContent] = useState<Content>(initial)
   const [selectedKey, setSelectedKey] = useState('home')
@@ -42,6 +86,10 @@ export default function AdminPage() {
   const [role, setRole] = useState<'admin' | 'super' | null>(null)
   const [menuLabels, setMenuLabels] = useState<Record<string, string>>({})
   const [menuSaving, setMenuSaving] = useState(false)
+  const [extra, setExtra] = useState<SectionExtra>(defaultExtra)
+  const [extraSaving, setExtraSaving] = useState(false)
+
+  const isHome = useMemo(() => selectedKey === 'home', [selectedKey])
 
   async function loadContent(key: string) {
     const res = await fetch(`/api/content?key=${encodeURIComponent(key)}`, { cache: 'no-store' })
@@ -54,6 +102,14 @@ export default function AdminPage() {
         body: json.data.body ?? '',
         hero_image_url: json.data.hero_image_url ?? '',
       })
+    }
+
+    if (key !== 'home') {
+      const extraRes = await fetch(`/api/content?key=${encodeURIComponent(`${key}_extra`)}`, { cache: 'no-store' })
+      const extraJson = await extraRes.json()
+      setExtra(parseExtra(extraJson?.data?.body))
+    } else {
+      setExtra(defaultExtra)
     }
   }
 
@@ -93,16 +149,33 @@ export default function AdminPage() {
     if (!res.ok) {
       setMessage(`저장 실패: ${json?.error ?? 'unknown'}`)
     } else {
-      setContent({
-        key: content.key,
-        title: json.data.title ?? '',
-        subtitle: json.data.subtitle ?? '',
-        body: json.data.body ?? '',
-        hero_image_url: json.data.hero_image_url ?? '',
-      })
       setMessage('저장 완료 ✅')
     }
     setSaving(false)
+  }
+
+  async function saveExtra() {
+    if (isHome) return
+    setExtraSaving(true)
+    const res = await fetch('/api/content', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        key: `${selectedKey}_extra`,
+        title: `${selectedKey} extra`,
+        subtitle: '',
+        body: JSON.stringify(extra),
+        hero_image_url: '',
+      }),
+    })
+
+    if (res.ok) {
+      setMessage('갤러리/제품카드 저장 완료 ✅')
+    } else {
+      const json = await res.json()
+      setMessage(`갤러리/제품카드 저장 실패: ${json?.error ?? 'unknown'}`)
+    }
+    setExtraSaving(false)
   }
 
   async function saveMenuLabels() {
@@ -128,7 +201,7 @@ export default function AdminPage() {
     setMenuSaving(false)
   }
 
-  async function handleUpload(file: File) {
+  async function handleUpload(file: File, target: 'hero' | 'gallery' | 'product', index?: number) {
     setUploading(true)
     setMessage('이미지 업로드 중...')
     const fd = new FormData()
@@ -145,9 +218,25 @@ export default function AdminPage() {
       return
     }
 
-    const next = { ...content, hero_image_url: upJson.url }
-    setContent(next)
-    setMessage('이미지 업로드 완료. 저장 버튼을 눌러 반영하세요.')
+    if (target === 'hero') {
+      setContent((prev) => ({ ...prev, hero_image_url: upJson.url }))
+      setMessage('대표 이미지 업로드 완료. 저장 버튼을 눌러 반영하세요.')
+    } else if (target === 'gallery' && typeof index === 'number') {
+      setExtra((prev) => {
+        const next = [...prev.gallery]
+        next[index] = upJson.url
+        return { ...prev, gallery: next }
+      })
+      setMessage('갤러리 이미지 업로드 완료. 갤러리/제품카드 저장 버튼을 눌러 반영하세요.')
+    } else if (target === 'product' && typeof index === 'number') {
+      setExtra((prev) => {
+        const nextProducts = [...prev.products]
+        nextProducts[index] = { ...nextProducts[index], image: upJson.url }
+        return { ...prev, products: nextProducts }
+      })
+      setMessage('제품 이미지 업로드 완료. 갤러리/제품카드 저장 버튼을 눌러 반영하세요.')
+    }
+
     setUploading(false)
   }
 
@@ -156,7 +245,7 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen p-8 max-w-4xl mx-auto space-y-6">
+    <main className="min-h-screen p-8 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-bold">Admin - 콘텐츠 관리</h1>
         <div className="flex items-center gap-2">
@@ -242,7 +331,7 @@ export default function AdminPage() {
             accept="image/*"
             onChange={(e) => {
               const file = e.target.files?.[0]
-              if (file) handleUpload(file)
+              if (file) handleUpload(file, 'hero')
             }}
           />
           {content.hero_image_url ? (
@@ -256,6 +345,118 @@ export default function AdminPage() {
           {saving ? '저장 중...' : '저장'}
         </button>
       </section>
+
+      {!isHome ? (
+        <section className="border rounded-xl p-5 space-y-6">
+          <h2 className="text-lg font-semibold">갤러리 / 제품 카드 편집 ({selectedKey})</h2>
+
+          <div className="space-y-3">
+            <h3 className="font-medium">갤러리 이미지 3개</h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              {extra.gallery.map((url, i) => (
+                <div key={i} className="space-y-2">
+                  <input
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    placeholder={`갤러리 이미지 ${i + 1} URL`}
+                    value={url}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setExtra((prev) => {
+                        const next = [...prev.gallery]
+                        next[i] = val
+                        return { ...prev, gallery: next }
+                      })
+                    }}
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleUpload(file, 'gallery', i)
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="font-medium">제품 카드 3개</h3>
+            <div className="space-y-4">
+              {extra.products.map((product, i) => (
+                <div key={i} className="border rounded p-4 space-y-2">
+                  <p className="font-medium text-sm">제품 {i + 1}</p>
+                  <input
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    placeholder="제품명"
+                    value={product.name}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setExtra((prev) => {
+                        const next = [...prev.products]
+                        next[i] = { ...next[i], name: val }
+                        return { ...prev, products: next }
+                      })
+                    }}
+                  />
+                  <input
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    placeholder="제품 이미지 URL"
+                    value={product.image}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setExtra((prev) => {
+                        const next = [...prev.products]
+                        next[i] = { ...next[i], image: val }
+                        return { ...prev, products: next }
+                      })
+                    }}
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleUpload(file, 'product', i)
+                    }}
+                  />
+                  <textarea
+                    className="w-full border rounded px-3 py-2 text-sm min-h-20"
+                    placeholder="제품 설명"
+                    value={product.desc}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setExtra((prev) => {
+                        const next = [...prev.products]
+                        next[i] = { ...next[i], desc: val }
+                        return { ...prev, products: next }
+                      })
+                    }}
+                  />
+                  <input
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    placeholder="문의하기 버튼 링크 (선택)"
+                    value={product.link}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      setExtra((prev) => {
+                        const next = [...prev.products]
+                        next[i] = { ...next[i], link: val }
+                        return { ...prev, products: next }
+                      })
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button className="px-4 py-2 rounded border" disabled={extraSaving || uploading} onClick={saveExtra}>
+            {extraSaving ? '갤러리/제품카드 저장 중...' : '갤러리/제품카드 저장'}
+          </button>
+        </section>
+      ) : null}
 
       {message ? <p className="text-sm text-gray-700">{message}</p> : null}
     </main>

@@ -5,14 +5,58 @@ import { buildSiteSections, getSectionLabel, parseMenuLabels } from '@/lib/site-
 
 export const dynamic = 'force-dynamic'
 
+type Product = {
+  name: string
+  desc: string
+  image: string
+  link: string
+}
+
+type SectionExtra = {
+  gallery: string[]
+  products: Product[]
+}
+
+const defaultExtra: SectionExtra = {
+  gallery: ['', '', ''],
+  products: [
+    { name: '제품명 1', desc: '제품 설명을 입력할 수 있는 영역입니다.', image: '', link: '' },
+    { name: '제품명 2', desc: '제품 설명을 입력할 수 있는 영역입니다.', image: '', link: '' },
+    { name: '제품명 3', desc: '제품 설명을 입력할 수 있는 영역입니다.', image: '', link: '' },
+  ],
+}
+
+function parseExtra(raw?: string | null): SectionExtra {
+  if (!raw) return defaultExtra
+  try {
+    const parsed = JSON.parse(raw) as Partial<SectionExtra>
+    const gallery = Array.isArray(parsed.gallery)
+      ? [parsed.gallery[0] || '', parsed.gallery[1] || '', parsed.gallery[2] || '']
+      : defaultExtra.gallery
+
+    const products = Array.isArray(parsed.products)
+      ? [0, 1, 2].map((i) => ({
+          name: parsed.products?.[i]?.name || `제품명 ${i + 1}`,
+          desc: parsed.products?.[i]?.desc || '제품 설명을 입력할 수 있는 영역입니다.',
+          image: parsed.products?.[i]?.image || '',
+          link: parsed.products?.[i]?.link || '',
+        }))
+      : defaultExtra.products
+
+    return { gallery, products }
+  } catch {
+    return defaultExtra
+  }
+}
+
 export default async function SectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const { data: menuConfig } = await supabaseAdmin
-    .from('site_content')
-    .select('body')
-    .eq('key', 'menu_config')
-    .maybeSingle()
+  const [{ data: menuConfig }, { data }, { data: extraData }] = await Promise.all([
+    supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
+    supabaseAdmin.from('site_content').select('*').eq('key', slug).maybeSingle(),
+    supabaseAdmin.from('site_content').select('body').eq('key', `${slug}_extra`).maybeSingle(),
+  ])
 
   const menuLabels = parseMenuLabels(menuConfig?.body)
   const siteSections = buildSiteSections(menuLabels)
@@ -20,16 +64,11 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
   const exists = siteSections.some((s) => s.slug === slug)
   if (!exists) notFound()
 
-  const { data } = await supabaseAdmin
-    .from('site_content')
-    .select('*')
-    .eq('key', slug)
-    .maybeSingle()
-
   const title = data?.title || getSectionLabel(slug, menuLabels)
   const subtitle = data?.subtitle || ''
   const body = data?.body || '이 섹션의 상세 내용은 관리자 페이지에서 입력할 수 있습니다.'
   const image = data?.hero_image_url || ''
+  const extra = parseExtra(extraData?.body)
 
   return (
     <main id="top" className="min-h-screen bg-white text-gray-900">
@@ -72,9 +111,13 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
       <section className="max-w-6xl mx-auto px-6 pb-8 space-y-4">
         <h2 className="text-2xl font-bold">갤러리</h2>
         <div className="grid md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((n) => (
-            <div key={n} className="min-h-40 rounded-lg border border-dashed flex items-center justify-center text-gray-400">
-              갤러리 이미지 {n}
+          {extra.gallery.map((url, i) => (
+            <div key={i} className="min-h-40 rounded-lg border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
+              {url ? (
+                <img src={url} alt={`gallery-${i + 1}`} className="w-full h-40 object-cover" />
+              ) : (
+                `갤러리 이미지 ${i + 1}`
+              )}
             </div>
           ))}
         </div>
@@ -83,14 +126,24 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
       <section className="max-w-6xl mx-auto px-6 pb-16 space-y-4">
         <h2 className="text-2xl font-bold">제품 카드</h2>
         <div className="grid md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((n) => (
-            <article key={n} className="rounded-lg border p-4 space-y-3">
-              <div className="min-h-32 rounded border border-dashed flex items-center justify-center text-gray-400">
-                제품 이미지 {n}
+          {extra.products.map((product, i) => (
+            <article key={i} className="rounded-lg border p-4 space-y-3">
+              <div className="min-h-32 rounded border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
+                {product.image ? (
+                  <img src={product.image} alt={product.name} className="w-full h-32 object-cover" />
+                ) : (
+                  `제품 이미지 ${i + 1}`
+                )}
               </div>
-              <h3 className="font-semibold">제품명 {n}</h3>
-              <p className="text-sm text-gray-600">제품 설명을 입력할 수 있는 영역입니다.</p>
-              <button className="px-3 py-2 text-sm rounded bg-black text-white">문의하기</button>
+              <h3 className="font-semibold">{product.name || `제품명 ${i + 1}`}</h3>
+              <p className="text-sm text-gray-600">{product.desc || '제품 설명을 입력할 수 있는 영역입니다.'}</p>
+              {product.link ? (
+                <a href={product.link} className="inline-block px-3 py-2 text-sm rounded bg-black text-white">
+                  문의하기
+                </a>
+              ) : (
+                <button className="px-3 py-2 text-sm rounded bg-black text-white">문의하기</button>
+              )}
             </article>
           ))}
         </div>
