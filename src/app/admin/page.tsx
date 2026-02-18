@@ -3,13 +3,29 @@
 import { useEffect, useState } from 'react'
 
 type Content = {
+  key: string
   title: string
   subtitle: string
   body: string
   hero_image_url: string
 }
 
+const sections = [
+  { key: 'home', label: '홈' },
+  { key: 'company', label: '회사소개' },
+  { key: 'compressor', label: '콤프레샤' },
+  { key: 'air-cleaning', label: '에어크리닝시스템' },
+  { key: 'generator', label: '발전기' },
+  { key: 'eco-energy', label: '친환경에너지' },
+  { key: 'industrial', label: '산업기계' },
+  { key: 'records', label: '거래실적' },
+  { key: 'special-sale', label: '특가판매' },
+  { key: 'as', label: '제품AS' },
+  { key: 'support', label: '고객센터' },
+]
+
 const initial: Content = {
+  key: 'home',
   title: '',
   subtitle: '',
   body: '',
@@ -18,11 +34,26 @@ const initial: Content = {
 
 export default function AdminPage() {
   const [content, setContent] = useState<Content>(initial)
+  const [selectedKey, setSelectedKey] = useState('home')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState('')
   const [role, setRole] = useState<'admin' | 'super' | null>(null)
+
+  async function loadContent(key: string) {
+    const res = await fetch(`/api/content?key=${encodeURIComponent(key)}`, { cache: 'no-store' })
+    const json = await res.json()
+    if (json?.data) {
+      setContent({
+        key,
+        title: json.data.title ?? '',
+        subtitle: json.data.subtitle ?? '',
+        body: json.data.body ?? '',
+        hero_image_url: json.data.hero_image_url ?? '',
+      })
+    }
+  }
 
   useEffect(() => {
     ;(async () => {
@@ -32,9 +63,7 @@ export default function AdminPage() {
         setRole(meJson?.role ?? null)
       }
 
-      const res = await fetch('/api/content', { cache: 'no-store' })
-      const json = await res.json()
-      if (json?.data) setContent(json.data)
+      await loadContent('home')
       setLoading(false)
     })()
   }, [])
@@ -51,7 +80,13 @@ export default function AdminPage() {
     if (!res.ok) {
       setMessage(`저장 실패: ${json?.error ?? 'unknown'}`)
     } else {
-      setContent(json.data)
+      setContent({
+        key: content.key,
+        title: json.data.title ?? '',
+        subtitle: json.data.subtitle ?? '',
+        body: json.data.body ?? '',
+        hero_image_url: json.data.hero_image_url ?? '',
+      })
       setMessage('저장 완료 ✅')
     }
     setSaving(false)
@@ -109,6 +144,28 @@ export default function AdminPage() {
       </div>
 
       <div className="space-y-2">
+        <label className="text-sm font-medium">편집할 페이지</label>
+        <select
+          className="w-full border rounded px-3 py-2"
+          value={selectedKey}
+          onChange={async (e) => {
+            const key = e.target.value
+            setSelectedKey(key)
+            setLoading(true)
+            await loadContent(key)
+            setMessage('')
+            setLoading(false)
+          }}
+        >
+          {sections.map((section) => (
+            <option key={section.key} value={section.key}>
+              {section.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="space-y-2">
         <label className="text-sm font-medium">제목</label>
         <input
           className="w-full border rounded px-3 py-2"
@@ -136,7 +193,7 @@ export default function AdminPage() {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">히어로 이미지</label>
+        <label className="text-sm font-medium">대표 이미지</label>
         <input
           type="file"
           accept="image/*"

@@ -1,19 +1,8 @@
+import Link from 'next/link'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { siteSections } from '@/lib/site-sections'
 
 export const dynamic = 'force-dynamic'
-
-const menuItems = [
-  { label: '회사소개', id: 'company' },
-  { label: '콤프레샤', id: 'compressor' },
-  { label: '에어크리닝시스템', id: 'air-cleaning' },
-  { label: '발전기', id: 'generator' },
-  { label: '친환경에너지', id: 'eco-energy' },
-  { label: '산업기계', id: 'industrial' },
-  { label: '거래실적', id: 'records' },
-  { label: '특가판매', id: 'special-sale' },
-  { label: '제품AS', id: 'as' },
-  { label: '고객센터', id: 'support' },
-]
 
 export default async function Home() {
   const { data } = await supabaseAdmin
@@ -44,14 +33,14 @@ export default async function Home() {
           >
             홈
           </a>
-          {menuItems.map((item) => (
-            <a
-              key={item.id}
-              href={`#${item.id}`}
+          {siteSections.map((item) => (
+            <Link
+              key={item.slug}
+              href={`/${item.slug}`}
               className="shrink-0 px-4 py-2 rounded-md border text-sm hover:bg-gray-50"
             >
               {item.label}
-            </a>
+            </Link>
           ))}
         </div>
       </header>
@@ -78,17 +67,16 @@ export default async function Home() {
       </section>
 
       <section className="max-w-6xl mx-auto px-6 pb-16 grid md:grid-cols-2 gap-6">
-        {menuItems.map((item) => (
-          <section key={item.id} id={item.id} className="border rounded-xl p-6 space-y-4 scroll-mt-24">
+        {siteSections.map((item) => (
+          <Link key={item.slug} href={`/${item.slug}`} className="border rounded-xl p-6 space-y-4 hover:bg-gray-50">
             <h2 className="text-2xl font-bold">{item.label}</h2>
             <div className="w-full min-h-44 rounded-lg border border-dashed flex items-center justify-center text-gray-400">
               이미지 영역 (추후 업로드)
             </div>
             <p className="text-gray-600 text-sm leading-6">
-              {item.label} 상세 내용을 입력할 자리입니다. 관리자 페이지 고도화 단계에서
-              각 섹션별 텍스트/이미지 편집 기능으로 확장할 수 있습니다.
+              클릭하면 {item.label} 상세 페이지로 이동합니다.
             </p>
-          </section>
+          </Link>
         ))}
       </section>
 
