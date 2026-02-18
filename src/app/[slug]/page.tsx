@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase-server'
@@ -5,6 +6,31 @@ import InquiryForm from '@/components/InquiryForm'
 import { buildSiteSections, getSectionLabel, parseMenuLabels } from '@/lib/site-sections'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+
+  const [{ data: menuConfig }, { data }] = await Promise.all([
+    supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
+    supabaseAdmin.from('site_content').select('title,subtitle').eq('key', slug).maybeSingle(),
+  ])
+
+  const menuLabels = parseMenuLabels(menuConfig?.body)
+  const sectionTitle = data?.title || getSectionLabel(slug, menuLabels)
+  const description = data?.subtitle || `${sectionTitle} 안내 페이지`
+
+  return {
+    title: sectionTitle,
+    description,
+    openGraph: {
+      title: `${sectionTitle} | (주)엠알텍-mrtc`,
+      description,
+    },
+    alternates: {
+      canonical: `/${slug}`,
+    },
+  }
+}
 
 type GalleryItem = {
   url: string
