@@ -88,16 +88,33 @@ export default function AdminPage() {
   const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState('')
   const [role, setRole] = useState<'admin' | 'super' | null>(null)
+  const [allowedContentKeys, setAllowedContentKeys] = useState<string[]>(['*'])
   const [menuLabels, setMenuLabels] = useState<Record<string, string>>({})
   const [menuSaving, setMenuSaving] = useState(false)
   const [extra, setExtra] = useState<SectionExtra>(defaultExtra)
   const [extraSaving, setExtraSaving] = useState(false)
+
+  const editableSections = useMemo(() => {
+    if (allowedContentKeys.includes('*')) return sections
+    return sections.filter((s) => allowedContentKeys.includes(s.key))
+  }, [allowedContentKeys])
+
+  const canEditMenuConfig = useMemo(
+    () => allowedContentKeys.includes('*') || allowedContentKeys.includes('menu_config'),
+    [allowedContentKeys],
+  )
 
   const isHome = useMemo(() => selectedKey === 'home', [selectedKey])
 
   async function loadContent(key: string) {
     const res = await fetch(`/api/content?key=${encodeURIComponent(key)}`, { cache: 'no-store' })
     const json = await res.json()
+
+    if (!res.ok) {
+      setMessage(json?.error ?? '콘텐츠를 불러올 수 없습니다.')
+      return
+    }
+
     if (json?.data) {
       setContent({
         key,
@@ -134,6 +151,17 @@ export default function AdminPage() {
       if (me.ok) {
         const meJson = await me.json()
         setRole(meJson?.role ?? null)
+        const keys = Array.isArray(meJson?.allowedContentKeys) ? meJson.allowedContentKeys : ['*']
+        setAllowedContentKeys(keys)
+
+        const firstKey = keys.includes('*')
+          ? 'home'
+          : (sections.find((s) => keys.includes(s.key))?.key ?? 'home')
+
+        setSelectedKey(firstKey)
+        await Promise.all([loadContent(firstKey), loadMenuConfig()])
+        setLoading(false)
+        return
       }
 
       await Promise.all([loadContent('home'), loadMenuConfig()])
@@ -270,24 +298,26 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <section className="border rounded-xl p-5 space-y-4">
-        <h2 className="text-lg font-semibold">상단 메뉴명 편집</h2>
-        <div className="grid md:grid-cols-2 gap-3">
-          {sections.filter((s) => s.key !== 'home').map((section) => (
-            <label key={section.key} className="space-y-1 block">
-              <span className="text-sm text-gray-600">{section.key}</span>
-              <input
-                className="w-full border rounded px-3 py-2"
-                value={menuLabels[section.key] ?? section.label}
-                onChange={(e) => setMenuLabels((prev) => ({ ...prev, [section.key]: e.target.value }))}
-              />
-            </label>
-          ))}
-        </div>
-        <button className="px-4 py-2 rounded border" disabled={menuSaving} onClick={saveMenuLabels}>
-          {menuSaving ? '메뉴 저장 중...' : '메뉴명 저장'}
-        </button>
-      </section>
+      {canEditMenuConfig ? (
+        <section className="border rounded-xl p-5 space-y-4">
+          <h2 className="text-lg font-semibold">상단 메뉴명 편집</h2>
+          <div className="grid md:grid-cols-2 gap-3">
+            {sections.filter((s) => s.key !== 'home').map((section) => (
+              <label key={section.key} className="space-y-1 block">
+                <span className="text-sm text-gray-600">{section.key}</span>
+                <input
+                  className="w-full border rounded px-3 py-2"
+                  value={menuLabels[section.key] ?? section.label}
+                  onChange={(e) => setMenuLabels((prev) => ({ ...prev, [section.key]: e.target.value }))}
+                />
+              </label>
+            ))}
+          </div>
+          <button className="px-4 py-2 rounded border" disabled={menuSaving} onClick={saveMenuLabels}>
+            {menuSaving ? '메뉴 저장 중...' : '메뉴명 저장'}
+          </button>
+        </section>
+      ) : null}
 
       <section className="border rounded-xl p-5 space-y-4">
         <h2 className="text-lg font-semibold">페이지 콘텐츠 편집</h2>
@@ -305,7 +335,7 @@ export default function AdminPage() {
               setLoading(false)
             }}
           >
-            {sections.map((section) => (
+            {editableSections.map((section) => (
               <option key={section.key} value={section.key}>
                 {section.label}
               </option>

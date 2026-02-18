@@ -10,11 +10,15 @@ export function middleware(req: NextRequest) {
     pathname === '/api/content' ||
     pathname === '/api/upload' ||
     pathname === '/api/admin/me' ||
-    pathname === '/api/admin/accounts'
+    pathname === '/api/admin/accounts' ||
+    pathname === '/api/admin/backup'
 
   if (!protectedPage && !protectedApi) return NextResponse.next()
 
-  const needsSuper = pathname.startsWith('/admin/system') || pathname === '/api/admin/accounts'
+  const needsSuper =
+    pathname.startsWith('/admin/system') ||
+    pathname === '/api/admin/accounts' ||
+    pathname === '/api/admin/backup'
   const ok = isAuthorized(req, needsSuper ? 'super' : 'admin')
 
   if (ok) return NextResponse.next()
@@ -32,5 +36,12 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/content', '/api/upload', '/api/admin/me', '/api/admin/accounts'],
+  matcher: [
+    '/admin/:path*',
+    '/api/content',
+    '/api/upload',
+    '/api/admin/me',
+    '/api/admin/accounts',
+    '/api/admin/backup',
+  ],
 }

@@ -6,12 +6,15 @@ type Account = {
   role: 'super' | 'admin'
   name: string
   permissions: string[]
+  allowedContentKeys?: string[]
 }
 
 export default function AdminSystemPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [message, setMessage] = useState('')
   const [accounts, setAccounts] = useState<Account[]>([])
+  const [backupJson, setBackupJson] = useState('')
 
   useEffect(() => {
     ;(async () => {
@@ -39,12 +42,71 @@ export default function AdminSystemPage() {
     })()
   }, [])
 
+  async function exportBackup() {
+    setMessage('백업 내보내는 중...')
+    const res = await fetch('/api/admin/backup', { cache: 'no-store' })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setMessage(`백업 실패: ${json?.error ?? 'unknown'}`)
+      return
+    }
+
+    const text = JSON.stringify(json, null, 2)
+    setBackupJson(text)
+    setMessage('백업 생성 완료 ✅')
+
+    const blob = new Blob([text], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `mrtc-backup-${Date.now()}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  async function restoreBackup() {
+    if (!backupJson.trim()) {
+      setMessage('복원할 JSON을 먼저 입력하세요.')
+      return
+    }
+
+    let parsed: any
+    try {
+      parsed = JSON.parse(backupJson)
+    } catch {
+      setMessage('JSON 형식이 올바르지 않습니다.')
+      return
+    }
+
+    const rows = Array.isArray(parsed?.rows) ? parsed.rows : null
+    if (!rows) {
+      setMessage('복원 JSON에 rows 배열이 필요합니다.')
+      return
+    }
+
+    setMessage('복원 중...')
+    const res = await fetch('/api/admin/backup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rows }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setMessage(`복원 실패: ${json?.error ?? 'unknown'}`)
+      return
+    }
+
+    setMessage(`복원 완료 ✅ (${json?.restored ?? 0}건)`)
+  }
+
   if (loading) {
     return <main className="min-h-screen p-8">불러오는 중...</main>
   }
 
   return (
-    <main className="min-h-screen p-8 max-w-3xl mx-auto space-y-6">
+    <main className="min-h-screen p-8 max-w-4xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold">슈퍼관리자 - 시스템/계정 관리</h1>
       {error ? <p className="text-red-600">{error}</p> : null}
 
@@ -52,18 +114,32 @@ export default function AdminSystemPage() {
         <h2 className="text-lg font-semibold">계정 권한 정책</h2>
         <div className="space-y-3">
           {accounts.map((acc) => (
-            <div key={acc.role} className="border rounded p-4">
+            <div key={acc.role} className="border rounded p-4 space-y-2">
               <p className="font-medium">{acc.name} ({acc.role})</p>
-              <p className="text-sm text-gray-600 mt-2">권한: {acc.permissions.join(', ')}</p>
+              <p className="text-sm text-gray-600">권한: {acc.permissions.join(', ')}</p>
+              {acc.allowedContentKeys ? (
+                <p className="text-sm text-gray-600">편집 가능 페이지: {acc.allowedContentKeys.join(', ')}</p>
+              ) : null}
             </div>
           ))}
         </div>
       </section>
 
-      <section className="border rounded p-4 bg-amber-50 text-sm text-amber-900">
-        현재 1차 버전에서는 권한 분리와 접근 제어를 우선 적용했습니다.
-        다음 단계에서 실제 계정 추가/비활성화 UI(데이터베이스 기반)까지 확장할 수 있습니다.
+      <section className="border rounded p-4 space-y-3">
+        <h2 className="text-lg font-semibold">콘텐츠 백업 / 복구</h2>
+        <div className="flex items-center gap-2">
+          <button className="px-4 py-2 rounded border" onClick={exportBackup}>백업 내보내기</button>
+          <button className="px-4 py-2 rounded border" onClick={restoreBackup}>JSON으로 복구</button>
+        </div>
+        <textarea
+          className="w-full border rounded p-3 min-h-56 text-sm font-mono"
+          placeholder="백업 JSON을 붙여넣은 뒤 'JSON으로 복구'를 누르세요"
+          value={backupJson}
+          onChange={(e) => setBackupJson(e.target.value)}
+        />
       </section>
+
+      {message ? <p className="text-sm text-gray-700">{message}</p> : null}
     </main>
   )
 }
