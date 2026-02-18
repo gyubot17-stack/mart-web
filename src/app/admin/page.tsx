@@ -22,6 +22,12 @@ type SectionExtra = {
   products: Product[]
 }
 
+type FooterConfig = {
+  companyName: string
+  companyInfo: string
+  addressInfo: string
+}
+
 const sections = [
   { key: 'home', label: '홈' },
   { key: 'company', label: '회사소개' },
@@ -51,6 +57,12 @@ const defaultExtra: SectionExtra = {
     { name: '', desc: '', image: '', link: '' },
     { name: '', desc: '', image: '', link: '' },
   ],
+}
+
+const defaultFooter: FooterConfig = {
+  companyName: 'mrtc.kr',
+  companyInfo: '대표: (입력 예정) | 사업자번호: (입력 예정)',
+  addressInfo: '주소: (입력 예정) | 연락처: (입력 예정)',
 }
 
 function createEmptyProduct(): Product {
@@ -93,6 +105,8 @@ export default function AdminPage() {
   const [menuSaving, setMenuSaving] = useState(false)
   const [extra, setExtra] = useState<SectionExtra>(defaultExtra)
   const [extraSaving, setExtraSaving] = useState(false)
+  const [footer, setFooter] = useState<FooterConfig>(defaultFooter)
+  const [footerSaving, setFooterSaving] = useState(false)
 
   const editableSections = useMemo(() => {
     if (allowedContentKeys.includes('*')) return sections
@@ -135,13 +149,29 @@ export default function AdminPage() {
   }
 
   async function loadMenuConfig() {
-    const res = await fetch('/api/content?key=menu_config', { cache: 'no-store' })
-    const json = await res.json()
+    const [menuRes, footerRes] = await Promise.all([
+      fetch('/api/content?key=menu_config', { cache: 'no-store' }),
+      fetch('/api/content?key=footer_config', { cache: 'no-store' }),
+    ])
+
+    const menuJson = await menuRes.json()
     try {
-      const parsed = JSON.parse(json?.data?.body || '{}')
+      const parsed = JSON.parse(menuJson?.data?.body || '{}')
       setMenuLabels(parsed && typeof parsed === 'object' ? parsed : {})
     } catch {
       setMenuLabels({})
+    }
+
+    const footerJson = await footerRes.json()
+    try {
+      const parsed = JSON.parse(footerJson?.data?.body || '{}')
+      setFooter({
+        companyName: parsed?.companyName || defaultFooter.companyName,
+        companyInfo: parsed?.companyInfo || defaultFooter.companyInfo,
+        addressInfo: parsed?.addressInfo || defaultFooter.addressInfo,
+      })
+    } catch {
+      setFooter(defaultFooter)
     }
   }
 
@@ -233,6 +263,29 @@ export default function AdminPage() {
     setMenuSaving(false)
   }
 
+  async function saveFooter() {
+    setFooterSaving(true)
+    const res = await fetch('/api/content', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        key: 'footer_config',
+        title: 'footer config',
+        subtitle: '',
+        body: JSON.stringify(footer),
+        hero_image_url: '',
+      }),
+    })
+
+    if (res.ok) {
+      setMessage('푸터 정보 저장 완료 ✅')
+    } else {
+      const json = await res.json()
+      setMessage(`푸터 저장 실패: ${json?.error ?? 'unknown'}`)
+    }
+    setFooterSaving(false)
+  }
+
   async function handleUpload(file: File, target: 'hero' | 'gallery' | 'product', index?: number) {
     setUploading(true)
     setMessage('이미지 업로드 중...')
@@ -300,24 +353,51 @@ export default function AdminPage() {
       </div>
 
       {canEditMenuConfig ? (
-        <section className="border rounded-xl p-5 space-y-4">
-          <h2 className="text-lg font-semibold">상단 메뉴명 편집</h2>
-          <div className="grid md:grid-cols-2 gap-3">
-            {sections.filter((s) => s.key !== 'home').map((section) => (
-              <label key={section.key} className="space-y-1 block">
-                <span className="text-sm text-gray-600">{section.key}</span>
-                <input
-                  className="w-full border rounded px-3 py-2"
-                  value={menuLabels[section.key] ?? section.label}
-                  onChange={(e) => setMenuLabels((prev) => ({ ...prev, [section.key]: e.target.value }))}
-                />
-              </label>
-            ))}
-          </div>
-          <button className="px-4 py-2 rounded border" disabled={menuSaving} onClick={saveMenuLabels}>
-            {menuSaving ? '메뉴 저장 중...' : '메뉴명 저장'}
-          </button>
-        </section>
+        <>
+          <section className="border rounded-xl p-5 space-y-4">
+            <h2 className="text-lg font-semibold">상단 메뉴명 편집</h2>
+            <div className="grid md:grid-cols-2 gap-3">
+              {sections.filter((s) => s.key !== 'home').map((section) => (
+                <label key={section.key} className="space-y-1 block">
+                  <span className="text-sm text-gray-600">{section.key}</span>
+                  <input
+                    className="w-full border rounded px-3 py-2"
+                    value={menuLabels[section.key] ?? section.label}
+                    onChange={(e) => setMenuLabels((prev) => ({ ...prev, [section.key]: e.target.value }))}
+                  />
+                </label>
+              ))}
+            </div>
+            <button className="px-4 py-2 rounded border" disabled={menuSaving} onClick={saveMenuLabels}>
+              {menuSaving ? '메뉴 저장 중...' : '메뉴명 저장'}
+            </button>
+          </section>
+
+          <section className="border rounded-xl p-5 space-y-4">
+            <h2 className="text-lg font-semibold">푸터 정보 편집</h2>
+            <input
+              className="w-full border rounded px-3 py-2"
+              placeholder="회사명"
+              value={footer.companyName}
+              onChange={(e) => setFooter((prev) => ({ ...prev, companyName: e.target.value }))}
+            />
+            <input
+              className="w-full border rounded px-3 py-2"
+              placeholder="대표/사업자번호 정보"
+              value={footer.companyInfo}
+              onChange={(e) => setFooter((prev) => ({ ...prev, companyInfo: e.target.value }))}
+            />
+            <input
+              className="w-full border rounded px-3 py-2"
+              placeholder="주소/연락처 정보"
+              value={footer.addressInfo}
+              onChange={(e) => setFooter((prev) => ({ ...prev, addressInfo: e.target.value }))}
+            />
+            <button className="px-4 py-2 rounded border" disabled={footerSaving} onClick={saveFooter}>
+              {footerSaving ? '푸터 저장 중...' : '푸터 저장'}
+            </button>
+          </section>
+        </>
       ) : null}
 
       <section className="border rounded-xl p-5 space-y-4">

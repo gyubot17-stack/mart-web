@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import InquiryForm from '@/components/InquiryForm'
 import { buildSiteSections, getSectionLabel, parseMenuLabels } from '@/lib/site-sections'
 
 export const dynamic = 'force-dynamic'
@@ -52,10 +53,11 @@ function parseExtra(raw?: string | null): SectionExtra {
 export default async function SectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const [{ data: menuConfig }, { data }, { data: extraData }] = await Promise.all([
+  const [{ data: menuConfig }, { data }, { data: extraData }, { data: footerConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('*').eq('key', slug).maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', `${slug}_extra`).maybeSingle(),
+    supabaseAdmin.from('site_content').select('body').eq('key', 'footer_config').maybeSingle(),
   ])
 
   const menuLabels = parseMenuLabels(menuConfig?.body)
@@ -69,6 +71,23 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
   const body = data?.body || '이 섹션의 상세 내용은 관리자 페이지에서 입력할 수 있습니다.'
   const image = data?.hero_image_url || ''
   const extra = parseExtra(extraData?.body)
+
+  let footer = {
+    companyName: 'mrtc.kr',
+    companyInfo: '대표: (입력 예정) | 사업자번호: (입력 예정)',
+    addressInfo: '주소: (입력 예정) | 연락처: (입력 예정)',
+  }
+
+  if (footerConfig?.body) {
+    try {
+      const parsed = JSON.parse(footerConfig.body)
+      footer = {
+        companyName: parsed?.companyName || footer.companyName,
+        companyInfo: parsed?.companyInfo || footer.companyInfo,
+        addressInfo: parsed?.addressInfo || footer.addressInfo,
+      }
+    } catch {}
+  }
 
   return (
     <main id="top" className="min-h-screen bg-white text-gray-900">
@@ -148,6 +167,21 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
           ))}
         </div>
       </section>
+
+      {slug === 'support' ? (
+        <section className="max-w-6xl mx-auto px-6 pb-12">
+          <InquiryForm />
+        </section>
+      ) : null}
+
+      <footer className="border-t bg-gray-50">
+        <div className="max-w-6xl mx-auto px-6 py-8 text-sm text-gray-600 space-y-2">
+          <p className="font-semibold text-gray-800">{footer.companyName}</p>
+          <p>{footer.companyInfo}</p>
+          <p>{footer.addressInfo}</p>
+          <p className="text-gray-500">© {new Date().getFullYear()} {footer.companyName}. All rights reserved.</p>
+        </div>
+      </footer>
     </main>
   )
 }

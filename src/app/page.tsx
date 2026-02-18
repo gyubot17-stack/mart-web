@@ -5,9 +5,10 @@ import { buildSiteSections, parseMenuLabels } from '@/lib/site-sections'
 export const dynamic = 'force-dynamic'
 
 export default async function Home() {
-  const [{ data }, { data: menuConfig }] = await Promise.all([
+  const [{ data }, { data: menuConfig }, { data: footerConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('*').eq('key', 'home').single(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
+    supabaseAdmin.from('site_content').select('body').eq('key', 'footer_config').maybeSingle(),
   ])
 
   const menuLabels = parseMenuLabels(menuConfig?.body)
@@ -17,6 +18,23 @@ export default async function Home() {
   const subtitle = data?.subtitle ?? ''
   const body = data?.body ?? ''
   const image = data?.hero_image_url ?? ''
+
+  let footer = {
+    companyName: 'mrtc.kr',
+    companyInfo: '대표: (입력 예정) | 사업자번호: (입력 예정)',
+    addressInfo: '주소: (입력 예정) | 연락처: (입력 예정)',
+  }
+
+  if (footerConfig?.body) {
+    try {
+      const parsed = JSON.parse(footerConfig.body)
+      footer = {
+        companyName: parsed?.companyName || footer.companyName,
+        companyInfo: parsed?.companyInfo || footer.companyInfo,
+        addressInfo: parsed?.addressInfo || footer.addressInfo,
+      }
+    } catch {}
+  }
 
   return (
     <main id="top" className="min-h-screen bg-white text-gray-900">
@@ -60,10 +78,10 @@ export default async function Home() {
 
       <footer className="border-t bg-gray-50">
         <div className="max-w-6xl mx-auto px-6 py-8 text-sm text-gray-600 space-y-2">
-          <p className="font-semibold text-gray-800">mrtc.kr</p>
-          <p>대표: (입력 예정) | 사업자번호: (입력 예정)</p>
-          <p>주소: (입력 예정) | 연락처: (입력 예정)</p>
-          <p className="text-gray-500">© {new Date().getFullYear()} mrtc.kr. All rights reserved.</p>
+          <p className="font-semibold text-gray-800">{footer.companyName}</p>
+          <p>{footer.companyInfo}</p>
+          <p>{footer.addressInfo}</p>
+          <p className="text-gray-500">© {new Date().getFullYear()} {footer.companyName}. All rights reserved.</p>
         </div>
       </footer>
     </main>

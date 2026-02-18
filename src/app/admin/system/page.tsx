@@ -96,15 +96,19 @@ export default function AdminSystemPage() {
       return
     }
 
-    const text = JSON.stringify(json, null, 2)
+    const stamp = new Date()
+    const version = `${stamp.getFullYear()}${String(stamp.getMonth() + 1).padStart(2, '0')}${String(stamp.getDate()).padStart(2, '0')}-${String(stamp.getHours()).padStart(2, '0')}${String(stamp.getMinutes()).padStart(2, '0')}${String(stamp.getSeconds()).padStart(2, '0')}`
+
+    const payload = { version, ...json }
+    const text = JSON.stringify(payload, null, 2)
     setBackupJson(text)
-    setMessage('백업 생성 완료 ✅')
+    setMessage(`백업 생성 완료 ✅ (버전: ${version})`)
 
     const blob = new Blob([text], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `mrtc-backup-${Date.now()}.json`
+    a.download = `mrtc-backup-${version}.json`
     a.click()
     URL.revokeObjectURL(url)
   }
