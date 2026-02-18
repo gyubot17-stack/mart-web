@@ -9,21 +9,12 @@ type Account = {
   allowedContentKeys?: string[]
 }
 
-type Inquiry = {
-  key: string
-  name: string
-  phone: string
-  message: string
-  createdAt: string | null
-  status: 'new' | 'done'
-}
 
 export default function AdminSystemPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [accounts, setAccounts] = useState<Account[]>([])
-  const [inquiries, setInquiries] = useState<Inquiry[]>([])
   const [backupJson, setBackupJson] = useState('')
   const [allowedKeysInput, setAllowedKeysInput] = useState('')
 
@@ -42,10 +33,9 @@ export default function AdminSystemPage() {
         return
       }
 
-      const [accountsRes, policyRes, inquiriesRes] = await Promise.all([
+      const [accountsRes, policyRes] = await Promise.all([
         fetch('/api/admin/accounts', { cache: 'no-store' }),
         fetch('/api/admin/policy', { cache: 'no-store' }),
-        fetch('/api/admin/inquiries', { cache: 'no-store' }),
       ])
 
       const accountsJson = await accountsRes.json()
@@ -58,11 +48,6 @@ export default function AdminSystemPage() {
       const policyJson = await policyRes.json()
       if (policyRes.ok && Array.isArray(policyJson?.allowedContentKeys)) {
         setAllowedKeysInput(policyJson.allowedContentKeys.join(', '))
-      }
-
-      const inquiriesJson = await inquiriesRes.json()
-      if (inquiriesRes.ok) {
-        setInquiries(inquiriesJson?.inquiries ?? [])
       }
 
       setLoading(false)
@@ -100,31 +85,6 @@ export default function AdminSystemPage() {
     if (accountsRes.ok) {
       setAccounts(accountsJson.accounts ?? [])
     }
-  }
-
-  async function refreshInquiries() {
-    const res = await fetch('/api/admin/inquiries', { cache: 'no-store' })
-    const json = await res.json()
-    if (res.ok) {
-      setInquiries(json?.inquiries ?? [])
-    }
-  }
-
-  async function toggleInquiryStatus(key: string, status: 'new' | 'done') {
-    const res = await fetch('/api/admin/inquiries', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, status }),
-    })
-    const json = await res.json()
-
-    if (!res.ok) {
-      setMessage(`문의 상태 변경 실패: ${json?.error ?? 'unknown'}`)
-      return
-    }
-
-    setMessage('문의 상태 변경 완료 ✅')
-    await refreshInquiries()
   }
 
   async function exportBackup() {
@@ -232,34 +192,6 @@ export default function AdminSystemPage() {
           onChange={(e) => setAllowedKeysInput(e.target.value)}
         />
         <button className="px-4 py-2 rounded border" onClick={saveAdminPolicy}>권한 저장</button>
-      </section>
-
-      <section className="border rounded p-4 space-y-3">
-        <h2 className="text-lg font-semibold">고객 문의 관리</h2>
-        <div className="space-y-3">
-          {inquiries.length === 0 ? (
-            <p className="text-sm text-gray-500">접수된 문의가 없습니다.</p>
-          ) : inquiries.map((q) => (
-            <div key={q.key} className="border rounded p-3 space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <p className="font-medium">{q.name} / {q.phone}</p>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs px-2 py-1 rounded ${q.status === 'done' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                    {q.status === 'done' ? '처리완료' : '신규'}
-                  </span>
-                  <button
-                    className="px-2 py-1 text-xs rounded border"
-                    onClick={() => toggleInquiryStatus(q.key, q.status === 'done' ? 'new' : 'done')}
-                  >
-                    {q.status === 'done' ? '신규로 변경' : '완료로 변경'}
-                  </button>
-                </div>
-              </div>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{q.message}</p>
-              {q.createdAt ? <p className="text-xs text-gray-500">접수시각: {new Date(q.createdAt).toLocaleString()}</p> : null}
-            </div>
-          ))}
-        </div>
       </section>
 
       <section className="border rounded p-4 space-y-3">

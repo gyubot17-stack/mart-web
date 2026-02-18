@@ -78,3 +78,26 @@ export async function PATCH(request: NextRequest) {
 
   return NextResponse.json({ ok: true })
 }
+
+export async function DELETE(request: NextRequest) {
+  const denied = ensureSuper(request)
+  if (denied) return denied
+
+  const { searchParams } = new URL(request.url)
+  const key = String(searchParams.get('key') || '')
+
+  if (!key.startsWith('inquiry_')) {
+    return NextResponse.json({ error: '잘못된 key입니다.' }, { status: 400 })
+  }
+
+  const { error } = await supabaseAdmin
+    .from('site_content')
+    .delete()
+    .eq('key', key)
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ ok: true })
+}
