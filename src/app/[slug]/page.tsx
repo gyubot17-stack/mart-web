@@ -19,12 +19,8 @@ type SectionExtra = {
 }
 
 const defaultExtra: SectionExtra = {
-  gallery: ['', '', ''],
-  products: [
-    { name: '제품명 1', desc: '제품 설명을 입력할 수 있는 영역입니다.', image: '', link: '' },
-    { name: '제품명 2', desc: '제품 설명을 입력할 수 있는 영역입니다.', image: '', link: '' },
-    { name: '제품명 3', desc: '제품 설명을 입력할 수 있는 영역입니다.', image: '', link: '' },
-  ],
+  gallery: [],
+  products: [],
 }
 
 function parseExtra(raw?: string | null): SectionExtra {
@@ -32,10 +28,10 @@ function parseExtra(raw?: string | null): SectionExtra {
   try {
     const parsed = JSON.parse(raw) as Partial<SectionExtra>
     const gallery = Array.isArray(parsed.gallery)
-      ? [parsed.gallery[0] || '', parsed.gallery[1] || '', parsed.gallery[2] || '']
+      ? parsed.gallery.map((g) => String(g || ''))
       : defaultExtra.gallery
 
-    const products = Array.isArray(parsed.products) && parsed.products.length > 0
+    const products = Array.isArray(parsed.products)
       ? parsed.products.map((p, i) => ({
           name: p?.name || `제품명 ${i + 1}`,
           desc: p?.desc || '제품 설명을 입력할 수 있는 영역입니다.',
@@ -130,6 +126,9 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
       <section className="max-w-6xl mx-auto px-6 pb-8 space-y-4">
         <h2 className="text-2xl font-bold">갤러리</h2>
         <div className="grid md:grid-cols-3 gap-4">
+          {extra.gallery.length === 0 ? (
+            <p className="text-sm text-gray-500 md:col-span-3">등록된 갤러리가 없습니다.</p>
+          ) : null}
           {extra.gallery.map((url, i) => (
             <div key={i} className="min-h-40 rounded-lg border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
               {url ? (
@@ -145,6 +144,9 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
       <section className="max-w-6xl mx-auto px-6 pb-16 space-y-4">
         <h2 className="text-2xl font-bold">제품 카드</h2>
         <div className="grid md:grid-cols-3 gap-4">
+          {extra.products.length === 0 ? (
+            <p className="text-sm text-gray-500 md:col-span-3">등록된 제품 카드가 없습니다.</p>
+          ) : null}
           {extra.products.map((product, i) => (
             <article key={i} className="rounded-lg border p-4 space-y-3">
               <div className="min-h-32 rounded border border-dashed overflow-hidden flex items-center justify-center text-gray-400">

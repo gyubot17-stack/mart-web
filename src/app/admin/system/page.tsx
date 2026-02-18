@@ -157,7 +157,11 @@ export default function AdminSystemPage() {
     <main className="min-h-screen p-8 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">슈퍼관리자 - 시스템/계정 관리</h1>
-        <a href="/" className="admin-btn px-3 py-2 text-sm rounded border">홈</a>
+        <div className="flex items-center gap-2">
+          <a href="/" className="admin-btn px-3 py-2 text-sm rounded border">홈</a>
+          <a href="/admin" className="admin-btn px-3 py-2 text-sm rounded border">콘텐츠 관리</a>
+          <a href="/admin/common" className="admin-btn px-3 py-2 text-sm rounded border">공통 관리</a>
+        </div>
       </div>
       {error ? <p className="text-red-600">{error}</p> : null}
 

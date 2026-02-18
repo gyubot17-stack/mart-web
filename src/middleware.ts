@@ -18,6 +18,7 @@ export function middleware(req: NextRequest) {
 
   const needsSuper =
     pathname.startsWith('/admin/system') ||
+    pathname.startsWith('/admin/common') ||
     pathname === '/api/admin/accounts' ||
     pathname === '/api/admin/backup' ||
     pathname === '/api/admin/policy'
