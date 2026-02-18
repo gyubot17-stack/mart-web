@@ -15,6 +15,7 @@ export default function AdminSystemPage() {
   const [message, setMessage] = useState('')
   const [accounts, setAccounts] = useState<Account[]>([])
   const [backupJson, setBackupJson] = useState('')
+  const [allowedKeysInput, setAllowedKeysInput] = useState('')
 
   useEffect(() => {
     ;(async () => {
@@ -31,16 +32,59 @@ export default function AdminSystemPage() {
         return
       }
 
-      const res = await fetch('/api/admin/accounts', { cache: 'no-store' })
-      const json = await res.json()
-      if (!res.ok) {
-        setError(json?.error ?? '불러오기에 실패했습니다.')
+      const [accountsRes, policyRes] = await Promise.all([
+        fetch('/api/admin/accounts', { cache: 'no-store' }),
+        fetch('/api/admin/policy', { cache: 'no-store' }),
+      ])
+
+      const accountsJson = await accountsRes.json()
+      if (!accountsRes.ok) {
+        setError(accountsJson?.error ?? '불러오기에 실패했습니다.')
       } else {
-        setAccounts(json.accounts ?? [])
+        setAccounts(accountsJson.accounts ?? [])
       }
+
+      const policyJson = await policyRes.json()
+      if (policyRes.ok && Array.isArray(policyJson?.allowedContentKeys)) {
+        setAllowedKeysInput(policyJson.allowedContentKeys.join(', '))
+      }
+
       setLoading(false)
     })()
   }, [])
+
+  async function saveAdminPolicy() {
+    const allowedContentKeys = allowedKeysInput
+      .split(',')
+      .map((k) => k.trim())
+      .filter(Boolean)
+
+    if (allowedContentKeys.length === 0) {
+      setMessage('최소 1개 이상의 키를 입력해주세요.')
+      return
+    }
+
+    setMessage('일반관리자 권한 저장 중...')
+    const res = await fetch('/api/admin/policy', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ allowedContentKeys }),
+    })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setMessage(`권한 저장 실패: ${json?.error ?? 'unknown'}`)
+      return
+    }
+
+    setMessage('일반관리자 편집 권한 저장 완료 ✅')
+
+    const accountsRes = await fetch('/api/admin/accounts', { cache: 'no-store' })
+    const accountsJson = await accountsRes.json()
+    if (accountsRes.ok) {
+      setAccounts(accountsJson.accounts ?? [])
+    }
+  }
 
   async function exportBackup() {
     setMessage('백업 내보내는 중...')
@@ -107,7 +151,10 @@ export default function AdminSystemPage() {
 
   return (
     <main className="min-h-screen p-8 max-w-4xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold">슈퍼관리자 - 시스템/계정 관리</h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold">슈퍼관리자 - 시스템/계정 관리</h1>
+        <a href="/" className="admin-btn px-3 py-2 text-sm rounded border">홈</a>
+      </div>
       {error ? <p className="text-red-600">{error}</p> : null}
 
       <section className="space-y-3">
@@ -123,6 +170,19 @@ export default function AdminSystemPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="border rounded p-4 space-y-3">
+        <h2 className="text-lg font-semibold">일반관리자 편집 권한 설정</h2>
+        <p className="text-sm text-gray-600">
+          쉼표(,)로 구분해서 입력하세요. 예: home,special-sale,support
+        </p>
+        <input
+          className="w-full border rounded px-3 py-2"
+          value={allowedKeysInput}
+          onChange={(e) => setAllowedKeysInput(e.target.value)}
+        />
+        <button className="px-4 py-2 rounded border" onClick={saveAdminPolicy}>권한 저장</button>
       </section>
 
       <section className="border rounded p-4 space-y-3">

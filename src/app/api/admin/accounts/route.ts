@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminAllowedContentKeys, getSessionFromRequest } from '@/lib/admin-auth'
+import { getSessionFromRequest } from '@/lib/admin-auth'
+import { getEffectiveAdminAllowedKeys } from '@/lib/admin-policy'
 
 export async function GET(request: NextRequest) {
   const session = getSessionFromRequest(request)
@@ -7,7 +8,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const adminAllowed = getAdminAllowedContentKeys()
+  const adminAllowed = await getEffectiveAdminAllowedKeys()
 
   return NextResponse.json({
     accounts: [

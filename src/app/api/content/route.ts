@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { canEditContent, getSessionFromRequest } from '@/lib/admin-auth'
+import { getSessionFromRequest } from '@/lib/admin-auth'
+import { canEditWithAllowedKeys, getEffectiveAdminAllowedKeys } from '@/lib/admin-policy'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
 const DEFAULT_CONTENT_KEY = 'home'
 
-function ensureKeyAccess(request: NextRequest, key: string) {
+async function ensureKeyAccess(request: NextRequest, key: string) {
   const session = getSessionFromRequest(request)
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  if (!canEditContent(session.role, key)) {
+  const allowed = await getEffectiveAdminAllowedKeys()
+  if (!canEditWithAllowedKeys(session.role, key, allowed)) {
     return NextResponse.json({ error: 'Forbidden: 이 페이지는 수정 권한이 없습니다.' }, { status: 403 })
   }
 
@@ -21,7 +23,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const key = searchParams.get('key') || DEFAULT_CONTENT_KEY
 
-  const denied = ensureKeyAccess(request, key)
+  const denied = await ensureKeyAccess(request, key)
   if (denied) return denied
 
   const { data, error } = await supabaseAdmin
@@ -49,7 +51,7 @@ export async function PATCH(request: NextRequest) {
   const body = await request.json()
   const key = body.key ?? DEFAULT_CONTENT_KEY
 
-  const denied = ensureKeyAccess(request, key)
+  const denied = await ensureKeyAccess(request, key)
   if (denied) return denied
 
   const payload = {
