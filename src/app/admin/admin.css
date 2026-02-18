@@ -1,0 +1,14 @@
+.admin-ui :is(button, input[type='button'], input[type='submit'], .admin-btn) {
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.admin-ui :is(button, input[type='button'], input[type='submit'], .admin-btn):hover {
+  background-color: #000 !important;
+  color: #fff !important;
+  border-color: #000 !important;
+}
+
+.admin-ui :is(button, input[type='button'], input[type='submit'], .admin-btn):disabled {
+  cursor: not-allowed;
+}

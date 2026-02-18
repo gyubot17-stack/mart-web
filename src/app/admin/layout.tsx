@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import './admin.css'
 
 export const metadata: Metadata = {
   title: '(주)엠알텍-admin',
@@ -6,5 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return children
+  return <div className="admin-ui">{children}</div>
 }

@@ -282,7 +282,7 @@ export default function AdminPage() {
         <h1 className="text-2xl font-bold">Admin - 콘텐츠 관리</h1>
         <div className="flex items-center gap-2">
           {role === 'super' ? (
-            <a href="/admin/system" className="px-3 py-2 text-sm rounded border">
+            <a href="/admin/system" className="admin-btn px-3 py-2 text-sm rounded border">
               시스템/계정 관리
             </a>
           ) : null}
