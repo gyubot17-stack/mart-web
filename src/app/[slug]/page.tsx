@@ -34,12 +34,12 @@ function parseExtra(raw?: string | null): SectionExtra {
       ? [parsed.gallery[0] || '', parsed.gallery[1] || '', parsed.gallery[2] || '']
       : defaultExtra.gallery
 
-    const products = Array.isArray(parsed.products)
-      ? [0, 1, 2].map((i) => ({
-          name: parsed.products?.[i]?.name || `제품명 ${i + 1}`,
-          desc: parsed.products?.[i]?.desc || '제품 설명을 입력할 수 있는 영역입니다.',
-          image: parsed.products?.[i]?.image || '',
-          link: parsed.products?.[i]?.link || '',
+    const products = Array.isArray(parsed.products) && parsed.products.length > 0
+      ? parsed.products.map((p, i) => ({
+          name: p?.name || `제품명 ${i + 1}`,
+          desc: p?.desc || '제품 설명을 입력할 수 있는 영역입니다.',
+          image: p?.image || '',
+          link: p?.link || '',
         }))
       : defaultExtra.products
 

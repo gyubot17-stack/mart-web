@@ -53,6 +53,10 @@ const defaultExtra: SectionExtra = {
   ],
 }
 
+function createEmptyProduct(): Product {
+  return { name: '', desc: '', image: '', link: '' }
+}
+
 function parseExtra(raw?: string | null): SectionExtra {
   if (!raw) return defaultExtra
   try {
@@ -61,12 +65,12 @@ function parseExtra(raw?: string | null): SectionExtra {
       ? [parsed.gallery[0] || '', parsed.gallery[1] || '', parsed.gallery[2] || '']
       : defaultExtra.gallery
 
-    const products = Array.isArray(parsed.products)
-      ? [0, 1, 2].map((i) => ({
-          name: parsed.products?.[i]?.name || '',
-          desc: parsed.products?.[i]?.desc || '',
-          image: parsed.products?.[i]?.image || '',
-          link: parsed.products?.[i]?.link || '',
+    const products = Array.isArray(parsed.products) && parsed.products.length > 0
+      ? parsed.products.map((p) => ({
+          name: p?.name || '',
+          desc: p?.desc || '',
+          image: p?.image || '',
+          link: p?.link || '',
         }))
       : defaultExtra.products
 
@@ -382,11 +386,35 @@ export default function AdminPage() {
           </div>
 
           <div className="space-y-3">
-            <h3 className="font-medium">제품 카드 3개</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="font-medium">제품 카드 ({extra.products.length}개)</h3>
+              <button
+                type="button"
+                className="px-3 py-1.5 text-sm rounded border"
+                onClick={() => setExtra((prev) => ({ ...prev, products: [...prev.products, createEmptyProduct()] }))}
+              >
+                + 제품 카드 추가
+              </button>
+            </div>
             <div className="space-y-4">
               {extra.products.map((product, i) => (
                 <div key={i} className="border rounded p-4 space-y-2">
-                  <p className="font-medium text-sm">제품 {i + 1}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium text-sm">제품 {i + 1}</p>
+                    <button
+                      type="button"
+                      className="px-2 py-1 text-xs rounded border text-red-600 disabled:opacity-50"
+                      disabled={extra.products.length <= 1}
+                      onClick={() => {
+                        setExtra((prev) => ({
+                          ...prev,
+                          products: prev.products.filter((_, idx) => idx !== i),
+                        }))
+                      }}
+                    >
+                      삭제
+                    </button>
+                  </div>
                   <input
                     className="w-full border rounded px-3 py-2 text-sm"
                     placeholder="제품명"
