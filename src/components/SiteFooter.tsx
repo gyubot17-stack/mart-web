@@ -11,6 +11,9 @@ export default function SiteFooter({ footer }: { footer: Footer }) {
         <p className="font-semibold text-slate-900">{footer.companyName}</p>
         <p>{footer.companyInfo}</p>
         <p>{footer.addressInfo}</p>
+        <div className="pt-1">
+          <a href="/privacy" className="underline text-slate-600 hover:text-slate-900">개인정보처리방침</a>
+        </div>
         <p className="text-slate-400">© {new Date().getFullYear()} {footer.companyName}. All rights reserved.</p>
       </div>
     </footer>

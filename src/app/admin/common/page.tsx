@@ -46,6 +46,8 @@ export default function AdminCommonPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'done'>('all')
   const [menuSaving, setMenuSaving] = useState(false)
   const [footerSaving, setFooterSaving] = useState(false)
+  const [privacySaving, setPrivacySaving] = useState(false)
+  const [privacyText, setPrivacyText] = useState('')
   const [message, setMessage] = useState('')
   const [analyticsFrom, setAnalyticsFrom] = useState('')
   const [analyticsTo, setAnalyticsTo] = useState('')
@@ -90,9 +92,10 @@ export default function AdminCommonPage() {
 
   useEffect(() => {
     ;(async () => {
-      const [menuRes, footerRes, inquiriesRes, analyticsRes] = await Promise.all([
+      const [menuRes, footerRes, privacyRes, inquiriesRes, analyticsRes] = await Promise.all([
         fetch('/api/content?key=menu_config', { cache: 'no-store' }),
         fetch('/api/content?key=footer_config', { cache: 'no-store' }),
+        fetch('/api/content?key=privacy_policy', { cache: 'no-store' }),
         fetch('/api/admin/inquiries', { cache: 'no-store' }),
         fetch('/api/admin/analytics', { cache: 'no-store' }),
       ])
@@ -115,6 +118,11 @@ export default function AdminCommonPage() {
         })
       } catch {
         setFooter(defaultFooter)
+      }
+
+      const privacyJson = await privacyRes.json()
+      if (privacyRes.ok) {
+        setPrivacyText(privacyJson?.data?.body || '')
       }
 
       const inquiriesJson = await inquiriesRes.json()
@@ -171,6 +179,29 @@ export default function AdminCommonPage() {
       setMessage(`푸터 저장 실패: ${json?.error ?? 'unknown'}`)
     }
     setFooterSaving(false)
+  }
+
+  async function savePrivacyPolicy() {
+    setPrivacySaving(true)
+    const res = await fetch('/api/content', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        key: 'privacy_policy',
+        title: '개인정보처리방침',
+        subtitle: '',
+        body: privacyText,
+        hero_image_url: '',
+      }),
+    })
+
+    if (res.ok) {
+      setMessage('개인정보처리방침 저장 완료 ✅')
+    } else {
+      const json = await res.json()
+      setMessage(`개인정보처리방침 저장 실패: ${json?.error ?? 'unknown'}`)
+    }
+    setPrivacySaving(false)
   }
 
   async function toggleInquiryStatus(key: string, status: 'new' | 'done') {
@@ -290,6 +321,19 @@ export default function AdminCommonPage() {
         />
         <button className="px-4 py-2 rounded border" disabled={footerSaving} onClick={saveFooter}>
           {footerSaving ? '푸터 저장 중...' : '푸터 저장'}
+        </button>
+      </section>
+
+      <section className="border rounded-xl p-5 space-y-4">
+        <h2 className="text-lg font-semibold">개인정보처리방침 편집</h2>
+        <textarea
+          className="w-full border rounded p-3 min-h-56"
+          placeholder="개인정보처리방침 내용을 입력하세요"
+          value={privacyText}
+          onChange={(e) => setPrivacyText(e.target.value)}
+        />
+        <button className="px-4 py-2 rounded border" disabled={privacySaving} onClick={savePrivacyPolicy}>
+          {privacySaving ? '저장 중...' : '개인정보처리방침 저장'}
         </button>
       </section>
 
