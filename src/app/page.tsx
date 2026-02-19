@@ -8,15 +8,21 @@ import { buildSiteSections, parseMenuLabels } from '@/lib/site-sections'
 export const dynamic = 'force-dynamic'
 
 export default async function Home() {
-  const [{ data }, { data: menuConfig }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
+  const [{ data }, { data: menuConfig }, { data: submenuConfig }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('*').eq('key', 'home').single(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
+    supabaseAdmin.from('site_content').select('body').eq('key', 'submenu_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'footer_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'home_style').maybeSingle(),
   ])
 
   const menuLabels = parseMenuLabels(menuConfig?.body)
   const siteSections = buildSiteSections(menuLabels)
+  let submenus: Record<string, { label: string; href: string }[]> = {}
+  try {
+    const parsed = JSON.parse(submenuConfig?.body || '{}')
+    if (parsed && typeof parsed === 'object') submenus = parsed
+  } catch {}
 
   const title = data?.title ?? 'mrtc.kr'
   const subtitle = data?.subtitle ?? ''
@@ -61,7 +67,7 @@ export default async function Home() {
     <main id="top" className="min-h-screen bg-white text-gray-900">
       <a href="#top" className="fixed right-4 md:right-6 bottom-4 md:bottom-6 z-50 rounded-full bg-black text-white px-4 py-3 text-sm font-semibold shadow-lg hover:bg-gray-800">맨위로 ↑</a>
 
-      <SiteHeader items={siteSections} />
+      <SiteHeader items={siteSections} submenus={submenus} />
 
       <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 

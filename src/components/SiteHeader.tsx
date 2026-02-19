@@ -5,8 +5,9 @@ import { useState } from 'react'
 
 type Item = { label: string; slug: string }
 type Child = { label: string; href: string }
+type SubmenuMap = Record<string, Child[]>
 
-function getChildren(item: Item): Child[] {
+function fallbackChildren(item: Item): Child[] {
   if (item.slug === 'support') {
     return [
       { label: '문의하기', href: '/support#inquiry' },
@@ -16,9 +17,23 @@ function getChildren(item: Item): Child[] {
   return []
 }
 
-export default function SiteHeader({ items, currentSlug }: { items: Item[]; currentSlug?: string }) {
+export default function SiteHeader({
+  items,
+  currentSlug,
+  submenus,
+}: {
+  items: Item[]
+  currentSlug?: string
+  submenus?: SubmenuMap
+}) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openedSlug, setOpenedSlug] = useState<string | null>(null)
+
+  const getChildren = (item: Item): Child[] => {
+    const fromConfig = submenus?.[item.slug]
+    if (Array.isArray(fromConfig) && fromConfig.length > 0) return fromConfig
+    return fallbackChildren(item)
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">

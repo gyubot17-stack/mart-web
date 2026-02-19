@@ -91,8 +91,9 @@ function parseExtra(raw?: string | null): SectionExtra {
 export default async function SectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const [{ data: menuConfig }, { data }, { data: extraData }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
+  const [{ data: menuConfig }, { data: submenuConfig }, { data }, { data: extraData }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
+    supabaseAdmin.from('site_content').select('body').eq('key', 'submenu_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('*').eq('key', slug).maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', `${slug}_extra`).maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'footer_config').maybeSingle(),
@@ -101,6 +102,11 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
 
   const menuLabels = parseMenuLabels(menuConfig?.body)
   const siteSections = buildSiteSections(menuLabels)
+  let submenus: Record<string, { label: string; href: string }[]> = {}
+  try {
+    const parsed = JSON.parse(submenuConfig?.body || '{}')
+    if (parsed && typeof parsed === 'object') submenus = parsed
+  } catch {}
 
   const exists = siteSections.some((s) => s.slug === slug)
   if (!exists) notFound()
@@ -153,7 +159,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
         맨위로 ↑
       </a>
 
-      <SiteHeader items={siteSections} currentSlug={slug} />
+      <SiteHeader items={siteSections} currentSlug={slug} submenus={submenus} />
 
       <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 
