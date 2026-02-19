@@ -1,6 +1,6 @@
 .admin-ui {
   min-height: 100vh;
-  background: transparent;
+  background: #ffffff;
   color: var(--foreground);
 }
 

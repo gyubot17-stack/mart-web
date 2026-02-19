@@ -193,13 +193,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
                 </div>
                 <h3 className="font-semibold">{product.name || `제품명 ${i + 1}`}</h3>
                 <p className="text-sm text-gray-600">{product.desc || '제품 설명을 입력할 수 있는 영역입니다.'}</p>
-                {product.link ? (
-                  <a href={product.link} className="inline-block px-3 py-2 text-sm rounded bg-black text-white">
-                    문의하기
-                  </a>
-                ) : (
-                  <button className="px-3 py-2 text-sm rounded bg-black text-white">문의하기</button>
-                )}
+                {/* 문의하기 버튼 제거 요청 반영 */}
               </article>
             ))}
           </div>

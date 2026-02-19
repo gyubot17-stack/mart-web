@@ -107,3 +107,8 @@ body {
   color: #fff;
   box-shadow: 0 6px 16px rgba(29, 78, 216, 0.35);
 }
+
+.ui-chip-active:active,
+.ui-chip-active:focus-visible {
+  color: #111827;
+}
