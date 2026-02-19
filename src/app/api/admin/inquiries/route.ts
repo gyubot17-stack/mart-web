@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
       name: parsed?.name || row.title?.replace('문의 - ', '') || '',
       phone: parsed?.phone || row.subtitle || '',
       message: parsed?.message || '',
+      note: parsed?.note || '',
       createdAt: parsed?.createdAt || null,
       status: parsed?.status || 'new',
     }
@@ -48,8 +49,9 @@ export async function PATCH(request: NextRequest) {
   const body = await request.json()
   const key = String(body?.key || '')
   const status = String(body?.status || '')
+  const note = typeof body?.note === 'string' ? body.note : null
 
-  if (!key.startsWith('inquiry_') || !['new', 'done'].includes(status)) {
+  if (!key.startsWith('inquiry_') || (!['new', 'done'].includes(status) && note === null)) {
     return NextResponse.json({ error: '잘못된 요청입니다.' }, { status: 400 })
   }
 
@@ -65,7 +67,8 @@ export async function PATCH(request: NextRequest) {
 
   let parsed: any = {}
   try { parsed = JSON.parse(found.body || '{}') } catch {}
-  parsed.status = status
+  if (['new', 'done'].includes(status)) parsed.status = status
+  if (note !== null) parsed.note = note
 
   const { error } = await supabaseAdmin
     .from('site_content')

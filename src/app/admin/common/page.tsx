@@ -26,6 +26,7 @@ type Inquiry = {
   name: string
   phone: string
   message: string
+  note?: string
   createdAt: string | null
   status: 'new' | 'done'
 }
@@ -48,6 +49,8 @@ export default function AdminCommonPage() {
   const [message, setMessage] = useState('')
   const [analyticsFrom, setAnalyticsFrom] = useState('')
   const [analyticsTo, setAnalyticsTo] = useState('')
+  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null)
+  const [note, setNote] = useState('')
   const [analytics, setAnalytics] = useState<{
     rangeTotal: number
     totalDay: number
@@ -183,6 +186,21 @@ export default function AdminCommonPage() {
     }
 
     setMessage('문의 상태 변경 완료 ✅')
+    await refreshInquiries()
+  }
+
+  async function saveInquiryNote(key: string) {
+    const res = await fetch('/api/admin/inquiries', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, status: '', note }),
+    })
+    const json = await res.json()
+    if (!res.ok) {
+      setMessage(`문의 메모 저장 실패: ${json?.error ?? 'unknown'}`)
+      return
+    }
+    setMessage('문의 메모 저장 완료 ✅')
     await refreshInquiries()
   }
 
@@ -352,6 +370,12 @@ export default function AdminCommonPage() {
                     {q.status === 'done' ? '신규로 변경' : '완료로 변경'}
                   </button>
                   <button
+                    className="px-2 py-1 text-xs rounded border"
+                    onClick={() => { setSelectedInquiry(q); setNote(q.note || '') }}
+                  >
+                    상세
+                  </button>
+                  <button
                     className="px-2 py-1 text-xs rounded border text-red-600"
                     onClick={() => deleteInquiry(q.key)}
                   >
@@ -365,6 +389,22 @@ export default function AdminCommonPage() {
           ))}
         </div>
       </section>
+
+
+
+      {selectedInquiry ? (
+        <section className="border rounded-xl p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">문의 상세</h2>
+            <button className="px-3 py-1 text-sm rounded border" onClick={() => setSelectedInquiry(null)}>닫기</button>
+          </div>
+          <p className="text-sm"><b>이름:</b> {selectedInquiry.name}</p>
+          <p className="text-sm"><b>연락처:</b> {selectedInquiry.phone}</p>
+          <p className="text-sm whitespace-pre-wrap"><b>문의내용:</b> {selectedInquiry.message}</p>
+          <textarea className="w-full border rounded p-3 min-h-24" placeholder="관리자 메모" value={note} onChange={(e)=>setNote(e.target.value)} />
+          <button className="px-4 py-2 rounded border" onClick={() => saveInquiryNote(selectedInquiry.key)}>메모 저장</button>
+        </section>
+      ) : null}
 
       {message ? <p className="text-sm text-gray-700">{message}</p> : null}
     </main>

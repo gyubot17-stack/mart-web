@@ -30,6 +30,12 @@ export const metadata: Metadata = {
     siteName: '(주)엠알텍-mrtc',
     locale: 'ko_KR',
     type: 'website',
+    images: ['/brand-og.svg'],
+  },
+  icons: {
+    icon: '/brand-icon.svg',
+    shortcut: '/brand-icon.svg',
+    apple: '/brand-icon.svg',
   },
   alternates: {
     canonical: '/',

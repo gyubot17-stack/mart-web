@@ -115,6 +115,7 @@ export default function AdminPage() {
   const [extraSaving, setExtraSaving] = useState(false)
   const [style, setStyle] = useState<StyleConfig>(defaultStyle)
   const [styleSaving, setStyleSaving] = useState(false)
+  const [autoBackup, setAutoBackup] = useState(true)
 
   const editableSections = useMemo(() => {
     if (allowedContentKeys.includes('*')) return sections
@@ -197,8 +198,25 @@ export default function AdminPage() {
     })()
   }, [])
 
+
+  useEffect(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('admin_auto_backup') : null
+    if (saved === '0') setAutoBackup(false)
+  }, [])
+
+  async function runAutoBackupIfNeeded() {
+    if (!autoBackup || role !== 'super') return true
+    const res = await fetch('/api/admin/backup', { cache: 'no-store' })
+    if (!res.ok) {
+      setMessage('자동 백업 실패: 저장을 중단했습니다.')
+      return false
+    }
+    return true
+  }
+
   async function handleSave() {
     setSaving(true)
+    if (!(await runAutoBackupIfNeeded())) { setSaving(false); return }
     setMessage('저장 중...')
     const res = await fetch('/api/content', {
       method: 'PATCH',
@@ -217,6 +235,7 @@ export default function AdminPage() {
   async function saveExtra() {
     if (isHome) return
     setExtraSaving(true)
+    if (!(await runAutoBackupIfNeeded())) { setExtraSaving(false); return }
     const res = await fetch('/api/content', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -240,6 +259,7 @@ export default function AdminPage() {
 
   async function saveStyle() {
     setStyleSaving(true)
+    if (!(await runAutoBackupIfNeeded())) { setStyleSaving(false); return }
     const res = await fetch('/api/content', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -331,6 +351,21 @@ export default function AdminPage() {
           </button>
         </div>
       </div>
+
+
+      <section className="border rounded-xl p-4">
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={autoBackup}
+            onChange={(e) => {
+              setAutoBackup(e.target.checked)
+              if (typeof window !== 'undefined') localStorage.setItem('admin_auto_backup', e.target.checked ? '1' : '0')
+            }}
+          />
+          저장 전에 자동 백업하기 (슈퍼관리자만)
+        </label>
+      </section>
 
       <section className="border rounded-xl p-5 space-y-4">
         <h2 className="text-lg font-semibold">페이지 콘텐츠 편집</h2>
