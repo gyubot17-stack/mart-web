@@ -252,7 +252,7 @@ export default function AdminPage() {
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-bold">Admin - 콘텐츠 관리</h1>
         <div className="flex items-center gap-2">
-          <a href="/" className="admin-btn px-3 py-2 text-sm rounded border">홈</a>
+          <a href="/admin" className="admin-btn px-3 py-2 text-sm rounded border">홈</a>
           {role === 'super' ? (
             <a href="/admin/common" className="admin-btn px-3 py-2 text-sm rounded border">
               공통 관리
