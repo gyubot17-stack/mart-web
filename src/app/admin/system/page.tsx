@@ -155,15 +155,16 @@ export default function AdminSystemPage() {
   }
 
   return (
-    <main className="min-h-screen p-8 max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between gap-3">
+    <main className="min-h-screen pb-8 max-w-4xl mx-auto space-y-6">
+      <div className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200 px-8 py-4 flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">슈퍼관리자 - 시스템/계정 관리</h1>
         <div className="flex items-center gap-2">
-          <a href="/admin" className="admin-btn px-3 py-2 text-sm rounded border">홈</a>
           <a href="/admin" className="admin-btn px-3 py-2 text-sm rounded border">콘텐츠 관리</a>
           <a href="/admin/common" className="admin-btn px-3 py-2 text-sm rounded border">공통 관리</a>
         </div>
       </div>
+
+      <div className="px-8 pt-6 space-y-6">
       {error ? <p className="text-red-600">{error}</p> : null}
 
       <section className="space-y-3">
@@ -209,6 +210,7 @@ export default function AdminSystemPage() {
       </section>
 
       {message ? <p className="text-sm text-gray-700">{message}</p> : null}
+      </div>
     </main>
   )
 }

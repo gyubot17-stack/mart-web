@@ -37,6 +37,7 @@ type StyleConfig = {
 type SubmenuItem = {
   label: string
   href: string
+  visible: boolean
 }
 
 const sections = [
@@ -74,8 +75,8 @@ const defaultStyle: StyleConfig = {
 
 const defaultSubmenus: Record<string, SubmenuItem[]> = {
   support: [
-    { label: '문의하기', href: '/support#inquiry' },
-    { label: '개인정보처리방침', href: '/privacy' },
+    { label: '문의하기', href: '/support#inquiry', visible: true },
+    { label: '개인정보처리방침', href: '/privacy', visible: true },
   ],
 }
 
@@ -236,7 +237,19 @@ export default function AdminPage() {
     try {
       const parsed = JSON.parse(json?.data?.body || '{}')
       const parsedMap = parsed && typeof parsed === 'object' ? parsed : {}
-      setSubmenus({ ...defaultSubmenus, ...parsedMap })
+      const normalized = Object.fromEntries(
+        Object.entries({ ...defaultSubmenus, ...parsedMap }).map(([key, rows]) => [
+          key,
+          Array.isArray(rows)
+            ? rows.map((row: any) => ({
+                label: String(row?.label || ''),
+                href: String(row?.href || ''),
+                visible: row?.visible !== false,
+              }))
+            : [],
+        ]),
+      ) as Record<string, SubmenuItem[]>
+      setSubmenus(normalized)
     } catch {
       setSubmenus(defaultSubmenus)
     }
@@ -424,19 +437,7 @@ export default function AdminPage() {
       </div>
 
       <div className="px-8 pt-6 space-y-6">
-      <section className="border rounded-xl p-4">
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={autoBackup}
-            onChange={(e) => {
-              setAutoBackup(e.target.checked)
-              if (typeof window !== 'undefined') localStorage.setItem('admin_auto_backup', e.target.checked ? '1' : '0')
-            }}
-          />
-          저장 전에 자동 백업하기 (슈퍼관리자만)
-        </label>
-      </section>
+
 
       <section className="border rounded-xl p-5 space-y-4">
         <h2 className="text-lg font-semibold">상단 하위 메뉴 편집</h2>
@@ -454,7 +455,7 @@ export default function AdminPage() {
                     className="px-2 py-1 text-xs rounded border"
                     onClick={() => setSubmenus((prev) => ({
                       ...prev,
-                      [section.key]: [...(prev[section.key] ?? []), { label: '', href: '' }],
+                      [section.key]: [...(prev[section.key] ?? []), { label: '', href: '', visible: true }],
                     }))}
                   >
                     + 하위 메뉴 추가
@@ -464,7 +465,7 @@ export default function AdminPage() {
                 {rows.length === 0 ? <p className="text-xs text-gray-500">하위 메뉴 없음</p> : null}
 
                 {rows.map((row, idx) => (
-                  <div key={`${section.key}-${idx}`} className="grid md:grid-cols-[1fr_1.5fr_auto] gap-2 items-center">
+                  <div key={`${section.key}-${idx}`} className="grid md:grid-cols-[1fr_1.5fr_auto_auto] gap-2 items-center">
                     <input
                       className="w-full border rounded px-3 py-2 text-sm"
                       placeholder="메뉴명"
@@ -485,6 +486,18 @@ export default function AdminPage() {
                         return { ...prev, [section.key]: next }
                       })}
                     />
+
+                    <button
+                      type="button"
+                      className="px-2 py-1 text-xs rounded border"
+                      onClick={() => setSubmenus((prev) => {
+                        const next = [...(prev[section.key] ?? [])]
+                        next[idx] = { ...next[idx], visible: !next[idx].visible }
+                        return { ...prev, [section.key]: next }
+                      })}
+                    >
+                      {row.visible ? '숨기기' : '보이기'}
+                    </button>
                     <button
                       type="button"
                       className="px-2 py-1 text-xs rounded border text-red-600"
@@ -548,7 +561,7 @@ export default function AdminPage() {
 
         <div className="space-y-2">
           <label className="text-sm font-medium">대표 이미지</label>
-          <label className="inline-flex items-center gap-2 px-3 py-2 rounded border bg-white text-sm cursor-pointer hover:bg-slate-50">
+          <label className="inline-flex items-center gap-3 px-3 py-1.5 rounded border bg-white text-xs font-medium cursor-pointer hover:bg-slate-50">
             이미지 파일 선택
             <input
               type="file"
@@ -683,7 +696,7 @@ export default function AdminPage() {
                       })
                     }}
                   />
-                  <label className="inline-flex items-center gap-2 px-3 py-2 rounded border bg-white text-xs cursor-pointer hover:bg-slate-50">
+                  <label className="inline-flex items-center gap-3 px-2.5 py-1.5 rounded border bg-white text-[11px] font-medium cursor-pointer hover:bg-slate-50">
                     갤러리 이미지 선택
                     <input
                       type="file"
@@ -795,7 +808,7 @@ export default function AdminPage() {
                       })
                     }}
                   />
-                  <label className="inline-flex items-center gap-2 px-3 py-2 rounded border bg-white text-xs cursor-pointer hover:bg-slate-50">
+                  <label className="inline-flex items-center gap-3 px-2.5 py-1.5 rounded border bg-white text-[11px] font-medium cursor-pointer hover:bg-slate-50">
                     제품 이미지 선택
                     <input
                       type="file"

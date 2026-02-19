@@ -4,14 +4,14 @@ import Link from 'next/link'
 import { useState } from 'react'
 
 type Item = { label: string; slug: string }
-type Child = { label: string; href: string }
+type Child = { label: string; href: string; visible?: boolean }
 type SubmenuMap = Record<string, Child[]>
 
 function fallbackChildren(item: Item): Child[] {
   if (item.slug === 'support') {
     return [
-      { label: '문의하기', href: '/support#inquiry' },
-      { label: '개인정보처리방침', href: '/privacy' },
+      { label: '문의하기', href: '/support#inquiry', visible: true },
+      { label: '개인정보처리방침', href: '/privacy', visible: true },
     ]
   }
   return []
@@ -31,8 +31,8 @@ export default function SiteHeader({
 
   const getChildren = (item: Item): Child[] => {
     const fromConfig = submenus?.[item.slug]
-    if (Array.isArray(fromConfig) && fromConfig.length > 0) return fromConfig
-    return fallbackChildren(item)
+    const source = Array.isArray(fromConfig) && fromConfig.length > 0 ? fromConfig : fallbackChildren(item)
+    return source.filter((c) => c.visible !== false)
   }
 
   return (

@@ -270,16 +270,16 @@ export default function AdminCommonPage() {
   if (loading) return <main className="min-h-screen p-8">불러오는 중...</main>
 
   return (
-    <main className="min-h-screen p-8 max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between gap-4">
+    <main className="min-h-screen pb-8 max-w-5xl mx-auto space-y-6">
+      <div className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200 px-8 py-4 flex items-center justify-between gap-4">
         <h1 className="text-2xl font-bold">Admin - 공통 관리</h1>
         <div className="flex items-center gap-2">
-          <a href="/admin" className="admin-btn px-3 py-2 text-sm rounded border">홈</a>
           <a href="/admin" className="admin-btn px-3 py-2 text-sm rounded border">콘텐츠 관리</a>
           <a href="/admin/system" className="admin-btn px-3 py-2 text-sm rounded border">시스템/계정 관리</a>
         </div>
       </div>
 
+      <div className="px-8 pt-6 space-y-6">
       <section className="border rounded-xl p-5 space-y-4">
         <h2 className="text-lg font-semibold">상단 메뉴명 편집</h2>
         <div className="grid md:grid-cols-2 gap-3">
@@ -451,6 +451,7 @@ export default function AdminCommonPage() {
       ) : null}
 
       {message ? <p className="text-sm text-gray-700">{message}</p> : null}
+      </div>
     </main>
   )
 }
