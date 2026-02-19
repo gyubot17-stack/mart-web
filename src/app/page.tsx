@@ -66,7 +66,7 @@ export default async function Home() {
       <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 
       <section className="max-w-7xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
-        <div className="ui-card p-5 md:p-8 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
+        <div className="p-1 md:p-2 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
       </section>
 
       <section className="max-w-7xl mx-auto px-4 md:px-6 pb-16 grid md:grid-cols-2 gap-4 md:gap-6 ui-fade-in">
