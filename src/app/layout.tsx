@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import { Geist, Geist_Mono } from 'next/font/google'
+import AnalyticsTracker from '@/components/AnalyticsTracker'
 import './globals.css'
 
 const geistSans = Geist({
@@ -46,6 +47,7 @@ export default function RootLayout({
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
+        <AnalyticsTracker />
         {plausibleDomain ? (
           <Script
             defer

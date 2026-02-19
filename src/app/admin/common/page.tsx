@@ -46,6 +46,15 @@ export default function AdminCommonPage() {
   const [menuSaving, setMenuSaving] = useState(false)
   const [footerSaving, setFooterSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [analyticsFrom, setAnalyticsFrom] = useState('')
+  const [analyticsTo, setAnalyticsTo] = useState('')
+  const [analytics, setAnalytics] = useState<{
+    rangeTotal: number
+    totalDay: number
+    totalMonth: number
+    sources: { source: string; count: number }[]
+    topPages: { path: string; count: number }[]
+  } | null>(null)
 
   const filteredInquiries = useMemo(() => {
     return inquiries.filter((q) => {
@@ -66,12 +75,23 @@ export default function AdminCommonPage() {
     if (res.ok) setInquiries(json?.inquiries ?? [])
   }
 
+  async function loadAnalytics(from?: string, to?: string) {
+    const qs = new URLSearchParams()
+    if (from) qs.set('from', from)
+    if (to) qs.set('to', to)
+
+    const res = await fetch(`/api/admin/analytics?${qs.toString()}`, { cache: 'no-store' })
+    const json = await res.json()
+    if (res.ok) setAnalytics(json)
+  }
+
   useEffect(() => {
     ;(async () => {
-      const [menuRes, footerRes, inquiriesRes] = await Promise.all([
+      const [menuRes, footerRes, inquiriesRes, analyticsRes] = await Promise.all([
         fetch('/api/content?key=menu_config', { cache: 'no-store' }),
         fetch('/api/content?key=footer_config', { cache: 'no-store' }),
         fetch('/api/admin/inquiries', { cache: 'no-store' }),
+        fetch('/api/admin/analytics', { cache: 'no-store' }),
       ])
 
       const menuJson = await menuRes.json()
@@ -96,6 +116,9 @@ export default function AdminCommonPage() {
 
       const inquiriesJson = await inquiriesRes.json()
       if (inquiriesRes.ok) setInquiries(inquiriesJson?.inquiries ?? [])
+
+      const analyticsJson = await analyticsRes.json()
+      if (analyticsRes.ok) setAnalytics(analyticsJson)
 
       setLoading(false)
     })()
@@ -250,6 +273,42 @@ export default function AdminCommonPage() {
         <button className="px-4 py-2 rounded border" disabled={footerSaving} onClick={saveFooter}>
           {footerSaving ? '푸터 저장 중...' : '푸터 저장'}
         </button>
+      </section>
+
+      <section className="border rounded-xl p-5 space-y-4">
+        <h2 className="text-lg font-semibold">방문 통계 (간편)</h2>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="text-sm">
+            시작일
+            <input type="date" className="block border rounded px-3 py-2" value={analyticsFrom} onChange={(e) => setAnalyticsFrom(e.target.value)} />
+          </label>
+          <label className="text-sm">
+            종료일
+            <input type="date" className="block border rounded px-3 py-2" value={analyticsTo} onChange={(e) => setAnalyticsTo(e.target.value)} />
+          </label>
+          <button className="px-3 py-2 text-sm rounded border" onClick={() => loadAnalytics(analyticsFrom, analyticsTo)}>기간 조회</button>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-3 text-sm">
+          <div className="border rounded p-3">총 방문자(최근 24h): <b>{analytics?.totalDay ?? 0}</b></div>
+          <div className="border rounded p-3">총 방문자(최근 30d): <b>{analytics?.totalMonth ?? 0}</b></div>
+          <div className="border rounded p-3">조회기간 방문수: <b>{analytics?.rangeTotal ?? 0}</b></div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="border rounded p-3 space-y-2">
+            <p className="font-medium">Source</p>
+            {(analytics?.sources ?? []).slice(0, 10).map((s) => (
+              <p key={s.source} className="text-sm flex justify-between"><span>{s.source}</span><span>{s.count}</span></p>
+            ))}
+          </div>
+          <div className="border rounded p-3 space-y-2">
+            <p className="font-medium">하위 페이지 Top 3</p>
+            {(analytics?.topPages ?? []).map((p) => (
+              <p key={p.path} className="text-sm flex justify-between"><span>{p.path}</span><span>{p.count}</span></p>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section className="border rounded-xl p-5 space-y-4">
