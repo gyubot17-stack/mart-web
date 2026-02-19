@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #e5e7eb;
+  --background: #f5f7fb;
   --foreground: #111827;
 
   /* Design Tokens (premium neutral + deep blue) */
