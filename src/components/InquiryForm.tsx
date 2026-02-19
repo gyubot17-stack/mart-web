@@ -35,16 +35,16 @@ export default function InquiryForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="border rounded-xl p-5 space-y-3">
-      <h3 className="text-lg font-semibold">문의하기</h3>
-      <input className="w-full border rounded px-3 py-2" placeholder="성함" value={name} onChange={(e) => setName(e.target.value)} required />
-      <input className="w-full border rounded px-3 py-2" placeholder="연락처" value={phone} onChange={(e) => setPhone(e.target.value)} required />
-      <textarea className="w-full border rounded px-3 py-2 min-h-28" placeholder="문의 내용" value={message} onChange={(e) => setMessage(e.target.value)} required />
+    <form onSubmit={onSubmit} className="ui-card ui-fade-in p-5 space-y-3 text-slate-200">
+      <h3 className="text-lg font-semibold text-slate-100">문의하기</h3>
+      <input className="w-full border border-slate-300 rounded px-3 py-2 bg-white text-slate-900" placeholder="성함" value={name} onChange={(e) => setName(e.target.value)} required />
+      <input className="w-full border border-slate-300 rounded px-3 py-2 bg-white text-slate-900" placeholder="연락처" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+      <textarea className="w-full border border-slate-300 rounded px-3 py-2 min-h-28 bg-white text-slate-900" placeholder="문의 내용" value={message} onChange={(e) => setMessage(e.target.value)} required />
       <input type="text" name="website" className="hidden" tabIndex={-1} autoComplete="off" onChange={() => {}} />
-      <button className="px-4 py-2 rounded bg-black text-white disabled:opacity-50" disabled={loading}>
+      <button className="ui-btn-primary px-4 py-2 disabled:opacity-50" disabled={loading}>
         {loading ? '접수 중...' : '문의 접수'}
       </button>
-      {status ? <p className="text-sm text-gray-700">{status}</p> : null}
+      {status ? <p className="text-sm text-slate-300">{status}</p> : null}
     </form>
   )
 }

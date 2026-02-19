@@ -150,7 +150,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
   return (
     <main id="top" className="min-h-screen bg-white text-gray-900">
       <a href="#top" className="fixed right-4 md:right-6 bottom-4 md:bottom-6 z-50 rounded-full bg-black text-white px-4 py-3 text-sm font-semibold shadow-lg hover:bg-gray-800">
-        홈으로 ↑
+        맨위로 ↑
       </a>
 
       <SiteHeader items={siteSections} currentSlug={slug} />
