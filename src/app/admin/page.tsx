@@ -40,7 +40,7 @@ type SubmenuItem = {
   visible: boolean
 }
 
-const baseSections = [
+const sections = [
   { key: 'home', label: '홈' },
   { key: 'company', label: '회사소개' },
   { key: 'compressor', label: '콤프레샤' },
@@ -134,21 +134,9 @@ export default function AdminPage() {
   const [submenuSaving, setSubmenuSaving] = useState(false)
   const [autoBackup, setAutoBackup] = useState(true)
 
-  const [dynamicSections, setDynamicSections] = useState<{ key: string; label: string }[]>([])
-
-  const allSections = useMemo(() => {
-    const merged = [...baseSections, ...dynamicSections]
-    const seen = new Set<string>()
-    return merged.filter((item) => {
-      if (seen.has(item.key)) return false
-      seen.add(item.key)
-      return true
-    })
-  }, [dynamicSections])
-
   const editableSections = useMemo(() => {
-    if (allowedContentKeys.includes('*')) return allSections
-    return allSections.filter((s) => allowedContentKeys.includes(s.key))
+    if (allowedContentKeys.includes('*')) return sections
+    return sections.filter((s) => allowedContentKeys.includes(s.key))
   }, [allowedContentKeys])
 
   const isHome = useMemo(() => selectedKey === 'home', [selectedKey])
@@ -214,7 +202,7 @@ export default function AdminPage() {
 
         const firstKey = keys.includes('*')
           ? 'home'
-          : (allSections.find((s) => keys.includes(s.key))?.key ?? 'home')
+          : (sections.find((s) => keys.includes(s.key))?.key ?? 'home')
 
         setSelectedKey(firstKey)
         await Promise.all([loadContent(firstKey), loadSubmenus()])
@@ -243,25 +231,6 @@ export default function AdminPage() {
     return true
   }
 
-  function extractDynamicSections(map: Record<string, SubmenuItem[]>) {
-    const baseMap = new Map(baseSections.map((s) => [s.key, s.label]))
-    const out: { key: string; label: string }[] = []
-
-    Object.entries(map).forEach(([parentKey, rows]) => {
-      rows.forEach((row) => {
-        const href = String(row?.href || '')
-        const parts = href.split('#')[0].split('?')[0].split('/').filter(Boolean)
-        if (parts.length === 2) {
-          const key = `${parts[0]}-${parts[1]}`
-          const parentLabel = baseMap.get(parentKey) || parentKey
-          const childLabel = row?.label?.trim() || parts[1]
-          out.push({ key, label: `${parentLabel} - ${childLabel}` })
-        }
-      })
-    })
-    return out
-  }
-
   async function loadSubmenus() {
     const res = await fetch('/api/content?key=submenu_config', { cache: 'no-store' })
     const json = await res.json()
@@ -281,10 +250,8 @@ export default function AdminPage() {
         ]),
       ) as Record<string, SubmenuItem[]>
       setSubmenus(normalized)
-      setDynamicSections(extractDynamicSections(normalized))
     } catch {
       setSubmenus(defaultSubmenus)
-      setDynamicSections(extractDynamicSections(defaultSubmenus))
     }
   }
 
