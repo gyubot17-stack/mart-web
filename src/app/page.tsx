@@ -59,19 +59,19 @@ export default async function Home() {
 
   return (
     <main id="top" className="min-h-screen bg-white text-gray-900">
-      <a href="#top" className="fixed right-6 bottom-6 z-50 rounded-full bg-black text-white px-4 py-3 text-sm font-semibold shadow-lg hover:bg-gray-800">홈으로 ↑</a>
+      <a href="#top" className="fixed right-4 md:right-6 bottom-4 md:bottom-6 z-50 rounded-full bg-black text-white px-4 py-3 text-sm font-semibold shadow-lg hover:bg-gray-800">홈으로 ↑</a>
 
       <SiteHeader items={siteSections} />
 
       <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 
-      <section className="max-w-6xl mx-auto px-6 pb-8">
-        <div className="ui-card p-6 md:p-8 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
+      <section className="max-w-6xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
+        <div className="ui-card p-5 md:p-8 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-6 pb-16 grid md:grid-cols-2 gap-6">
+      <section className="max-w-6xl mx-auto px-4 md:px-6 pb-16 grid md:grid-cols-2 gap-4 md:gap-6 ui-fade-in">
         {siteSections.map((item) => (
-          <Link key={item.slug} href={`/${item.slug}`} className="ui-card ui-card-hover p-6 space-y-4">
+          <Link key={item.slug} href={`/${item.slug}`} className="ui-card ui-card-hover p-5 md:p-6 space-y-4">
             <h2 className="text-2xl font-bold">{item.label}</h2>
             <div className="w-full min-h-44 rounded-lg border border-dashed flex items-center justify-center text-gray-400">이미지 영역 (추후 업로드)</div>
             <p className="text-gray-600 text-sm leading-6">클릭하면 {item.label} 상세 페이지로 이동합니다.</p>

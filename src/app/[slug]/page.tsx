@@ -149,7 +149,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
 
   return (
     <main id="top" className="min-h-screen bg-white text-gray-900">
-      <a href="#top" className="fixed right-6 bottom-6 z-50 rounded-full bg-black text-white px-4 py-3 text-sm font-semibold shadow-lg hover:bg-gray-800">
+      <a href="#top" className="fixed right-4 md:right-6 bottom-4 md:bottom-6 z-50 rounded-full bg-black text-white px-4 py-3 text-sm font-semibold shadow-lg hover:bg-gray-800">
         홈으로 ↑
       </a>
 
@@ -157,12 +157,12 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
 
       <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 
-      <section className="max-w-6xl mx-auto px-6 pb-8">
-        <div className="ui-card p-6 md:p-8 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
+      <section className="max-w-6xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
+        <div className="ui-card p-5 md:p-8 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
       </section>
 
       {visibleGallery.length > 0 ? (
-        <section className="max-w-6xl mx-auto px-6 pb-8 space-y-4">
+        <section className="max-w-6xl mx-auto px-4 md:px-6 pb-8 space-y-4 ui-fade-in">
           <h2 className="text-2xl font-bold">갤러리</h2>
           <div className="grid md:grid-cols-3 gap-4">
             {visibleGallery.map((item, i) => (
@@ -179,11 +179,11 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
       ) : null}
 
       {visibleProducts.length > 0 ? (
-        <section className="max-w-6xl mx-auto px-6 pb-16 space-y-4">
+        <section className="max-w-6xl mx-auto px-4 md:px-6 pb-16 space-y-4 ui-fade-in">
           <h2 className="text-2xl font-bold">제품 카드</h2>
           <div className="grid md:grid-cols-3 gap-4">
             {visibleProducts.map((product, i) => (
-              <article key={i} className="ui-card p-4 space-y-3">
+              <article key={i} className="ui-card ui-card-hover p-4 space-y-3">
                 <div className="ui-card min-h-32 overflow-hidden flex items-center justify-center text-slate-400">
                   {product.image ? (
                     <Image src={product.image} alt={product.name} width={400} height={style.productHeight} className="w-full object-cover" style={{ height: `${style.productHeight}px` }} sizes="(max-width: 768px) 100vw, 33vw" />
