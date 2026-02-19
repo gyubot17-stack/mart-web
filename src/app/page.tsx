@@ -72,7 +72,7 @@ export default async function Home() {
       <section className="max-w-6xl mx-auto px-4 md:px-6 pb-16 grid md:grid-cols-2 gap-4 md:gap-6 ui-fade-in">
         {siteSections.map((item) => (
           <Link key={item.slug} href={`/${item.slug}`} className="ui-card ui-card-hover p-5 md:p-6 space-y-4">
-            <h2 className="text-2xl font-bold">{item.label}</h2>
+            <h2 className="text-2xl font-bold text-slate-900">{item.label}</h2>
             <div className="w-full min-h-44 rounded-lg border border-dashed flex items-center justify-center text-gray-400">이미지 영역 (추후 업로드)</div>
             <p className="text-gray-600 text-sm leading-6">클릭하면 {item.label} 상세 페이지로 이동합니다.</p>
           </Link>
