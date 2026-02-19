@@ -6,10 +6,11 @@ import { buildSiteSections, parseMenuLabels } from '@/lib/site-sections'
 export const dynamic = 'force-dynamic'
 
 export default async function Home() {
-  const [{ data }, { data: menuConfig }, { data: footerConfig }] = await Promise.all([
+  const [{ data }, { data: menuConfig }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('*').eq('key', 'home').single(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'footer_config').maybeSingle(),
+    supabaseAdmin.from('site_content').select('body').eq('key', 'home_style').maybeSingle(),
   ])
 
   const menuLabels = parseMenuLabels(menuConfig?.body)
@@ -26,6 +27,12 @@ export default async function Home() {
     addressInfo: '주소: (입력 예정) | 연락처: (입력 예정)',
   }
 
+  let style = {
+    heroHeight: 420,
+    galleryHeight: 160,
+    productHeight: 128,
+  }
+
   if (footerConfig?.body) {
     try {
       const parsed = JSON.parse(footerConfig.body)
@@ -33,6 +40,17 @@ export default async function Home() {
         companyName: parsed?.companyName || footer.companyName,
         companyInfo: parsed?.companyInfo || footer.companyInfo,
         addressInfo: parsed?.addressInfo || footer.addressInfo,
+      }
+    } catch {}
+  }
+
+  if (styleConfig?.body) {
+    try {
+      const parsed = JSON.parse(styleConfig.body)
+      style = {
+        heroHeight: Number(parsed?.heroHeight) || style.heroHeight,
+        galleryHeight: Number(parsed?.galleryHeight) || style.galleryHeight,
+        productHeight: Number(parsed?.productHeight) || style.productHeight,
       }
     } catch {}
   }
@@ -59,7 +77,7 @@ export default async function Home() {
         </div>
 
         {image ? (
-          <div className="relative w-full h-[420px] rounded-2xl border overflow-hidden">
+          <div className="relative w-full rounded-2xl border overflow-hidden" style={{ height: `${style.heroHeight}px` }}>
             <Image src={image} alt="hero" fill priority className="object-cover" sizes="(max-width: 768px) 100vw, 1200px" />
           </div>
         ) : (

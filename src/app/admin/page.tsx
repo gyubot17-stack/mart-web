@@ -28,6 +28,12 @@ type SectionExtra = {
   products: Product[]
 }
 
+type StyleConfig = {
+  heroHeight: number
+  galleryHeight: number
+  productHeight: number
+}
+
 const sections = [
   { key: 'home', label: '홈' },
   { key: 'company', label: '회사소개' },
@@ -53,6 +59,12 @@ const initial: Content = {
 const defaultExtra: SectionExtra = {
   gallery: [],
   products: [],
+}
+
+const defaultStyle: StyleConfig = {
+  heroHeight: 420,
+  galleryHeight: 160,
+  productHeight: 128,
 }
 
 function createEmptyProduct(): Product {
@@ -101,6 +113,8 @@ export default function AdminPage() {
   const [allowedContentKeys, setAllowedContentKeys] = useState<string[]>(['*'])
   const [extra, setExtra] = useState<SectionExtra>(defaultExtra)
   const [extraSaving, setExtraSaving] = useState(false)
+  const [style, setStyle] = useState<StyleConfig>(defaultStyle)
+  const [styleSaving, setStyleSaving] = useState(false)
 
   const editableSections = useMemo(() => {
     if (allowedContentKeys.includes('*')) return sections
@@ -128,12 +142,32 @@ export default function AdminPage() {
       })
     }
 
-    if (key !== 'home') {
-      const extraRes = await fetch(`/api/content?key=${encodeURIComponent(`${key}_extra`)}`, { cache: 'no-store' })
+    const [extraRes, styleRes] = await Promise.all([
+      key !== 'home'
+        ? fetch(`/api/content?key=${encodeURIComponent(`${key}_extra`)}`, { cache: 'no-store' })
+        : Promise.resolve(null),
+      fetch(`/api/content?key=${encodeURIComponent(`${key}_style`)}`, { cache: 'no-store' }),
+    ])
+
+    if (extraRes) {
       const extraJson = await extraRes.json()
       setExtra(parseExtra(extraJson?.data?.body))
     } else {
       setExtra(defaultExtra)
+    }
+
+    if (styleRes) {
+      const styleJson = await styleRes.json()
+      try {
+        const parsed = JSON.parse(styleJson?.data?.body || '{}')
+        setStyle({
+          heroHeight: Number(parsed?.heroHeight) || defaultStyle.heroHeight,
+          galleryHeight: Number(parsed?.galleryHeight) || defaultStyle.galleryHeight,
+          productHeight: Number(parsed?.productHeight) || defaultStyle.productHeight,
+        })
+      } catch {
+        setStyle(defaultStyle)
+      }
     }
   }
 
@@ -202,6 +236,29 @@ export default function AdminPage() {
       setMessage(`갤러리/제품카드 저장 실패: ${json?.error ?? 'unknown'}`)
     }
     setExtraSaving(false)
+  }
+
+  async function saveStyle() {
+    setStyleSaving(true)
+    const res = await fetch('/api/content', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        key: `${selectedKey}_style`,
+        title: `${selectedKey} style`,
+        subtitle: '',
+        body: JSON.stringify(style),
+        hero_image_url: '',
+      }),
+    })
+
+    if (res.ok) {
+      setMessage('이미지 크기 설정 저장 완료 ✅')
+    } else {
+      const json = await res.json()
+      setMessage(`이미지 크기 저장 실패: ${json?.error ?? 'unknown'}`)
+    }
+    setStyleSaving(false)
   }
 
   async function handleUpload(file: File, target: 'hero' | 'gallery' | 'product', index?: number) {
@@ -333,6 +390,30 @@ export default function AdminPage() {
 
         <button className="px-4 py-2 rounded bg-black text-white disabled:opacity-50" disabled={saving || uploading} onClick={handleSave}>
           {saving ? '저장 중...' : '저장'}
+        </button>
+      </section>
+
+      <section className="border rounded-xl p-5 space-y-4">
+        <h2 className="text-lg font-semibold">이미지 크기 조절</h2>
+        <div className="grid md:grid-cols-3 gap-3">
+          <label className="space-y-1 block">
+            <span className="text-sm text-gray-600">히어로 높이(px)</span>
+            <input type="number" className="w-full border rounded px-3 py-2" value={style.heroHeight}
+              onChange={(e) => setStyle((prev) => ({ ...prev, heroHeight: Number(e.target.value) || 420 }))} />
+          </label>
+          <label className="space-y-1 block">
+            <span className="text-sm text-gray-600">갤러리 높이(px)</span>
+            <input type="number" className="w-full border rounded px-3 py-2" value={style.galleryHeight}
+              onChange={(e) => setStyle((prev) => ({ ...prev, galleryHeight: Number(e.target.value) || 160 }))} />
+          </label>
+          <label className="space-y-1 block">
+            <span className="text-sm text-gray-600">제품 이미지 높이(px)</span>
+            <input type="number" className="w-full border rounded px-3 py-2" value={style.productHeight}
+              onChange={(e) => setStyle((prev) => ({ ...prev, productHeight: Number(e.target.value) || 128 }))} />
+          </label>
+        </div>
+        <button className="px-4 py-2 rounded border" disabled={styleSaving} onClick={saveStyle}>
+          {styleSaving ? '크기 저장 중...' : '이미지 크기 저장'}
         </button>
       </section>
 

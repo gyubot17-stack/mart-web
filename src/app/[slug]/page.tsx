@@ -89,11 +89,12 @@ function parseExtra(raw?: string | null): SectionExtra {
 export default async function SectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const [{ data: menuConfig }, { data }, { data: extraData }, { data: footerConfig }] = await Promise.all([
+  const [{ data: menuConfig }, { data }, { data: extraData }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('*').eq('key', slug).maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', `${slug}_extra`).maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'footer_config').maybeSingle(),
+    supabaseAdmin.from('site_content').select('body').eq('key', `${slug}_style`).maybeSingle(),
   ])
 
   const menuLabels = parseMenuLabels(menuConfig?.body)
@@ -116,6 +117,12 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
     addressInfo: '주소: (입력 예정) | 연락처: (입력 예정)',
   }
 
+  let style = {
+    heroHeight: 420,
+    galleryHeight: 160,
+    productHeight: 128,
+  }
+
   if (footerConfig?.body) {
     try {
       const parsed = JSON.parse(footerConfig.body)
@@ -123,6 +130,17 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
         companyName: parsed?.companyName || footer.companyName,
         companyInfo: parsed?.companyInfo || footer.companyInfo,
         addressInfo: parsed?.addressInfo || footer.addressInfo,
+      }
+    } catch {}
+  }
+
+  if (styleConfig?.body) {
+    try {
+      const parsed = JSON.parse(styleConfig.body)
+      style = {
+        heroHeight: Number(parsed?.heroHeight) || style.heroHeight,
+        galleryHeight: Number(parsed?.galleryHeight) || style.galleryHeight,
+        productHeight: Number(parsed?.productHeight) || style.productHeight,
       }
     } catch {}
   }
@@ -155,7 +173,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
         </div>
 
         {image ? (
-          <div className="relative w-full h-[420px] rounded-2xl border overflow-hidden">
+          <div className="relative w-full rounded-2xl border overflow-hidden" style={{ height: `${style.heroHeight}px` }}>
             <Image src={image} alt={title} fill priority className="object-cover" sizes="(max-width: 768px) 100vw, 1200px" />
           </div>
         ) : (
@@ -174,7 +192,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
             {visibleGallery.map((item, i) => (
               <div key={i} className="min-h-40 rounded-lg border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
                 {item.url ? (
-                  <Image src={item.url} alt={`gallery-${i + 1}`} width={480} height={160} className="w-full h-40 object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
+                  <Image src={item.url} alt={`gallery-${i + 1}`} width={480} height={style.galleryHeight} className="w-full object-cover" style={{ height: `${style.galleryHeight}px` }} sizes="(max-width: 768px) 100vw, 33vw" />
                 ) : (
                   `갤러리 이미지 ${i + 1}`
                 )}
@@ -192,7 +210,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
               <article key={i} className="rounded-lg border p-4 space-y-3">
                 <div className="min-h-32 rounded border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
                   {product.image ? (
-                    <Image src={product.image} alt={product.name} width={400} height={128} className="w-full h-32 object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
+                    <Image src={product.image} alt={product.name} width={400} height={style.productHeight} className="w-full object-cover" style={{ height: `${style.productHeight}px` }} sizes="(max-width: 768px) 100vw, 33vw" />
                   ) : (
                     `제품 이미지 ${i + 1}`
                   )}

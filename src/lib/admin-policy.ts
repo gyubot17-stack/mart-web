@@ -54,5 +54,9 @@ export function canEditWithAllowedKeys(role: 'admin' | 'super', key: string, all
     const baseKey = key.replace(/_extra$/, '')
     return allowed.includes(baseKey)
   }
+  if (key.endsWith('_style')) {
+    const baseKey = key.replace(/_style$/, '')
+    return allowed.includes(baseKey)
+  }
   return false
 }
