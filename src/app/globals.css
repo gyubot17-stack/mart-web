@@ -104,10 +104,11 @@ body {
 .ui-chip-active {
   background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
   border-color: transparent;
-  color: #fff;
+  color: #111827;
   box-shadow: 0 6px 16px rgba(29, 78, 216, 0.35);
 }
 
+.ui-chip-active:hover,
 .ui-chip-active:active,
 .ui-chip-active:focus-visible {
   color: #111827;
