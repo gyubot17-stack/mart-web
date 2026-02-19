@@ -158,12 +158,12 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
       <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 
       <section className="max-w-6xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
-        <div className="ui-card p-5 md:p-8 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
+        <div className="ui-card p-5 md:p-8 text-slate-200 leading-7 whitespace-pre-wrap">{body}</div>
       </section>
 
       {visibleGallery.length > 0 ? (
         <section className="max-w-6xl mx-auto px-4 md:px-6 pb-8 space-y-4 ui-fade-in">
-          <h2 className="text-2xl font-bold">갤러리</h2>
+          <h2 className="text-2xl font-bold text-slate-100">갤러리</h2>
           <div className="grid md:grid-cols-3 gap-4">
             {visibleGallery.map((item, i) => (
               <div key={i} className="ui-card min-h-40 overflow-hidden flex items-center justify-center text-slate-400">
@@ -180,7 +180,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
 
       {visibleProducts.length > 0 ? (
         <section className="max-w-6xl mx-auto px-4 md:px-6 pb-16 space-y-4 ui-fade-in">
-          <h2 className="text-2xl font-bold">제품 카드</h2>
+          <h2 className="text-2xl font-bold text-slate-100">제품 카드</h2>
           <div className="grid md:grid-cols-3 gap-4">
             {visibleProducts.map((product, i) => (
               <article key={i} className="ui-card ui-card-hover p-4 space-y-3">
@@ -192,7 +192,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
                   )}
                 </div>
                 <h3 className="font-semibold">{product.name || `제품명 ${i + 1}`}</h3>
-                <p className="text-sm text-gray-600">{product.desc || '제품 설명을 입력할 수 있는 영역입니다.'}</p>
+                <p className="text-sm text-slate-300">{product.desc || '제품 설명을 입력할 수 있는 영역입니다.'}</p>
                 {product.link ? (
                   <a href={product.link} className="inline-block px-3 py-2 text-sm rounded bg-black text-white">
                     문의하기
