@@ -43,7 +43,7 @@ export default async function PrivacyPage() {
   const body = data?.body || '개인정보처리방침 내용을 관리자에서 입력해주세요.'
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen bg-white text-gray-900">
       <SiteHeader items={siteSections} submenus={submenus} />
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-12">
         <div className="ui-card p-6 md:p-8 space-y-4">
