@@ -66,15 +66,15 @@ export default async function Home() {
       <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 
       <section className="max-w-6xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
-        <div className="ui-card p-5 md:p-8 text-slate-200 leading-7 whitespace-pre-wrap">{body}</div>
+        <div className="ui-card p-5 md:p-8 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
       </section>
 
       <section className="max-w-6xl mx-auto px-4 md:px-6 pb-16 grid md:grid-cols-2 gap-4 md:gap-6 ui-fade-in">
         {siteSections.map((item) => (
           <Link key={item.slug} href={`/${item.slug}`} className="ui-card ui-card-hover p-5 md:p-6 space-y-4">
-            <h2 className="text-2xl font-bold text-slate-100">{item.label}</h2>
+            <h2 className="text-2xl font-bold text-slate-900">{item.label}</h2>
             <div className="w-full min-h-44 rounded-lg border border-dashed flex items-center justify-center text-gray-400">이미지 영역 (추후 업로드)</div>
-            <p className="text-slate-300 text-sm leading-6">클릭하면 {item.label} 상세 페이지로 이동합니다.</p>
+            <p className="text-gray-600 text-sm leading-6">클릭하면 {item.label} 상세 페이지로 이동합니다.</p>
           </Link>
         ))}
       </section>
