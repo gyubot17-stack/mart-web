@@ -32,14 +32,7 @@ export default function SiteHeader({
   const getChildren = (item: Item): Child[] => {
     const fromConfig = submenus?.[item.slug]
     const source = Array.isArray(fromConfig) && fromConfig.length > 0 ? fromConfig : fallbackChildren(item)
-
-    return source
-      .map((c: any) => ({
-        label: String(c?.label || ''),
-        href: String(c?.href || ''),
-        visible: c?.visible !== false,
-      }))
-      .filter((c) => c.visible !== false && c.label && c.href)
+    return source.filter((c) => c.visible !== false)
   }
 
   return (
