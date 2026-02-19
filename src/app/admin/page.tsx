@@ -34,6 +34,11 @@ type StyleConfig = {
   productHeight: number
 }
 
+type SubmenuItem = {
+  label: string
+  href: string
+}
+
 const sections = [
   { key: 'home', label: '홈' },
   { key: 'company', label: '회사소개' },
@@ -115,6 +120,8 @@ export default function AdminPage() {
   const [extraSaving, setExtraSaving] = useState(false)
   const [style, setStyle] = useState<StyleConfig>(defaultStyle)
   const [styleSaving, setStyleSaving] = useState(false)
+  const [submenus, setSubmenus] = useState<Record<string, SubmenuItem[]>>({})
+  const [submenuSaving, setSubmenuSaving] = useState(false)
   const [autoBackup, setAutoBackup] = useState(true)
 
   const editableSections = useMemo(() => {
@@ -188,12 +195,12 @@ export default function AdminPage() {
           : (sections.find((s) => keys.includes(s.key))?.key ?? 'home')
 
         setSelectedKey(firstKey)
-        await loadContent(firstKey)
+        await Promise.all([loadContent(firstKey), loadSubmenus()])
         setLoading(false)
         return
       }
 
-      await loadContent('home')
+      await Promise.all([loadContent('home'), loadSubmenus()])
       setLoading(false)
     })()
   }, [])
@@ -212,6 +219,41 @@ export default function AdminPage() {
       return false
     }
     return true
+  }
+
+  async function loadSubmenus() {
+    const res = await fetch('/api/content?key=submenu_config', { cache: 'no-store' })
+    const json = await res.json()
+    try {
+      const parsed = JSON.parse(json?.data?.body || '{}')
+      setSubmenus(parsed && typeof parsed === 'object' ? parsed : {})
+    } catch {
+      setSubmenus({})
+    }
+  }
+
+  async function saveSubmenus() {
+    setSubmenuSaving(true)
+    if (!(await runAutoBackupIfNeeded())) { setSubmenuSaving(false); return }
+
+    const res = await fetch('/api/content', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        key: 'submenu_config',
+        title: 'submenu config',
+        subtitle: '',
+        body: JSON.stringify(submenus),
+        hero_image_url: '',
+      }),
+    })
+
+    if (res.ok) setMessage('하위 메뉴 저장 완료 ✅')
+    else {
+      const json = await res.json()
+      setMessage(`하위 메뉴 저장 실패: ${json?.error ?? 'unknown'}`)
+    }
+    setSubmenuSaving(false)
   }
 
   async function handleSave() {
@@ -365,6 +407,75 @@ export default function AdminPage() {
           />
           저장 전에 자동 백업하기 (슈퍼관리자만)
         </label>
+      </section>
+
+      <section className="border rounded-xl p-5 space-y-4">
+        <h2 className="text-lg font-semibold">상단 하위 메뉴 편집</h2>
+        <p className="text-sm text-gray-600">각 상단 메뉴별로 하위 메뉴를 추가/수정/삭제할 수 있습니다.</p>
+
+        <div className="space-y-4">
+          {editableSections.map((section) => {
+            const rows = submenus[section.key] ?? []
+            return (
+              <div key={section.key} className="border rounded p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="font-medium text-sm">{section.label} ({section.key})</p>
+                  <button
+                    type="button"
+                    className="px-2 py-1 text-xs rounded border"
+                    onClick={() => setSubmenus((prev) => ({
+                      ...prev,
+                      [section.key]: [...(prev[section.key] ?? []), { label: '', href: '' }],
+                    }))}
+                  >
+                    + 하위 메뉴 추가
+                  </button>
+                </div>
+
+                {rows.length === 0 ? <p className="text-xs text-gray-500">하위 메뉴 없음</p> : null}
+
+                {rows.map((row, idx) => (
+                  <div key={`${section.key}-${idx}`} className="grid md:grid-cols-[1fr_1.5fr_auto] gap-2 items-center">
+                    <input
+                      className="w-full border rounded px-3 py-2 text-sm"
+                      placeholder="메뉴명"
+                      value={row.label}
+                      onChange={(e) => setSubmenus((prev) => {
+                        const next = [...(prev[section.key] ?? [])]
+                        next[idx] = { ...next[idx], label: e.target.value }
+                        return { ...prev, [section.key]: next }
+                      })}
+                    />
+                    <input
+                      className="w-full border rounded px-3 py-2 text-sm"
+                      placeholder="링크 (예: /support#inquiry)"
+                      value={row.href}
+                      onChange={(e) => setSubmenus((prev) => {
+                        const next = [...(prev[section.key] ?? [])]
+                        next[idx] = { ...next[idx], href: e.target.value }
+                        return { ...prev, [section.key]: next }
+                      })}
+                    />
+                    <button
+                      type="button"
+                      className="px-2 py-1 text-xs rounded border text-red-600"
+                      onClick={() => setSubmenus((prev) => ({
+                        ...prev,
+                        [section.key]: (prev[section.key] ?? []).filter((_, i) => i !== idx),
+                      }))}
+                    >
+                      삭제
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )
+          })}
+        </div>
+
+        <button className="px-4 py-2 rounded border" disabled={submenuSaving} onClick={saveSubmenus}>
+          {submenuSaving ? '하위 메뉴 저장 중...' : '하위 메뉴 저장'}
+        </button>
       </section>
 
       <section className="border rounded-xl p-5 space-y-4">

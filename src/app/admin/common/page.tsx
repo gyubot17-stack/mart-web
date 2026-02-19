@@ -46,8 +46,6 @@ export default function AdminCommonPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'done'>('all')
   const [menuSaving, setMenuSaving] = useState(false)
   const [footerSaving, setFooterSaving] = useState(false)
-  const [submenuSaving, setSubmenuSaving] = useState(false)
-  const [submenus, setSubmenus] = useState<Record<string, { label: string; href: string }[]>>({})
   const [privacySaving, setPrivacySaving] = useState(false)
   const [privacyText, setPrivacyText] = useState('')
   const [message, setMessage] = useState('')
@@ -94,10 +92,9 @@ export default function AdminCommonPage() {
 
   useEffect(() => {
     ;(async () => {
-      const [menuRes, footerRes, submenuRes, privacyRes, inquiriesRes, analyticsRes] = await Promise.all([
+      const [menuRes, footerRes, privacyRes, inquiriesRes, analyticsRes] = await Promise.all([
         fetch('/api/content?key=menu_config', { cache: 'no-store' }),
         fetch('/api/content?key=footer_config', { cache: 'no-store' }),
-        fetch('/api/content?key=submenu_config', { cache: 'no-store' }),
         fetch('/api/content?key=privacy_policy', { cache: 'no-store' }),
         fetch('/api/admin/inquiries', { cache: 'no-store' }),
         fetch('/api/admin/analytics', { cache: 'no-store' }),
@@ -121,14 +118,6 @@ export default function AdminCommonPage() {
         })
       } catch {
         setFooter(defaultFooter)
-      }
-
-      const submenuJson = await submenuRes.json()
-      try {
-        const parsed = JSON.parse(submenuJson?.data?.body || '{}')
-        setSubmenus(parsed && typeof parsed === 'object' ? parsed : {})
-      } catch {
-        setSubmenus({})
       }
 
       const privacyJson = await privacyRes.json()
@@ -190,29 +179,6 @@ export default function AdminCommonPage() {
       setMessage(`푸터 저장 실패: ${json?.error ?? 'unknown'}`)
     }
     setFooterSaving(false)
-  }
-
-  async function saveSubmenus() {
-    setSubmenuSaving(true)
-    const res = await fetch('/api/content', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        key: 'submenu_config',
-        title: 'submenu config',
-        subtitle: '',
-        body: JSON.stringify(submenus),
-        hero_image_url: '',
-      }),
-    })
-
-    if (res.ok) {
-      setMessage('하위 메뉴 저장 완료 ✅')
-    } else {
-      const json = await res.json()
-      setMessage(`하위 메뉴 저장 실패: ${json?.error ?? 'unknown'}`)
-    }
-    setSubmenuSaving(false)
   }
 
   async function savePrivacyPolicy() {
@@ -330,69 +296,6 @@ export default function AdminCommonPage() {
         </div>
         <button className="px-4 py-2 rounded border" disabled={menuSaving} onClick={saveMenuLabels}>
           {menuSaving ? '메뉴 저장 중...' : '메뉴명 저장'}
-        </button>
-      </section>
-
-      <section className="border rounded-xl p-5 space-y-4">
-        <h2 className="text-lg font-semibold">하위 메뉴 편집 (고객센터)</h2>
-        <label className="space-y-1 block">
-          <span className="text-sm text-gray-600">1번 하위메뉴 이름</span>
-          <input
-            className="w-full border rounded px-3 py-2"
-            value={submenus.support?.[0]?.label ?? '문의하기'}
-            onChange={(e) => setSubmenus((prev) => ({
-              ...prev,
-              support: [
-                { label: e.target.value, href: prev.support?.[0]?.href || '/support#inquiry' },
-                ...(prev.support?.[1] ? [prev.support[1]] : [{ label: '개인정보처리방침', href: '/privacy' }]),
-              ],
-            }))}
-          />
-        </label>
-        <label className="space-y-1 block">
-          <span className="text-sm text-gray-600">1번 하위메뉴 링크</span>
-          <input
-            className="w-full border rounded px-3 py-2"
-            value={submenus.support?.[0]?.href ?? '/support#inquiry'}
-            onChange={(e) => setSubmenus((prev) => ({
-              ...prev,
-              support: [
-                { label: prev.support?.[0]?.label || '문의하기', href: e.target.value },
-                ...(prev.support?.[1] ? [prev.support[1]] : [{ label: '개인정보처리방침', href: '/privacy' }]),
-              ],
-            }))}
-          />
-        </label>
-        <label className="space-y-1 block">
-          <span className="text-sm text-gray-600">2번 하위메뉴 이름</span>
-          <input
-            className="w-full border rounded px-3 py-2"
-            value={submenus.support?.[1]?.label ?? '개인정보처리방침'}
-            onChange={(e) => setSubmenus((prev) => ({
-              ...prev,
-              support: [
-                ...(prev.support?.[0] ? [prev.support[0]] : [{ label: '문의하기', href: '/support#inquiry' }]),
-                { label: e.target.value, href: prev.support?.[1]?.href || '/privacy' },
-              ],
-            }))}
-          />
-        </label>
-        <label className="space-y-1 block">
-          <span className="text-sm text-gray-600">2번 하위메뉴 링크</span>
-          <input
-            className="w-full border rounded px-3 py-2"
-            value={submenus.support?.[1]?.href ?? '/privacy'}
-            onChange={(e) => setSubmenus((prev) => ({
-              ...prev,
-              support: [
-                ...(prev.support?.[0] ? [prev.support[0]] : [{ label: '문의하기', href: '/support#inquiry' }]),
-                { label: prev.support?.[1]?.label || '개인정보처리방침', href: e.target.value },
-              ],
-            }))}
-          />
-        </label>
-        <button className="px-4 py-2 rounded border" disabled={submenuSaving} onClick={saveSubmenus}>
-          {submenuSaving ? '하위메뉴 저장 중...' : '하위메뉴 저장'}
         </button>
       </section>
 
