@@ -157,12 +157,12 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
 
       <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 
-      <section className="max-w-6xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
+      <section className="max-w-7xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
         <div className="ui-card p-5 md:p-8 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
       </section>
 
       {visibleGallery.length > 0 ? (
-        <section className="max-w-6xl mx-auto px-4 md:px-6 pb-8 space-y-4 ui-fade-in">
+        <section className="max-w-7xl mx-auto px-4 md:px-6 pb-8 space-y-4 ui-fade-in">
           <h2 className="text-2xl font-bold">갤러리</h2>
           <div className="grid md:grid-cols-3 gap-4">
             {visibleGallery.map((item, i) => (
@@ -179,7 +179,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
       ) : null}
 
       {visibleProducts.length > 0 ? (
-        <section className="max-w-6xl mx-auto px-4 md:px-6 pb-16 space-y-4 ui-fade-in">
+        <section className="max-w-7xl mx-auto px-4 md:px-6 pb-16 space-y-4 ui-fade-in">
           <h2 className="text-2xl font-bold">제품 카드</h2>
           <div className="grid md:grid-cols-3 gap-4">
             {visibleProducts.map((product, i) => (
@@ -201,7 +201,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
       ) : null}
 
       {slug === 'support' ? (
-        <section className="max-w-6xl mx-auto px-6 pb-12">
+        <section className="max-w-7xl mx-auto px-6 pb-12">
           <InquiryForm />
         </section>
       ) : null}

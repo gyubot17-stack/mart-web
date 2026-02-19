@@ -65,11 +65,11 @@ export default async function Home() {
 
       <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 
-      <section className="max-w-6xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
+      <section className="max-w-7xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
         <div className="ui-card p-5 md:p-8 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
       </section>
 
-      <section className="max-w-6xl mx-auto px-4 md:px-6 pb-16 grid md:grid-cols-2 gap-4 md:gap-6 ui-fade-in">
+      <section className="max-w-7xl mx-auto px-4 md:px-6 pb-16 grid md:grid-cols-2 gap-4 md:gap-6 ui-fade-in">
         {siteSections.map((item) => (
           <Link key={item.slug} href={`/${item.slug}`} className="ui-card ui-card-hover p-5 md:p-6 space-y-4">
             <h2 className="text-2xl font-bold text-slate-900">{item.label}</h2>
