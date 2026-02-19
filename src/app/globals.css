@@ -104,7 +104,7 @@ body {
 .ui-chip-active {
   background: linear-gradient(135deg, var(--brand-500), var(--brand-700));
   border-color: transparent;
-  color: #111827;
+  color: #fff;
   box-shadow: 0 6px 16px rgba(29, 78, 216, 0.35);
 }
 
