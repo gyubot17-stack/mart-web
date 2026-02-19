@@ -87,6 +87,8 @@ function createEmptyGalleryItem(): GalleryItem {
   return { url: '', visible: true }
 }
 
+const MAX_UPLOAD_MB = 10
+
 function parseExtra(raw?: string | null): SectionExtra {
   if (!raw) return defaultExtra
   try {
@@ -332,15 +334,34 @@ export default function AdminPage() {
   }
 
   async function handleUpload(file: File, target: 'hero' | 'gallery' | 'product', index?: number) {
+    if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
+      setMessage(`업로드 실패: 파일 용량은 ${MAX_UPLOAD_MB}MB 이하만 가능합니다.`)
+      return
+    }
+
     setUploading(true)
     setMessage('이미지 업로드 중...')
     const fd = new FormData()
     fd.append('file', file)
 
-    const up = await fetch('/api/upload', {
-      method: 'POST',
-      body: fd,
-    })
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 30000)
+
+    let up: Response
+    try {
+      up = await fetch('/api/upload', {
+        method: 'POST',
+        body: fd,
+        signal: controller.signal,
+      })
+    } catch (e: any) {
+      clearTimeout(timer)
+      setUploading(false)
+      setMessage(e?.name === 'AbortError' ? '업로드 시간 초과입니다. 파일 용량을 줄여 다시 시도해주세요.' : '업로드 중 네트워크 오류가 발생했습니다.')
+      return
+    }
+
+    clearTimeout(timer)
     const upJson = await up.json()
     if (!up.ok) {
       setMessage(`업로드 실패: ${upJson?.error ?? 'unknown'}`)
@@ -527,14 +548,19 @@ export default function AdminPage() {
 
         <div className="space-y-2">
           <label className="text-sm font-medium">대표 이미지</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              if (file) handleUpload(file, 'hero')
-            }}
-          />
+          <label className="inline-flex items-center gap-2 px-3 py-2 rounded border bg-white text-sm cursor-pointer hover:bg-slate-50">
+            이미지 파일 선택
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) handleUpload(file, 'hero')
+              }}
+            />
+          </label>
+          <p className="text-xs text-gray-500">권장: 10MB 이하 / jpg, png, webp</p>
           {content.hero_image_url ? (
             <img src={content.hero_image_url} alt="hero" className="w-full max-h-72 object-cover rounded border" />
           ) : (
@@ -657,14 +683,18 @@ export default function AdminPage() {
                       })
                     }}
                   />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) handleUpload(file, 'gallery', i)
-                    }}
-                  />
+                  <label className="inline-flex items-center gap-2 px-3 py-2 rounded border bg-white text-xs cursor-pointer hover:bg-slate-50">
+                    갤러리 이미지 선택
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) handleUpload(file, 'gallery', i)
+                      }}
+                    />
+                  </label>
                 </div>
               ))}
             </div>
@@ -765,14 +795,18 @@ export default function AdminPage() {
                       })
                     }}
                   />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) handleUpload(file, 'product', i)
-                    }}
-                  />
+                  <label className="inline-flex items-center gap-2 px-3 py-2 rounded border bg-white text-xs cursor-pointer hover:bg-slate-50">
+                    제품 이미지 선택
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) handleUpload(file, 'product', i)
+                      }}
+                    />
+                  </label>
                   <textarea
                     className="w-full border rounded px-3 py-2 text-sm min-h-20"
                     placeholder="제품 설명"

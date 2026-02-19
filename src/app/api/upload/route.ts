@@ -1,12 +1,19 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
+const MAX_UPLOAD_MB = 10
+const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024
+
 export async function POST(request: Request) {
   const formData = await request.formData()
   const file = formData.get('file')
 
   if (!(file instanceof File)) {
     return NextResponse.json({ error: 'file is required' }, { status: 400 })
+  }
+
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return NextResponse.json({ error: `파일 용량이 너무 큽니다. ${MAX_UPLOAD_MB}MB 이하로 업로드해주세요.` }, { status: 413 })
   }
 
   const ext = file.name.includes('.') ? file.name.split('.').pop() : 'bin'
