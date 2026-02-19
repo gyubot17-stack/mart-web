@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { buildSiteSections, parseMenuLabels } from '@/lib/site-sections'
@@ -58,7 +59,9 @@ export default async function Home() {
         </div>
 
         {image ? (
-          <img src={image} alt="hero" className="w-full rounded-2xl border object-cover max-h-[420px]" />
+          <div className="relative w-full h-[420px] rounded-2xl border overflow-hidden">
+            <Image src={image} alt="hero" fill priority className="object-cover" sizes="(max-width: 768px) 100vw, 1200px" />
+          </div>
         ) : (
           <div className="w-full rounded-2xl border border-dashed min-h-[280px] flex items-center justify-center text-gray-400">메인 이미지 업로드 영역</div>
         )}

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase-server'
@@ -154,7 +155,9 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
         </div>
 
         {image ? (
-          <img src={image} alt={title} className="w-full rounded-2xl border object-cover max-h-[420px]" />
+          <div className="relative w-full h-[420px] rounded-2xl border overflow-hidden">
+            <Image src={image} alt={title} fill priority className="object-cover" sizes="(max-width: 768px) 100vw, 1200px" />
+          </div>
         ) : (
           <div className="w-full rounded-2xl border border-dashed min-h-[280px] flex items-center justify-center text-gray-400">
             이미지 업로드 영역
@@ -171,7 +174,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
             {visibleGallery.map((item, i) => (
               <div key={i} className="min-h-40 rounded-lg border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
                 {item.url ? (
-                  <img src={item.url} alt={`gallery-${i + 1}`} className="w-full h-40 object-cover" />
+                  <Image src={item.url} alt={`gallery-${i + 1}`} width={480} height={160} className="w-full h-40 object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
                 ) : (
                   `갤러리 이미지 ${i + 1}`
                 )}
@@ -189,7 +192,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
               <article key={i} className="rounded-lg border p-4 space-y-3">
                 <div className="min-h-32 rounded border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
                   {product.image ? (
-                    <img src={product.image} alt={product.name} className="w-full h-32 object-cover" />
+                    <Image src={product.image} alt={product.name} width={400} height={128} className="w-full h-32 object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
                   ) : (
                     `제품 이미지 ${i + 1}`
                   )}
