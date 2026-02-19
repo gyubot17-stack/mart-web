@@ -275,7 +275,17 @@ export default function AdminCommonPage() {
         <h1 className="text-2xl font-bold">Admin - 공통 관리</h1>
         <div className="flex items-center gap-2">
           <a href="/admin" className="admin-btn px-3 py-2 text-sm rounded border">콘텐츠 관리</a>
+          <a href="/admin/common" className="admin-btn px-3 py-2 text-sm rounded border">공통 관리</a>
           <a href="/admin/system" className="admin-btn px-3 py-2 text-sm rounded border">시스템/계정 관리</a>
+          <button
+            className="px-3 py-2 text-sm rounded border"
+            onClick={async () => {
+              await fetch('/api/admin/logout', { method: 'POST' })
+              window.location.href = '/admin/login'
+            }}
+          >
+            로그아웃
+          </button>
         </div>
       </div>
 

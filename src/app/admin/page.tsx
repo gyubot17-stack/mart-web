@@ -489,14 +489,14 @@ export default function AdminPage() {
 
                     <button
                       type="button"
-                      className="px-2 py-1 text-xs rounded border"
+                      className={`px-2 py-1 text-xs rounded border ${row.visible ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-slate-100 text-slate-500 border-slate-300'}`}
                       onClick={() => setSubmenus((prev) => {
                         const next = [...(prev[section.key] ?? [])]
                         next[idx] = { ...next[idx], visible: !next[idx].visible }
                         return { ...prev, [section.key]: next }
                       })}
                     >
-                      {row.visible ? '숨기기' : '보이기'}
+                      {row.visible ? '표시' : '숨김'}
                     </button>
                     <button
                       type="button"
@@ -560,8 +560,9 @@ export default function AdminPage() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">대표 이미지</label>
-          <label className="inline-flex items-center gap-3 px-3 py-1.5 rounded border bg-white text-xs font-medium cursor-pointer hover:bg-slate-50">
+          <div className="flex items-center gap-3">
+            <label className="text-sm font-medium">대표 이미지</label>
+            <label className="inline-flex items-center gap-3 px-3 py-1.5 rounded border bg-white text-xs font-medium cursor-pointer hover:bg-slate-50">
             이미지 파일 선택
             <input
               type="file"
@@ -572,7 +573,8 @@ export default function AdminPage() {
                 if (file) handleUpload(file, 'hero')
               }}
             />
-          </label>
+            </label>
+          </div>
           <p className="text-xs text-gray-500">권장: 10MB 이하 / jpg, png, webp</p>
           {content.hero_image_url ? (
             <img src={content.hero_image_url} alt="hero" className="w-full max-h-72 object-cover rounded border" />
