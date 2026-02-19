@@ -1,6 +1,8 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import HeroBlock from '@/components/HeroBlock'
+import SiteFooter from '@/components/SiteFooter'
+import SiteHeader from '@/components/SiteHeader'
 import { buildSiteSections, parseMenuLabels } from '@/lib/site-sections'
 
 export const dynamic = 'force-dynamic'
@@ -59,52 +61,24 @@ export default async function Home() {
     <main id="top" className="min-h-screen bg-white text-gray-900">
       <a href="#top" className="fixed right-6 bottom-6 z-50 rounded-full bg-black text-white px-4 py-3 text-sm font-semibold shadow-lg hover:bg-gray-800">홈으로 ↑</a>
 
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3 overflow-x-auto">
-          <a href="#top" className="shrink-0 px-4 py-2 rounded-md bg-black text-white text-sm font-semibold">홈</a>
-          {siteSections.map((item) => (
-            <Link key={item.slug} href={`/${item.slug}`} className="shrink-0 px-4 py-2 rounded-md border text-sm hover:bg-gray-50">
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </header>
+      <SiteHeader items={siteSections} />
 
-      <section className="max-w-6xl mx-auto px-6 py-14 space-y-8">
-        <div className="space-y-3">
-          <h1 className="text-4xl font-bold tracking-tight">{title}</h1>
-          {subtitle ? <p className="text-xl text-gray-600">{subtitle}</p> : null}
-        </div>
+      <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 
-        {image ? (
-          <div className="relative w-full rounded-2xl border overflow-hidden" style={{ height: `${style.heroHeight}px` }}>
-            <Image src={image} alt="hero" fill priority className="object-cover" sizes="(max-width: 768px) 100vw, 1200px" />
-          </div>
-        ) : (
-          <div className="w-full rounded-2xl border border-dashed min-h-[280px] flex items-center justify-center text-gray-400">메인 이미지 업로드 영역</div>
-        )}
-
-        <article className="whitespace-pre-wrap leading-7 text-gray-700">{body}</article>
+      <section className="max-w-6xl mx-auto px-6 pb-8">
+        <div className="ui-card p-6 md:p-8 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
       </section>
 
       <section className="max-w-6xl mx-auto px-6 pb-16 grid md:grid-cols-2 gap-6">
         {siteSections.map((item) => (
-          <Link key={item.slug} href={`/${item.slug}`} className="border rounded-xl p-6 space-y-4 hover:bg-gray-50">
+          <Link key={item.slug} href={`/${item.slug}`} className="ui-card ui-card-hover p-6 space-y-4">
             <h2 className="text-2xl font-bold">{item.label}</h2>
             <div className="w-full min-h-44 rounded-lg border border-dashed flex items-center justify-center text-gray-400">이미지 영역 (추후 업로드)</div>
             <p className="text-gray-600 text-sm leading-6">클릭하면 {item.label} 상세 페이지로 이동합니다.</p>
           </Link>
         ))}
       </section>
-
-      <footer className="border-t bg-gray-50">
-        <div className="max-w-6xl mx-auto px-6 py-8 text-sm text-gray-600 space-y-2">
-          <p className="font-semibold text-gray-800">{footer.companyName}</p>
-          <p>{footer.companyInfo}</p>
-          <p>{footer.addressInfo}</p>
-          <p className="text-gray-500">© {new Date().getFullYear()} {footer.companyName}. All rights reserved.</p>
-        </div>
-      </footer>
+      <SiteFooter footer={footer} />
     </main>
   )
 }

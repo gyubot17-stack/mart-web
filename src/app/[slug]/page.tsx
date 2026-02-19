@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import HeroBlock from '@/components/HeroBlock'
 import InquiryForm from '@/components/InquiryForm'
+import SiteFooter from '@/components/SiteFooter'
+import SiteHeader from '@/components/SiteHeader'
 import { buildSiteSections, getSectionLabel, parseMenuLabels } from '@/lib/site-sections'
 
 export const dynamic = 'force-dynamic'
@@ -151,38 +153,12 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
         홈으로 ↑
       </a>
 
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-3 overflow-x-auto">
-          <Link href="/" className="shrink-0 px-4 py-2 rounded-md bg-black text-white text-sm font-semibold">홈</Link>
-          {siteSections.map((item) => (
-            <Link
-              key={item.slug}
-              href={`/${item.slug}`}
-              className={`shrink-0 px-4 py-2 rounded-md border text-sm hover:bg-gray-50 ${item.slug === slug ? 'bg-gray-100' : ''}`}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </header>
+      <SiteHeader items={siteSections} currentSlug={slug} />
 
-      <section className="max-w-6xl mx-auto px-6 py-14 space-y-8">
-        <div className="space-y-3">
-          <h1 className="text-4xl font-bold tracking-tight">{title}</h1>
-          {subtitle ? <p className="text-xl text-gray-600">{subtitle}</p> : null}
-        </div>
+      <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 
-        {image ? (
-          <div className="relative w-full rounded-2xl border overflow-hidden" style={{ height: `${style.heroHeight}px` }}>
-            <Image src={image} alt={title} fill priority className="object-cover" sizes="(max-width: 768px) 100vw, 1200px" />
-          </div>
-        ) : (
-          <div className="w-full rounded-2xl border border-dashed min-h-[280px] flex items-center justify-center text-gray-400">
-            이미지 업로드 영역
-          </div>
-        )}
-
-        <article className="whitespace-pre-wrap leading-7 text-gray-700">{body}</article>
+      <section className="max-w-6xl mx-auto px-6 pb-8">
+        <div className="ui-card p-6 md:p-8 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
       </section>
 
       {visibleGallery.length > 0 ? (
@@ -190,7 +166,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
           <h2 className="text-2xl font-bold">갤러리</h2>
           <div className="grid md:grid-cols-3 gap-4">
             {visibleGallery.map((item, i) => (
-              <div key={i} className="min-h-40 rounded-lg border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
+              <div key={i} className="ui-card min-h-40 overflow-hidden flex items-center justify-center text-slate-400">
                 {item.url ? (
                   <Image src={item.url} alt={`gallery-${i + 1}`} width={480} height={style.galleryHeight} className="w-full object-cover" style={{ height: `${style.galleryHeight}px` }} sizes="(max-width: 768px) 100vw, 33vw" />
                 ) : (
@@ -207,8 +183,8 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
           <h2 className="text-2xl font-bold">제품 카드</h2>
           <div className="grid md:grid-cols-3 gap-4">
             {visibleProducts.map((product, i) => (
-              <article key={i} className="rounded-lg border p-4 space-y-3">
-                <div className="min-h-32 rounded border border-dashed overflow-hidden flex items-center justify-center text-gray-400">
+              <article key={i} className="ui-card p-4 space-y-3">
+                <div className="ui-card min-h-32 overflow-hidden flex items-center justify-center text-slate-400">
                   {product.image ? (
                     <Image src={product.image} alt={product.name} width={400} height={style.productHeight} className="w-full object-cover" style={{ height: `${style.productHeight}px` }} sizes="(max-width: 768px) 100vw, 33vw" />
                   ) : (
@@ -236,14 +212,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
         </section>
       ) : null}
 
-      <footer className="border-t bg-gray-50">
-        <div className="max-w-6xl mx-auto px-6 py-8 text-sm text-gray-600 space-y-2">
-          <p className="font-semibold text-gray-800">{footer.companyName}</p>
-          <p>{footer.companyInfo}</p>
-          <p>{footer.addressInfo}</p>
-          <p className="text-gray-500">© {new Date().getFullYear()} {footer.companyName}. All rights reserved.</p>
-        </div>
-      </footer>
+      <SiteFooter footer={footer} />
     </main>
   )
 }
