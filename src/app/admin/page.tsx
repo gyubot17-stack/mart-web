@@ -560,9 +560,9 @@ export default function AdminPage() {
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <label className="text-sm font-medium">대표 이미지</label>
-            <label className="inline-flex items-center gap-3 px-3 py-1.5 rounded border bg-white text-xs font-medium cursor-pointer hover:bg-slate-50">
+            <label className="ml-2 inline-flex items-center gap-3 px-3 py-1.5 rounded border bg-white text-xs font-medium cursor-pointer hover:bg-slate-50">
             이미지 파일 선택
             <input
               type="file"
@@ -583,7 +583,7 @@ export default function AdminPage() {
           )}
         </div>
 
-        <button className="px-4 py-2 rounded bg-black text-white disabled:opacity-50" disabled={saving || uploading} onClick={handleSave}>
+        <button className="px-4 py-2 rounded border" disabled={saving || uploading} onClick={handleSave}>
           {saving ? '저장 중...' : '저장'}
         </button>
       </section>

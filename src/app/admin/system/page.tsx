@@ -157,7 +157,7 @@ export default function AdminSystemPage() {
   return (
     <main className="min-h-screen pb-8 max-w-4xl mx-auto space-y-6">
       <div className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200 px-8 py-4 flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">슈퍼관리자 - 시스템/계정 관리</h1>
+        <h1 className="text-2xl font-bold">Admin - 시스템/계정 관리</h1>
         <div className="flex items-center gap-2">
           <a href="/admin" className="admin-btn px-3 py-2 text-sm rounded border">콘텐츠 관리</a>
           <a href="/admin/common" className="admin-btn px-3 py-2 text-sm rounded border">공통 관리</a>
@@ -177,13 +177,13 @@ export default function AdminSystemPage() {
       <div className="px-8 pt-6 space-y-6">
       {error ? <p className="text-red-600">{error}</p> : null}
 
-      <section className="space-y-3">
+      <section className="border rounded p-4 space-y-3">
         <h2 className="text-lg font-semibold">계정 권한 정책</h2>
         <div className="space-y-3">
           {accounts.map((acc) => (
             <div key={acc.role} className="border rounded p-4 space-y-2">
-              <p className="font-medium">{acc.name} ({acc.role})</p>
-              <p className="text-sm text-gray-600">권한: {acc.permissions.join(', ')}</p>
+              <p className="font-medium">{acc.name} ({acc.role === 'super' ? '슈퍼관리자' : '일반관리자'})</p>
+              <p className="text-sm text-gray-600">권한: {(acc.permissions ?? []).join(', ') || '-'}</p>
               {acc.allowedContentKeys ? (
                 <p className="text-sm text-gray-600">편집 가능 페이지: {acc.allowedContentKeys.join(', ')}</p>
               ) : null}
