@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({ params }: { params: Promise<{ parent: string; child: string }> }): Promise<Metadata> {
   const { parent, child } = await params
-  const key = `${decodeURIComponent(parent)}-${decodeURIComponent(child)}`
+  const key = `${parent}-${child}`
 
   const { data } = await supabaseAdmin.from('site_content').select('title,subtitle').eq('key', key).maybeSingle()
   const sectionTitle = data?.title || `${parent} - ${child}`
@@ -32,9 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ parent: s
 
 export default async function NestedSectionPage({ params }: { params: Promise<{ parent: string; child: string }> }) {
   const { parent, child } = await params
-  const parentDecoded = decodeURIComponent(parent)
-  const childDecoded = decodeURIComponent(child)
-  const key = `${parentDecoded}-${childDecoded}`
+  const key = `${parent}-${child}`
 
   const [{ data: menuConfig }, { data: submenuConfig }, { data }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
@@ -46,8 +44,8 @@ export default async function NestedSectionPage({ params }: { params: Promise<{ 
 
   const menuLabels = parseMenuLabels(menuConfig?.body)
   const siteSections = buildSiteSections(menuLabels)
-  const resolvedParent = siteSections.find((s) => s.slug === parentDecoded || s.label === parentDecoded)?.slug
-  if (!resolvedParent) notFound()
+  const parentExists = siteSections.some((s) => s.slug === parent)
+  if (!parentExists) notFound()
 
   let submenus: Record<string, { label: string; href: string; visible?: boolean }[]> = {}
   try {
@@ -55,7 +53,7 @@ export default async function NestedSectionPage({ params }: { params: Promise<{ 
     if (parsed && typeof parsed === 'object') submenus = parsed
   } catch {}
 
-  const title = data?.title || `${getSectionLabel(resolvedParent, menuLabels)} - ${childDecoded}`
+  const title = data?.title || `${getSectionLabel(parent, menuLabels)} - ${child}`
   const subtitle = data?.subtitle || ''
   const body = data?.body || '이 페이지의 내용은 관리자 > 콘텐츠 관리에서 입력할 수 있습니다.'
   const image = data?.hero_image_url || ''
@@ -96,14 +94,14 @@ export default async function NestedSectionPage({ params }: { params: Promise<{ 
         맨위로 ↑
       </a>
 
-      <SiteHeader items={siteSections} currentSlug={resolvedParent} submenus={submenus} />
+      <SiteHeader items={siteSections} currentSlug={parent} submenus={submenus} />
       <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 
       <section className="max-w-7xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
         <div className="p-1 md:p-2 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
       </section>
 
-      {resolvedParent === 'support' && childDecoded === 'inquiry' ? (
+      {parent === 'support' && child === 'inquiry' ? (
         <section id="inquiry" className="max-w-7xl mx-auto px-4 md:px-6 pb-12">
           <InquiryForm />
         </section>
