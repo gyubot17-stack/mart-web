@@ -16,6 +16,10 @@
   background: #fff;
 }
 
+.admin-ui .border {
+  border-color: #cbd5e1 !important;
+}
+
 .admin-ui :is(button, input[type='button'], input[type='submit'], .admin-btn) {
   cursor: pointer;
   border-color: #000 !important;
