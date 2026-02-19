@@ -18,6 +18,7 @@
 
 .admin-ui :is(button, input[type='button'], input[type='submit'], .admin-btn) {
   cursor: pointer;
+  border-color: #000 !important;
   transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 
