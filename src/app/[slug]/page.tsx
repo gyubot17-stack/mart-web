@@ -201,7 +201,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
       ) : null}
 
       {slug === 'support' ? (
-        <section className="max-w-7xl mx-auto px-6 pb-12">
+        <section id="inquiry" className="max-w-7xl mx-auto px-4 md:px-6 pb-12">
           <InquiryForm />
         </section>
       ) : null}
