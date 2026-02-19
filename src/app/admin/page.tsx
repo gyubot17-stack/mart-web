@@ -397,17 +397,17 @@ export default function AdminPage() {
         <h2 className="text-lg font-semibold">이미지 크기 조절</h2>
         <div className="grid md:grid-cols-3 gap-3">
           <label className="space-y-1 block">
-            <span className="text-sm text-gray-600">히어로 높이(px)</span>
+            <span className="text-sm text-gray-600">상단 큰 이미지 높이(px)</span>
             <input type="number" className="w-full border rounded px-3 py-2" value={style.heroHeight}
               onChange={(e) => setStyle((prev) => ({ ...prev, heroHeight: Number(e.target.value) || 420 }))} />
           </label>
           <label className="space-y-1 block">
-            <span className="text-sm text-gray-600">갤러리 높이(px)</span>
+            <span className="text-sm text-gray-600">갤러리 사진 높이(px)</span>
             <input type="number" className="w-full border rounded px-3 py-2" value={style.galleryHeight}
               onChange={(e) => setStyle((prev) => ({ ...prev, galleryHeight: Number(e.target.value) || 160 }))} />
           </label>
           <label className="space-y-1 block">
-            <span className="text-sm text-gray-600">제품 이미지 높이(px)</span>
+            <span className="text-sm text-gray-600">제품 사진 높이(px)</span>
             <input type="number" className="w-full border rounded px-3 py-2" value={style.productHeight}
               onChange={(e) => setStyle((prev) => ({ ...prev, productHeight: Number(e.target.value) || 128 }))} />
           </label>
