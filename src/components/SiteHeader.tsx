@@ -54,7 +54,7 @@ export default function SiteHeader({
                 </Link>
 
                 {children.length > 0 && openedSlug === entry.slug ? (
-                  <div className="absolute left-1/2 -translate-x-1/2 top-full pt-1 min-w-56 z-20">
+                  <div className="absolute left-1/2 -translate-x-1/2 top-full pt-1 min-w-44 z-20">
                     <div className="rounded-b-md border border-slate-200 border-t-0 bg-white shadow-md overflow-hidden">
                       {children.map((child) => (
                         <Link key={child.href} href={child.href} className="block px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 border-t border-slate-100 first:border-t-0">
@@ -71,13 +71,13 @@ export default function SiteHeader({
           })}
         </div>
 
-        <button className="md:hidden ui-chip" onClick={() => setMobileOpen((v) => !v)}>
+        <button className="mobile-menu-trigger ui-chip" onClick={() => setMobileOpen((v) => !v)}>
           메뉴
         </button>
       </div>
 
       {mobileOpen ? (
-        <div className="md:hidden border-t border-slate-200 bg-white/95 px-4 py-3 space-y-2">
+        <div className="mobile-menu-panel border-t border-slate-200 bg-white/95 px-4 py-3 space-y-2">
           <Link href="/" className={`block ui-chip w-full text-center ${!currentSlug ? 'ui-chip-active' : ''}`}>홈</Link>
           {items.map((item) => {
             const children = getChildren(item)
