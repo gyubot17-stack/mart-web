@@ -1,6 +1,5 @@
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
-import HeroBlock from '@/components/HeroBlock'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { buildSiteSections, parseMenuLabels, parseMenuVisibility } from '@/lib/site-sections'
 
@@ -78,19 +77,20 @@ export default async function MapPage() {
     <main className="min-h-screen bg-white text-gray-900">
       <SiteHeader items={siteSections} currentSlug="map" submenus={submenus} homeIconUrl={homeIconUrl} homeIconSize={homeIconSize} />
 
-      <HeroBlock title={title} subtitle={subtitle} image="" heroHeight={420} />
-
-      <section className="max-w-7xl mx-auto px-4 md:px-6 pb-12 space-y-4 ui-fade-in">
-        <p className="text-sm text-gray-700">{address}</p>
-        {body ? <div className="text-sm text-gray-700 whitespace-pre-wrap">{body}</div> : null}
-        <a href={naverSearchUrl} target="_blank" rel="noreferrer" className="inline-flex px-3 py-2 rounded border text-sm">네이버지도에서 열기</a>
+      <section className="w-full pt-12 md:pt-14 pb-8 md:pb-10 ui-fade-in">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-8">
+          <div className="space-y-3">
+            <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-slate-900 leading-tight">{title}</h1>
+            {subtitle ? <p className="text-lg text-slate-600 max-w-3xl">{subtitle}</p> : null}
+          </div>
+        </div>
 
         {embedUrl ? (
-          <div className="w-full overflow-hidden rounded-xl border">
+          <div className="relative w-full overflow-hidden border-y border-slate-200/80" style={{ height: '420px' }}>
             <iframe
               src={embedUrl}
               width="100%"
-              height="560"
+              height="420"
               style={{ border: 0 }}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -99,10 +99,16 @@ export default async function MapPage() {
             />
           </div>
         ) : (
-          <div className="w-full rounded-xl border p-6 text-sm text-gray-600">
-            지도 임베드 URL이 아직 설정되지 않았습니다. 관리자 &gt; 콘텐츠 관리에서 map 페이지를 선택해 지도형 설정을 저장해주세요.
+          <div className="max-w-7xl mx-auto px-4 md:px-6">
+            <div className="ui-card min-h-[260px] flex items-center justify-center text-slate-400">메인 이미지 업로드 영역</div>
           </div>
         )}
+      </section>
+
+      <section className="max-w-7xl mx-auto px-4 md:px-6 pb-12 space-y-4 ui-fade-in">
+        <p className="text-sm text-gray-700">{address}</p>
+        {body ? <div className="text-sm text-gray-700 whitespace-pre-wrap">{body}</div> : null}
+        <a href={naverSearchUrl} target="_blank" rel="noreferrer" className="inline-flex px-3 py-2 rounded border text-sm">네이버지도에서 열기</a>
       </section>
 
       <SiteFooter footer={footer} />
