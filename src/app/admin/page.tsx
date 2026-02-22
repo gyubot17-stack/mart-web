@@ -39,6 +39,16 @@ type MapConfig = {
   embedUrl: string
 }
 
+type Inquiry = {
+  key: string
+  name: string
+  phone: string
+  message: string
+  note?: string
+  createdAt: string | null
+  status: 'new' | 'done'
+}
+
 type EditorSubmenuItem = {
   label: string
   href: string
@@ -135,6 +145,11 @@ export default function AdminPage() {
   const [styleSaving, setStyleSaving] = useState(false)
   const [mapConfig, setMapConfig] = useState<MapConfig>(defaultMapConfig)
   const [mapSaving, setMapSaving] = useState(false)
+  const [inquiries, setInquiries] = useState<Inquiry[]>([])
+  const [inquiryQuery, setInquiryQuery] = useState('')
+  const [inquiryStatusFilter, setInquiryStatusFilter] = useState<'all' | 'new' | 'done'>('all')
+  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null)
+  const [inquiryNote, setInquiryNote] = useState('')
   const [autoBackup, setAutoBackup] = useState(true)
   const [menuLabels, setMenuLabels] = useState<Record<string, string>>({})
   const [menuVisibility, setMenuVisibility] = useState<Record<string, boolean>>({})
@@ -164,6 +179,15 @@ export default function AdminPage() {
   const showHeroImageEditor = useMemo(() => !isHome && currentPageType !== 'map', [isHome, currentPageType])
   const showStyleEditor = useMemo(() => ['general', 'gallery', 'custom'].includes(currentPageType), [currentPageType])
   const showExtraEditor = useMemo(() => ['general', 'gallery', 'custom'].includes(currentPageType), [currentPageType])
+
+  const filteredInquiries = useMemo(() => {
+    return inquiries.filter((q) => {
+      const byStatus = inquiryStatusFilter === 'all' ? true : q.status === inquiryStatusFilter
+      const needle = inquiryQuery.trim().toLowerCase()
+      const byText = !needle || q.name.toLowerCase().includes(needle) || q.phone.toLowerCase().includes(needle) || q.message.toLowerCase().includes(needle)
+      return byStatus && byText
+    })
+  }, [inquiries, inquiryQuery, inquiryStatusFilter])
 
   function normalizeKeyFromHref(href: string) {
     const clean = String(href || '').trim()
@@ -335,6 +359,10 @@ export default function AdminPage() {
     if (saved === '0') setAutoBackup(false)
   }, [])
 
+  useEffect(() => {
+    if (currentPageType === 'inquiry') refreshInquiries()
+  }, [currentPageType])
+
   async function runAutoBackupIfNeeded() {
     if (!autoBackup || role !== 'super') return true
     const res = await fetch('/api/admin/backup', { cache: 'no-store' })
@@ -460,6 +488,69 @@ export default function AdminPage() {
       setMessage(`지도/주소 설정 저장 실패: ${json?.error ?? 'unknown'}`)
     }
     setMapSaving(false)
+  }
+
+
+  async function refreshInquiries() {
+    const res = await fetch('/api/admin/inquiries', { cache: 'no-store' })
+    const json = await res.json()
+    if (res.ok) setInquiries(json?.inquiries ?? [])
+  }
+
+  async function toggleInquiryStatus(key: string, status: 'new' | 'done') {
+    const res = await fetch('/api/admin/inquiries', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, status }),
+    })
+    const json = await res.json()
+    if (!res.ok) {
+      setMessage(`문의 상태 변경 실패: ${json?.error ?? 'unknown'}`)
+      return
+    }
+    setMessage('문의 상태 변경 완료 ✅')
+    await refreshInquiries()
+  }
+
+  async function saveInquiryNote(key: string) {
+    const res = await fetch('/api/admin/inquiries', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, status: '', note: inquiryNote }),
+    })
+    const json = await res.json()
+    if (!res.ok) {
+      setMessage(`문의 메모 저장 실패: ${json?.error ?? 'unknown'}`)
+      return
+    }
+    setMessage('문의 메모 저장 완료 ✅')
+    await refreshInquiries()
+  }
+
+  async function deleteInquiry(key: string) {
+    if (!confirm('이 문의를 삭제할까요?')) return
+    const res = await fetch(`/api/admin/inquiries?key=${encodeURIComponent(key)}`, { method: 'DELETE' })
+    const json = await res.json()
+    if (!res.ok) {
+      setMessage(`문의 삭제 실패: ${json?.error ?? 'unknown'}`)
+      return
+    }
+    setMessage('문의 삭제 완료 ✅')
+    await refreshInquiries()
+  }
+
+  function downloadInquiryCsv() {
+    const headers = ['key', 'status', 'name', 'phone', 'message', 'createdAt']
+    const escape = (v: string) => `"${String(v ?? '').replaceAll('"', '""')}"`
+    const rows = filteredInquiries.map((q) => [q.key, q.status, q.name, q.phone, q.message, q.createdAt ?? ''].map(escape).join(','))
+    const csv = [headers.join(','), ...rows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `inquiries-${Date.now()}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   async function handleUpload(file: File, target: 'hero' | 'gallery' | 'product', index?: number) {
@@ -981,6 +1072,47 @@ export default function AdminPage() {
             {extraSaving ? (isHome ? '메인 슬라이드 저장 중...' : '갤러리/제품카드 저장 중...') : (isHome ? '메인 슬라이드 저장' : '갤러리/제품카드 저장')}
           </button>
         </section>
+      ) : null}
+
+
+      {currentPageType === 'inquiry' ? (
+      <section className="border rounded-xl p-5 space-y-4">
+        <h2 className="text-lg font-semibold">고객 문의 관리</h2>
+        <div className="flex flex-wrap items-center gap-2">
+          <input className="border rounded px-3 py-2 text-sm min-w-56" placeholder="이름/연락처/내용 검색" value={inquiryQuery} onChange={(e) => setInquiryQuery(e.target.value)} />
+          <select className="border rounded px-3 py-2 text-sm" value={inquiryStatusFilter} onChange={(e) => setInquiryStatusFilter(e.target.value as 'all' | 'new' | 'done')}>
+            <option value="all">전체</option><option value="new">신규</option><option value="done">처리완료</option>
+          </select>
+          <button className="px-3 py-2 text-sm rounded border" onClick={downloadInquiryCsv}>CSV 다운로드</button>
+          <button className="px-3 py-2 text-sm rounded border" onClick={refreshInquiries}>새로고침</button>
+        </div>
+        <div className="space-y-3">
+          {filteredInquiries.length === 0 ? <p className="text-sm text-gray-500">조건에 맞는 문의가 없습니다.</p> : filteredInquiries.map((q) => (
+            <div key={q.key} className="border rounded p-3 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-medium">{q.name} / {q.phone}</p>
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs px-2 py-1 rounded ${q.status === 'done' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{q.status === 'done' ? '처리완료' : '신규'}</span>
+                  <button className="px-2 py-1 text-xs rounded border" onClick={() => toggleInquiryStatus(q.key, q.status === 'done' ? 'new' : 'done')}>{q.status === 'done' ? '신규로 변경' : '완료로 변경'}</button>
+                  <button className="px-2 py-1 text-xs rounded border" onClick={() => { setSelectedInquiry(q); setInquiryNote(q.note || '') }}>상세</button>
+                  <button className="px-2 py-1 text-xs rounded border text-red-600" onClick={() => deleteInquiry(q.key)}>삭제</button>
+                </div>
+              </div>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">{q.message}</p>
+            </div>
+          ))}
+        </div>
+        {selectedInquiry ? (
+          <div className="border rounded p-3 space-y-2">
+            <div className="flex items-center justify-between"><p className="font-medium">문의 상세</p><button className="px-2 py-1 text-xs rounded border" onClick={() => setSelectedInquiry(null)}>닫기</button></div>
+            <p className="text-sm"><b>이름:</b> {selectedInquiry.name}</p>
+            <p className="text-sm"><b>연락처:</b> {selectedInquiry.phone}</p>
+            <p className="text-sm whitespace-pre-wrap"><b>문의내용:</b> {selectedInquiry.message}</p>
+            <textarea className="w-full border rounded p-3 min-h-24" placeholder="관리자 메모" value={inquiryNote} onChange={(e)=>setInquiryNote(e.target.value)} />
+            <button className="px-4 py-2 rounded border" onClick={() => saveInquiryNote(selectedInquiry.key)}>메모 저장</button>
+          </div>
+        ) : null}
+      </section>
       ) : null}
 
       {message ? <p className="text-sm text-gray-700">{message}</p> : null}

@@ -8,15 +8,6 @@ type FooterConfig = {
   addressInfo: string
 }
 
-type Inquiry = {
-  key: string
-  name: string
-  phone: string
-  message: string
-  note?: string
-  createdAt: string | null
-  status: 'new' | 'done'
-}
 
 
 const defaultFooter: FooterConfig = {
@@ -31,9 +22,6 @@ export default function AdminCommonPage() {
   const [footer, setFooter] = useState<FooterConfig>(defaultFooter)
   const [homeIconUrl, setHomeIconUrl] = useState('')
   const [homeIconSize, setHomeIconSize] = useState(28)
-  const [inquiries, setInquiries] = useState<Inquiry[]>([])
-  const [query, setQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'done'>('all')
   const [menuSaving, setMenuSaving] = useState(false)
   const [footerSaving, setFooterSaving] = useState(false)
   const [iconSaving, setIconSaving] = useState(false)
@@ -43,8 +31,6 @@ export default function AdminCommonPage() {
   const [message, setMessage] = useState('')
   const [analyticsFrom, setAnalyticsFrom] = useState('')
   const [analyticsTo, setAnalyticsTo] = useState('')
-  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null)
-  const [note, setNote] = useState('')
   const [analytics, setAnalytics] = useState<{
     rangeTotal: number
     totalDay: number
@@ -52,25 +38,6 @@ export default function AdminCommonPage() {
     sources: { source: string; count: number }[]
     topPages: { path: string; count: number }[]
   } | null>(null)
-
-  const filteredInquiries = useMemo(() => {
-    return inquiries.filter((q) => {
-      const byStatus = statusFilter === 'all' ? true : q.status === statusFilter
-      const needle = query.trim().toLowerCase()
-      const byText =
-        !needle ||
-        q.name.toLowerCase().includes(needle) ||
-        q.phone.toLowerCase().includes(needle) ||
-        q.message.toLowerCase().includes(needle)
-      return byStatus && byText
-    })
-  }, [inquiries, query, statusFilter])
-
-  async function refreshInquiries() {
-    const res = await fetch('/api/admin/inquiries', { cache: 'no-store' })
-    const json = await res.json()
-    if (res.ok) setInquiries(json?.inquiries ?? [])
-  }
 
   async function loadAnalytics(from?: string, to?: string) {
     const qs = new URLSearchParams()
@@ -84,11 +51,10 @@ export default function AdminCommonPage() {
 
   useEffect(() => {
     ;(async () => {
-      const [footerRes, headerIconRes, privacyRes, inquiriesRes, analyticsRes] = await Promise.all([
+      const [footerRes, headerIconRes, privacyRes, analyticsRes] = await Promise.all([
         fetch('/api/content?key=footer_config', { cache: 'no-store' }),
         fetch('/api/content?key=header_icon', { cache: 'no-store' }),
         fetch('/api/content?key=privacy_policy', { cache: 'no-store' }),
-        fetch('/api/admin/inquiries', { cache: 'no-store' }),
         fetch('/api/admin/analytics', { cache: 'no-store' }),
       ])
 
@@ -121,9 +87,6 @@ export default function AdminCommonPage() {
       if (privacyRes.ok) {
         setPrivacyText(privacyJson?.data?.body || '')
       }
-
-      const inquiriesJson = await inquiriesRes.json()
-      if (inquiriesRes.ok) setInquiries(inquiriesJson?.inquiries ?? [])
 
       const analyticsJson = await analyticsRes.json()
       if (analyticsRes.ok) setAnalytics(analyticsJson)
@@ -222,68 +185,6 @@ export default function AdminCommonPage() {
       setMessage(`개인정보처리방침 저장 실패: ${json?.error ?? 'unknown'}`)
     }
     setPrivacySaving(false)
-  }
-  async function toggleInquiryStatus(key: string, status: 'new' | 'done') {
-    const res = await fetch('/api/admin/inquiries', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, status }),
-    })
-    const json = await res.json()
-    if (!res.ok) {
-      setMessage(`문의 상태 변경 실패: ${json?.error ?? 'unknown'}`)
-      return
-    }
-
-    setMessage('문의 상태 변경 완료 ✅')
-    await refreshInquiries()
-  }
-
-  async function saveInquiryNote(key: string) {
-    const res = await fetch('/api/admin/inquiries', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, status: '', note }),
-    })
-    const json = await res.json()
-    if (!res.ok) {
-      setMessage(`문의 메모 저장 실패: ${json?.error ?? 'unknown'}`)
-      return
-    }
-    setMessage('문의 메모 저장 완료 ✅')
-    await refreshInquiries()
-  }
-
-  async function deleteInquiry(key: string) {
-    if (!confirm('이 문의를 삭제할까요?')) return
-
-    const res = await fetch(`/api/admin/inquiries?key=${encodeURIComponent(key)}`, {
-      method: 'DELETE',
-    })
-    const json = await res.json()
-    if (!res.ok) {
-      setMessage(`문의 삭제 실패: ${json?.error ?? 'unknown'}`)
-      return
-    }
-
-    setMessage('문의 삭제 완료 ✅')
-    await refreshInquiries()
-  }
-
-  function downloadCsv() {
-    const headers = ['key', 'status', 'name', 'phone', 'message', 'createdAt']
-    const escape = (v: string) => `"${String(v ?? '').replaceAll('"', '""')}"`
-    const rows = filteredInquiries.map((q) =>
-      [q.key, q.status, q.name, q.phone, q.message, q.createdAt ?? ''].map(escape).join(','),
-    )
-    const csv = [headers.join(','), ...rows].join('\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `inquiries-${Date.now()}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
   }
 
   if (loading) return <main className="min-h-screen p-8">불러오는 중...</main>
@@ -430,83 +331,6 @@ export default function AdminCommonPage() {
           </div>
         </div>
       </section>
-
-      <section className="border rounded-xl p-5 space-y-4">
-        <h2 className="text-lg font-semibold">고객 문의 관리</h2>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <input
-            className="border rounded px-3 py-2 text-sm min-w-56"
-            placeholder="이름/연락처/내용 검색"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <select
-            className="border rounded px-3 py-2 text-sm"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'new' | 'done')}
-          >
-            <option value="all">전체</option>
-            <option value="new">신규</option>
-            <option value="done">처리완료</option>
-          </select>
-          <button className="px-3 py-2 text-sm rounded border" onClick={downloadCsv}>CSV 다운로드</button>
-          <button className="px-3 py-2 text-sm rounded border" onClick={refreshInquiries}>새로고침</button>
-        </div>
-
-        <div className="space-y-3">
-          {filteredInquiries.length === 0 ? (
-            <p className="text-sm text-gray-500">조건에 맞는 문의가 없습니다.</p>
-          ) : filteredInquiries.map((q) => (
-            <div key={q.key} className="border rounded p-3 space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <p className="font-medium">{q.name} / {q.phone}</p>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs px-2 py-1 rounded ${q.status === 'done' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                    {q.status === 'done' ? '처리완료' : '신규'}
-                  </span>
-                  <button
-                    className="px-2 py-1 text-xs rounded border"
-                    onClick={() => toggleInquiryStatus(q.key, q.status === 'done' ? 'new' : 'done')}
-                  >
-                    {q.status === 'done' ? '신규로 변경' : '완료로 변경'}
-                  </button>
-                  <button
-                    className="px-2 py-1 text-xs rounded border"
-                    onClick={() => { setSelectedInquiry(q); setNote(q.note || '') }}
-                  >
-                    상세
-                  </button>
-                  <button
-                    className="px-2 py-1 text-xs rounded border text-red-600"
-                    onClick={() => deleteInquiry(q.key)}
-                  >
-                    삭제
-                  </button>
-                </div>
-              </div>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{q.message}</p>
-              {q.createdAt ? <p className="text-xs text-gray-500">접수시각: {new Date(q.createdAt).toLocaleString()}</p> : null}
-            </div>
-          ))}
-        </div>
-      </section>
-
-
-
-      {selectedInquiry ? (
-        <section className="border rounded-xl p-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">문의 상세</h2>
-            <button className="px-3 py-1 text-sm rounded border" onClick={() => setSelectedInquiry(null)}>닫기</button>
-          </div>
-          <p className="text-sm"><b>이름:</b> {selectedInquiry.name}</p>
-          <p className="text-sm"><b>연락처:</b> {selectedInquiry.phone}</p>
-          <p className="text-sm whitespace-pre-wrap"><b>문의내용:</b> {selectedInquiry.message}</p>
-          <textarea className="w-full border rounded p-3 min-h-24" placeholder="관리자 메모" value={note} onChange={(e)=>setNote(e.target.value)} />
-          <button className="px-4 py-2 rounded border" onClick={() => saveInquiryNote(selectedInquiry.key)}>메모 저장</button>
-        </section>
-      ) : null}
 
       {message ? <p className="text-sm text-gray-700">{message}</p> : null}
       </div>
