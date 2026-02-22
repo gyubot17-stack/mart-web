@@ -489,7 +489,7 @@ export default function AdminPage() {
                             key={`${section.key}-${idx}-${child.href}`}
                             type="button"
                             disabled={isDisabled}
-                            className={`w-full px-2 py-2 text-sm border rounded-md text-left ${selectedKey === targetKey ? 'font-bold text-slate-900 border-slate-900 bg-slate-50' : 'font-medium text-slate-700 border-slate-200 bg-white'} ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-50'}`}
+                            className={`w-full px-2 py-2 text-sm border-0 rounded-md text-left ${selectedKey === targetKey ? 'font-bold text-slate-900 bg-slate-50' : 'font-medium text-slate-700 bg-white'} ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-50'}`}
                             onClick={() => !isDisabled && openEditorKey(targetKey)}
                             title={isDisabled ? '단일 페이지 링크만 편집 가능합니다' : child.href}
                           >
