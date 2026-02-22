@@ -38,7 +38,7 @@ export default function SiteHeader({
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-        <div className="hidden sm:flex items-stretch w-full">
+        <div className="hidden md:flex items-stretch w-full">
           {([{ label: '홈', href: '/', slug: '' }, ...items.map((it) => ({ label: it.label, href: `/${it.slug}`, slug: it.slug }))] as const).map((entry, idx, arr) => {
             const isActive = entry.slug ? currentSlug === entry.slug : !currentSlug
             const children = entry.slug ? getChildren({ label: entry.label, slug: entry.slug }) : []
@@ -57,7 +57,7 @@ export default function SiteHeader({
                   <div className="absolute left-1/2 -translate-x-1/2 top-full pt-1 min-w-56 z-20">
                     <div className="rounded-b-md border border-slate-200 border-t-0 bg-white shadow-md overflow-hidden">
                       {children.map((child) => (
-                        <Link key={child.href} href={child.href} className="flex items-center min-h-[64px] px-4 text-[17px] font-bold text-slate-700 hover:bg-slate-50 border-t border-slate-100 first:border-t-0">
+                        <Link key={child.href} href={child.href} className="block px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 border-t border-slate-100 first:border-t-0">
                           {child.label}
                         </Link>
                       ))}
@@ -71,13 +71,13 @@ export default function SiteHeader({
           })}
         </div>
 
-        <button className="sm:hidden ui-chip" onClick={() => setMobileOpen((v) => !v)}>
+        <button className="md:hidden ui-chip" onClick={() => setMobileOpen((v) => !v)}>
           메뉴
         </button>
       </div>
 
       {mobileOpen ? (
-        <div className="sm:hidden border-t border-slate-200 bg-white/95 px-4 py-3 space-y-2">
+        <div className="md:hidden border-t border-slate-200 bg-white/95 px-4 py-3 space-y-2">
           <Link href="/" className={`block ui-chip w-full text-center ${!currentSlug ? 'ui-chip-active' : ''}`}>홈</Link>
           {items.map((item) => {
             const children = getChildren(item)
@@ -97,7 +97,7 @@ export default function SiteHeader({
                 {children.length > 0 && expanded ? (
                   <div className="pl-2 space-y-1">
                     {children.map((child) => (
-                      <Link key={child.href} href={child.href} className="flex items-center min-h-[64px] rounded-md border border-slate-200 bg-white px-3 text-[17px] font-bold text-slate-700">
+                      <Link key={child.href} href={child.href} className="block rounded-md border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-700">
                         {child.label}
                       </Link>
                     ))}
