@@ -192,7 +192,48 @@ export default function AdminMenuPage() {
       </div>
 
       <div className="px-8 pt-6 space-y-6">
+
         <section className="border rounded-xl p-5 space-y-4">
+          <h2 className="text-lg font-semibold">사이트형 미리보기 편집</h2>
+          <p className="text-sm text-gray-600">실제 사이트 상단 구조와 동일하게 보입니다. 항목 확인 후 아래 상위/하위 편집 영역에서 바로 수정하세요.</p>
+
+          <div className="border rounded-lg p-3 bg-white space-y-2">
+            <div className="flex flex-wrap items-center gap-0 border-b border-slate-200 pb-1">
+              {sections.filter((sec) => menuVisibility[sec.key] !== false).map((sec, idx, arr) => (
+                <div key={`preview-top-${sec.key}`} className="flex items-center">
+                  <span className="h-10 px-3 inline-flex items-center text-sm font-semibold text-slate-800">{menuLabels[sec.key] ?? sec.label}</span>
+                  {idx < arr.length - 1 ? <span className="px-1 text-slate-300">|</span> : null}
+                </div>
+              ))}
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-3">
+              {sections.filter((sec) => menuVisibility[sec.key] !== false).map((sec) => {
+                const rows = (submenus[sec.key] || []).filter((row) => row.visible !== false)
+                if (rows.length === 0) return null
+                return (
+                  <div key={`preview-sub-${sec.key}`} className="space-y-1">
+                    <p className="text-xs text-slate-500">{menuLabels[sec.key] ?? sec.label}</p>
+                    <div className="flex flex-wrap items-center gap-1">
+                      {rows.map((row, idx) => (
+                        <div key={`preview-row-${sec.key}-${idx}`} className="flex items-center">
+                          <span className="px-1 py-0.5 text-sm text-slate-700">{row.label}</span>
+                          {idx < rows.length - 1 ? <span className="px-1 text-slate-300">|</span> : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <a href="#parent-editor" className="px-3 py-1.5 text-xs rounded border">상위메뉴 편집으로 이동</a>
+              <a href="#submenu-editor" className="px-3 py-1.5 text-xs rounded border">하위메뉴 편집으로 이동</a>
+            </div>
+          </div>
+        </section>
+        <section id="parent-editor" className="border rounded-xl p-5 space-y-4">
           <h2 className="text-lg font-semibold">상위메뉴 편집</h2>
           <div className="grid md:grid-cols-2 gap-3">
             {sections.map((section) => {
@@ -222,7 +263,7 @@ export default function AdminMenuPage() {
           </button></div>
         </section>
 
-        <section className="border rounded-xl p-5 space-y-4">
+        <section id="submenu-editor" className="border rounded-xl p-5 space-y-4">
           <h2 className="text-lg font-semibold">하위메뉴 편집</h2>
           <p className="text-sm text-gray-600">각 상단 메뉴별로 하위 메뉴를 추가/수정/삭제할 수 있습니다. 링크 형식에 따라 편집 가능 여부를 배지로 안내합니다.</p>
 
