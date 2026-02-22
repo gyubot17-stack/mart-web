@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 function renderBodyContent(body: string, className: string) {
   const hasHtml = /<[^>]+>/.test(body)
   if (hasHtml) return <div className={className} dangerouslySetInnerHTML={{ __html: body }} />
-  return <div className={`${className} whitespace-pre-wrap`}>{renderBodyContent(body, "p-1 md:p-2 text-slate-700 leading-7")}</div>
+  return <div className={`${className} whitespace-pre-wrap`}>{body}</div>
 }
 
 export default async function Home() {
