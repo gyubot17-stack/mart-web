@@ -38,7 +38,10 @@ export default function AdminLoginPage() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
       <form onSubmit={onSubmit} className="w-full max-w-sm bg-white rounded-xl border p-6 space-y-4">
-        <h1 className="text-xl font-bold">Admin 로그인</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-bold">Admin 로그인</h1>
+          <span className="px-2 py-0.5 text-xs rounded border border-slate-300 bg-slate-50 text-slate-600">build: 988fb38</span>
+        </div>
         <p className="text-sm text-gray-600">아이디/비밀번호로 로그인합니다.</p>
         <input
           type="text"
