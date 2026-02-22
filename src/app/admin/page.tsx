@@ -464,20 +464,22 @@ export default function AdminPage() {
         <div className="space-y-3">
           <label className="text-sm font-medium">편집할 페이지 (사이트 메뉴 구조)</label>
           <div className="border rounded-lg p-3 space-y-3 bg-white">
-            <div className="flex flex-wrap items-center gap-2">
-              {editableSections.map((section) => {
+            <div className="flex flex-wrap items-center gap-0 border-b border-slate-200">
+              {editableSections.map((section, idx) => {
                 const visible = menuVisibility[section.key] !== false
                 const label = menuLabels[section.key]?.trim() || section.label
                 return (
-                  <button
-                    key={section.key}
-                    type="button"
-                    disabled={!visible}
-                    className={`px-3 py-2 rounded border text-sm ${selectedKey === section.key ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700'} ${!visible ? 'opacity-40 cursor-not-allowed' : ''}`}
-                    onClick={() => openEditorKey(section.key)}
-                  >
-                    {label}
-                  </button>
+                  <div key={section.key} className="flex items-center">
+                    <button
+                      type="button"
+                      disabled={!visible}
+                      className={`h-12 px-4 text-sm border-b ${selectedKey === section.key ? 'font-bold text-slate-900 border-slate-900' : 'font-medium text-slate-700 border-transparent'} ${!visible ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-50'}`}
+                      onClick={() => openEditorKey(section.key)}
+                    >
+                      {label}
+                    </button>
+                    {idx < editableSections.length - 1 ? <span className="px-2 text-slate-400">|</span> : null}
+                  </div>
                 )
               })}
             </div>
@@ -489,7 +491,7 @@ export default function AdminPage() {
                 const label = menuLabels[section.key]?.trim() || section.label
                 return (
                   <div key={`submenu-${section.key}`} className="space-y-1">
-                    <p className="text-xs text-slate-500">{label} 하위메뉴</p>
+                    <p className="text-xs text-slate-500 font-medium">{label} 하위메뉴</p>
                     <div className="flex flex-wrap gap-2">
                       {children.map((child, idx) => {
                         const targetKey = normalizeKeyFromHref(child.href)
@@ -499,7 +501,7 @@ export default function AdminPage() {
                             key={`${section.key}-${idx}-${child.href}`}
                             type="button"
                             disabled={isDisabled}
-                            className={`px-3 py-2 rounded border text-sm ${selectedKey === targetKey ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-700'} ${isDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                            className={`h-11 px-4 rounded-md border text-sm ${selectedKey === targetKey ? 'font-bold text-slate-900 border-slate-900 bg-white' : 'font-medium text-slate-700 border-slate-200 bg-white'} ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-50'}`}
                             onClick={() => !isDisabled && openEditorKey(targetKey)}
                             title={isDisabled ? '단일 페이지 링크만 편집 가능합니다' : child.href}
                           >
