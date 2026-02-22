@@ -79,6 +79,7 @@ export default async function MapPage() {
 
   const naverSearchUrl = `https://map.naver.com/v5/search/${encodeURIComponent(address)}`
   const kakaoSearchUrl = `https://map.kakao.com/link/search/${encodeURIComponent(address)}`
+  const googleSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
 
   return (
     <main className="min-h-screen bg-white text-gray-900">
@@ -141,6 +142,17 @@ export default async function MapPage() {
             aria-label="카카오맵에서 열기"
           >
             <img src="https://map.kakao.com/favicon.ico" alt="카카오맵" className="w-5 h-5" />
+          </a>
+
+          <a
+            href={googleSearchUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-slate-300 bg-white shadow-sm hover:brightness-95"
+            title="구글맵에서 열기"
+            aria-label="구글맵에서 열기"
+          >
+            <img src="https://maps.google.com/favicon.ico" alt="구글맵" className="w-5 h-5" />
           </a>
         </div>
       </section>
