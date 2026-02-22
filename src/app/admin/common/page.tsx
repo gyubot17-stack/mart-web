@@ -321,9 +321,6 @@ export default function AdminCommonPage() {
               }}
             />
           </label>
-          <button className="px-3 py-2 rounded border text-sm" disabled={iconSaving} onClick={() => saveHeaderIcon()}>
-            {iconSaving ? '아이콘 저장 중...' : '아이콘 저장'}
-          </button>
         </div>
         <input
           className="w-full border rounded px-3 py-2 text-sm"
@@ -345,6 +342,9 @@ export default function AdminCommonPage() {
         <p className="text-xs text-gray-500">권장: 배경 투명 PNG / 높이 28~40px</p>
         {homeIconUrl ? <img src={homeIconUrl} alt="home icon" className="w-auto object-contain" style={{ height: `${homeIconSize}px` }} /> : <p className="text-sm text-gray-500">아이콘 미설정</p>}
         {iconUploading ? <p className="text-xs text-blue-600">업로드 중...</p> : null}
+        <button className="px-4 py-2 rounded border" disabled={iconSaving} onClick={() => saveHeaderIcon()}>
+          {iconSaving ? '아이콘 저장 중...' : '아이콘 저장'}
+        </button>
       </section>
 
       <section className="border rounded-xl p-5 space-y-4">
