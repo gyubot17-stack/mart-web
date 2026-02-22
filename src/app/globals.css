@@ -116,6 +116,7 @@ body {
 
 
 .ui-nav-item {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -142,8 +143,18 @@ body {
 
 .ui-nav-item-active {
   color: #0f172a;
-  border-bottom-color: #0f172a;
+  border-bottom-color: transparent;
   background: #eff6ff;
+}
+
+.ui-nav-item-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: #0f172a;
 }
 
 .ui-nav-sep {
