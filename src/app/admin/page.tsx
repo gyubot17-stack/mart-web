@@ -482,7 +482,7 @@ export default function AdminPage() {
                     >
                       {label}
                     </button>
-                    {visibleSections.findIndex((x) => x.key === section.key) < visibleSections.length - 1 ? <span className="absolute right-0 top-5 text-slate-300">|</span> : null}
+                    {visibleSections.findIndex((x) => x.key === section.key) < visibleSections.length - 1 ? <span className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-300">|</span> : null}
 
                     <div className="pt-1 min-h-[34px] flex flex-col items-stretch gap-1">
                       {children.map((child, idx) => {
