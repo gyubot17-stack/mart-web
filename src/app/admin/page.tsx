@@ -627,7 +627,10 @@ export default function AdminPage() {
   return (
     <main className="min-h-screen pb-8 max-w-5xl mx-auto space-y-6">
       <div className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-200 px-8 py-4 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">Admin - 콘텐츠 관리</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">Admin - 콘텐츠 관리</h1>
+          <span className="px-2 py-0.5 text-xs rounded border border-slate-300 bg-slate-50 text-slate-600">build: ff5af18</span>
+        </div>
         <div className="flex items-center gap-2">
           <a href="/admin" className="admin-btn px-3 py-2 text-sm rounded border">콘텐츠 관리</a>
           {role === 'super' ? (
