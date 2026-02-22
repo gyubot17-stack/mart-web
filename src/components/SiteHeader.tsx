@@ -54,8 +54,8 @@ export default function SiteHeader({
                 </Link>
 
                 {children.length > 0 && openedSlug === entry.slug ? (
-                  <div className="absolute left-1/2 -translate-x-1/2 top-full pt-1 min-w-44 z-20">
-                    <div className="rounded-b-md border border-slate-200 border-t-0 bg-white shadow-md overflow-hidden">
+                  <div className="absolute left-0 right-0 top-full pt-1 z-20">
+                    <div className="w-full rounded-b-md border border-slate-200 border-t-0 bg-white shadow-md overflow-hidden">
                       {children.map((child) => (
                         <Link key={child.href} href={child.href} className="block px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 border-t border-slate-100 first:border-t-0">
                           {child.label}
