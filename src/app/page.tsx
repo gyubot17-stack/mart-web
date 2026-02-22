@@ -8,8 +8,9 @@ import { buildSiteSections, parseMenuLabels } from '@/lib/site-sections'
 export const dynamic = 'force-dynamic'
 
 export default async function Home() {
-  const [{ data }, { data: menuConfig }, { data: submenuConfig }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
+  const [{ data }, { data: homeExtra }, { data: menuConfig }, { data: submenuConfig }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('*').eq('key', 'home').single(),
+    supabaseAdmin.from('site_content').select('body').eq('key', 'home_extra').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'submenu_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'footer_config').maybeSingle(),
@@ -28,6 +29,18 @@ export default async function Home() {
   const subtitle = data?.subtitle ?? ''
   const body = data?.body ?? ''
   const image = data?.hero_image_url ?? ''
+
+  let homeSlides: string[] = []
+  if (homeExtra?.body) {
+    try {
+      const parsed = JSON.parse(homeExtra.body)
+      if (Array.isArray(parsed?.gallery)) {
+        homeSlides = parsed.gallery
+          .map((g: any) => (typeof g === 'string' ? g : g?.url))
+          .filter(Boolean)
+      }
+    } catch {}
+  }
 
   let footer = {
     companyName: 'mrtc.kr',
@@ -69,7 +82,7 @@ export default async function Home() {
 
       <SiteHeader items={siteSections} submenus={submenus} />
 
-      <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
+      <HeroBlock title={title} subtitle={subtitle} image={image} images={homeSlides} heroHeight={style.heroHeight} />
 
       <section className="max-w-7xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
         <div className="p-1 md:p-2 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>

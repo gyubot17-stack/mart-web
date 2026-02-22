@@ -1,16 +1,23 @@
 import Image from 'next/image'
+import HeroCarousel from './HeroCarousel'
 
 export default function HeroBlock({
   title,
   subtitle,
   image,
+  images,
   heroHeight,
 }: {
   title: string
   subtitle?: string
   image?: string
+  images?: string[]
   heroHeight: number
 }) {
+  const validImages = (images || []).filter(Boolean)
+  const hasCarousel = validImages.length > 1
+  const singleImage = validImages[0] || image
+
   return (
     <section className="w-full pt-12 md:pt-14 pb-8 md:pb-10 ui-fade-in">
       <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-8">
@@ -21,9 +28,11 @@ export default function HeroBlock({
 
       </div>
 
-      {image ? (
+      {hasCarousel ? (
+        <HeroCarousel images={validImages} title={title} heroHeight={heroHeight} />
+      ) : singleImage ? (
         <div className="relative w-full overflow-hidden border-y border-slate-200/80" style={{ height: `${heroHeight}px` }}>
-          <Image src={image} alt={title} fill priority className="object-cover" sizes="100vw" />
+          <Image src={singleImage} alt={title} fill priority className="object-cover" sizes="100vw" />
         </div>
       ) : (
         <div className="max-w-7xl mx-auto px-4 md:px-6">

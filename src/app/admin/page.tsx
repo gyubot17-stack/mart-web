@@ -161,18 +161,12 @@ export default function AdminPage() {
     }
 
     const [extraRes, styleRes] = await Promise.all([
-      key !== 'home'
-        ? fetch(`/api/content?key=${encodeURIComponent(`${key}_extra`)}`, { cache: 'no-store' })
-        : Promise.resolve(null),
+      fetch(`/api/content?key=${encodeURIComponent(`${key}_extra`)}`, { cache: 'no-store' }),
       fetch(`/api/content?key=${encodeURIComponent(`${key}_style`)}`, { cache: 'no-store' }),
     ])
 
-    if (extraRes) {
-      const extraJson = await extraRes.json()
-      setExtra(parseExtra(extraJson?.data?.body))
-    } else {
-      setExtra(defaultExtra)
-    }
+    const extraJson = await extraRes.json()
+    setExtra(parseExtra(extraJson?.data?.body))
 
     if (styleRes) {
       const styleJson = await styleRes.json()
@@ -298,7 +292,6 @@ export default function AdminPage() {
   }
 
   async function saveExtra() {
-    if (isHome) return
     setExtraSaving(true)
     if (!(await runAutoBackupIfNeeded())) { setExtraSaving(false); return }
     const res = await fetch('/api/content', {
@@ -612,9 +605,9 @@ export default function AdminPage() {
         </button>
       </section>
 
-      {!isHome ? (
-        <section className="border rounded-xl p-5 space-y-6">
-          <h2 className="text-lg font-semibold">갤러리 / 제품 카드 편집 ({selectedKey})</h2>
+      <section className="border rounded-xl p-5 space-y-6">
+          <h2 className="text-lg font-semibold">{isHome ? '메인 슬라이드 이미지 편집 (home)' : `갤러리 / 제품 카드 편집 (${selectedKey})`}</h2>
+          {isHome ? <p className="text-sm text-gray-600">갤러리 이미지를 2장 이상 넣으면 홈 메인 이미지가 자동으로 슬라이드됩니다.</p> : null}
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -715,6 +708,7 @@ export default function AdminPage() {
             </div>
           </div>
 
+          {!isHome ? (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="font-medium">제품 카드 ({extra.products.length}개)</h3>
@@ -852,12 +846,12 @@ export default function AdminPage() {
               ))}
             </div>
           </div>
+          ) : null}
 
           <button className="px-4 py-2 rounded border" disabled={extraSaving || uploading} onClick={saveExtra}>
-            {extraSaving ? '갤러리/제품카드 저장 중...' : '갤러리/제품카드 저장'}
+            {extraSaving ? (isHome ? '메인 슬라이드 저장 중...' : '갤러리/제품카드 저장 중...') : (isHome ? '메인 슬라이드 저장' : '갤러리/제품카드 저장')}
           </button>
         </section>
-      ) : null}
 
       {message ? <p className="text-sm text-gray-700">{message}</p> : null}
       </div>
