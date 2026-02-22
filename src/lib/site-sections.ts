@@ -16,15 +16,19 @@ export const defaultSiteSections: SiteSection[] = [
   { label: '고객센터', slug: 'support' },
 ]
 
-export function buildSiteSections(menuLabels?: Record<string, string>): SiteSection[] {
-  return defaultSiteSections.map((section) => ({
-    ...section,
-    label: menuLabels?.[section.slug]?.trim() || section.label,
-  }))
+export function buildSiteSections(menuLabels?: Record<string, string>, menuVisibility?: Record<string, boolean>): SiteSection[] {
+  return defaultSiteSections
+    .filter((section) => menuVisibility?.[section.slug] !== false)
+    .map((section) => ({
+      ...section,
+      label: menuLabels?.[section.slug]?.trim() || section.label,
+    }))
 }
 
 export function getSectionLabel(slug: string, menuLabels?: Record<string, string>) {
-  return buildSiteSections(menuLabels).find((s) => s.slug === slug)?.label ?? slug
+  const found = defaultSiteSections.find((s) => s.slug === slug)
+  if (!found) return slug
+  return menuLabels?.[slug]?.trim() || found.label
 }
 
 export function parseMenuLabels(rawBody?: string | null): Record<string, string> {
@@ -33,6 +37,18 @@ export function parseMenuLabels(rawBody?: string | null): Record<string, string>
     const parsed = JSON.parse(rawBody)
     if (!parsed || typeof parsed !== 'object') return {}
     return parsed as Record<string, string>
+  } catch {
+    return {}
+  }
+}
+
+
+export function parseMenuVisibility(rawBody?: string | null): Record<string, boolean> {
+  if (!rawBody) return {}
+  try {
+    const parsed = JSON.parse(rawBody)
+    if (!parsed || typeof parsed !== "object") return {}
+    return parsed as Record<string, boolean>
   } catch {
     return {}
   }

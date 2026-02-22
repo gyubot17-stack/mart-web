@@ -6,7 +6,7 @@ import HeroBlock from '@/components/HeroBlock'
 import InquiryForm from '@/components/InquiryForm'
 import SiteFooter from '@/components/SiteFooter'
 import SiteHeader from '@/components/SiteHeader'
-import { buildSiteSections, getSectionLabel, parseMenuLabels } from '@/lib/site-sections'
+import { buildSiteSections, getSectionLabel, parseMenuLabels, parseMenuVisibility } from '@/lib/site-sections'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,8 +91,9 @@ function parseExtra(raw?: string | null): SectionExtra {
 export default async function SectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const [{ data: menuConfig }, { data: submenuConfig }, { data }, { data: extraData }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
+  const [{ data: menuConfig }, { data: menuVisibilityConfig }, { data: submenuConfig }, { data }, { data: extraData }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
+    supabaseAdmin.from('site_content').select('body').eq('key', 'menu_visibility').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'submenu_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('*').eq('key', slug).maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', `${slug}_extra`).maybeSingle(),
@@ -101,7 +102,8 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
   ])
 
   const menuLabels = parseMenuLabels(menuConfig?.body)
-  const siteSections = buildSiteSections(menuLabels)
+  const menuVisibility = parseMenuVisibility(menuVisibilityConfig?.body)
+  const siteSections = buildSiteSections(menuLabels, menuVisibility)
   let submenus: Record<string, { label: string; href: string }[]> = {}
   try {
     const parsed = JSON.parse(submenuConfig?.body || '{}')

@@ -3,22 +3,24 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import HeroBlock from '@/components/HeroBlock'
 import SiteFooter from '@/components/SiteFooter'
 import SiteHeader from '@/components/SiteHeader'
-import { buildSiteSections, parseMenuLabels } from '@/lib/site-sections'
+import { buildSiteSections, parseMenuLabels, parseMenuVisibility } from '@/lib/site-sections'
 
 export const dynamic = 'force-dynamic'
 
 export default async function Home() {
-  const [{ data }, { data: homeExtra }, { data: menuConfig }, { data: submenuConfig }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
+  const [{ data }, { data: homeExtra }, { data: menuConfig }, { data: menuVisibilityConfig }, { data: submenuConfig }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('*').eq('key', 'home').single(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'home_extra').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
+    supabaseAdmin.from('site_content').select('body').eq('key', 'menu_visibility').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'submenu_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'footer_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'home_style').maybeSingle(),
   ])
 
   const menuLabels = parseMenuLabels(menuConfig?.body)
-  const siteSections = buildSiteSections(menuLabels)
+  const menuVisibility = parseMenuVisibility(menuVisibilityConfig?.body)
+  const siteSections = buildSiteSections(menuLabels, menuVisibility)
   let submenus: Record<string, { label: string; href: string }[]> = {}
   try {
     const parsed = JSON.parse(submenuConfig?.body || '{}')

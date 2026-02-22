@@ -34,6 +34,7 @@ export default function AdminMenuPage() {
   const [menuSaving, setMenuSaving] = useState(false)
   const [submenuSaving, setSubmenuSaving] = useState(false)
   const [menuLabels, setMenuLabels] = useState<Record<string, string>>({})
+  const [menuVisibility, setMenuVisibility] = useState<Record<string, boolean>>({})
   const [submenus, setSubmenus] = useState<Record<string, SubmenuItem[]>>({})
   const [role, setRole] = useState<'admin' | 'super' | null>(null)
   const [allowedContentKeys, setAllowedContentKeys] = useState<string[]>(['*'])
@@ -53,8 +54,9 @@ export default function AdminMenuPage() {
         setAllowedContentKeys(keys)
       }
 
-      const [menuRes, submenuRes] = await Promise.all([
+      const [menuRes, visibilityRes, submenuRes] = await Promise.all([
         fetch('/api/content?key=menu_config', { cache: 'no-store' }),
+        fetch('/api/content?key=menu_visibility', { cache: 'no-store' }),
         fetch('/api/content?key=submenu_config', { cache: 'no-store' }),
       ])
 
@@ -64,6 +66,15 @@ export default function AdminMenuPage() {
         setMenuLabels(parsed && typeof parsed === 'object' ? parsed : {})
       } catch {
         setMenuLabels({})
+      }
+
+
+      const visibilityJson = await visibilityRes.json()
+      try {
+        const parsed = JSON.parse(visibilityJson?.data?.body || '{}')
+        setMenuVisibility(parsed && typeof parsed === 'object' ? parsed : {})
+      } catch {
+        setMenuVisibility({})
       }
 
       const submenuJson = await submenuRes.json()
@@ -106,7 +117,19 @@ export default function AdminMenuPage() {
     })
 
     if (res.ok) {
-      setMessage('메뉴명 저장 완료 ✅')
+      const visRes = await fetch('/api/content', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: 'menu_visibility',
+          title: 'menu visibility',
+          subtitle: '',
+          body: JSON.stringify(menuVisibility),
+          hero_image_url: '',
+        }),
+      })
+      if (visRes.ok) setMessage('메뉴명/표시상태 저장 완료 ✅')
+      else setMessage('메뉴명 저장은 완료됐지만 표시상태 저장에 실패했습니다.')
     } else {
       const json = await res.json()
       setMessage(`메뉴명 저장 실패: ${json?.error ?? 'unknown'}`)
@@ -163,16 +186,27 @@ export default function AdminMenuPage() {
         <section className="border rounded-xl p-5 space-y-4">
           <h2 className="text-lg font-semibold">상단 메뉴명 편집</h2>
           <div className="grid md:grid-cols-2 gap-3">
-            {sections.map((section) => (
-              <label key={section.key} className="space-y-1 block">
-                <span className="text-sm text-gray-600">{section.key}</span>
+            {sections.map((section) => {
+              const visible = menuVisibility[section.key] !== false
+              return (
+              <div key={section.key} className="space-y-1 block border rounded p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">{section.key}</span>
+                  <button
+                    type="button"
+                    className={`px-2 py-1 text-xs rounded border ${visible ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-slate-100 text-slate-500 border-slate-300'}`}
+                    onClick={() => setMenuVisibility((prev) => ({ ...prev, [section.key]: !visible }))}
+                  >
+                    {visible ? '표시' : '숨김'}
+                  </button>
+                </div>
                 <input
                   className="w-full border rounded px-3 py-2"
                   value={menuLabels[section.key] ?? section.label}
                   onChange={(e) => setMenuLabels((prev) => ({ ...prev, [section.key]: e.target.value }))}
                 />
-              </label>
-            ))}
+              </div>
+            )})}
           </div>
           <button className="px-4 py-2 rounded border" disabled={menuSaving} onClick={saveMenuLabels}>
             {menuSaving ? '메뉴 저장 중...' : '메뉴명 저장'}
