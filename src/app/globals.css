@@ -140,9 +140,9 @@ body {
 }
 
 .ui-nav-item-active {
-  color: #0f172a;
-  border-bottom-color: #111827;
-  background: #f8fafc;
+  color: #020617;
+  border-bottom-color: #020617;
+  background: #e2e8f0;
 }
 
 .ui-nav-sep {
