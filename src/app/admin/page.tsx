@@ -477,7 +477,7 @@ export default function AdminPage() {
                   <div key={section.key} className="px-1 relative">
                     <button
                       type="button"
-                      className={`h-12 w-full text-sm border-b ${selectedKey === section.key ? 'font-bold text-slate-900 border-slate-900' : 'font-medium text-slate-700 border-transparent'} hover:bg-slate-50`}
+                      className={`h-12 w-full text-sm ${selectedKey === section.key ? 'font-bold text-slate-900' : 'font-medium text-slate-700'} hover:bg-slate-50`}
                       onClick={() => openEditorKey(section.key)}
                     >
                       {label}
