@@ -465,36 +465,22 @@ export default function AdminPage() {
         <h2 className="text-lg font-semibold">페이지 콘텐츠 편집</h2>
         <div className="space-y-3">
           <label className="text-sm font-medium">편집할 페이지 (사이트 메뉴 구조)</label>
-          <div className="border rounded-lg p-3 space-y-3 bg-white">
-            <div className="flex flex-wrap items-center gap-0 border-b border-slate-200">
-              {visibleSections.map((section, idx) => {
-                const visible = menuVisibility[section.key] !== false
+          <div className="border rounded-lg p-3 bg-white">
+            <div className="flex items-start gap-0 overflow-x-auto">
+              {visibleSections.map((section) => {
                 const label = menuLabels[section.key]?.trim() || section.label
+                const children = (submenus[section.key] || []).filter((row) => row.visible !== false)
                 return (
-                  <div key={section.key} className="flex items-center">
+                  <div key={section.key} className="min-w-[140px] flex-1 px-2">
                     <button
                       type="button"
-                      disabled={!visible}
-                      className={`h-12 px-4 text-sm border-b ${selectedKey === section.key ? 'font-bold text-slate-900 border-slate-900' : 'font-medium text-slate-700 border-transparent'} ${!visible ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-50'}`}
+                      className={`h-12 w-full text-sm border-b ${selectedKey === section.key ? 'font-bold text-slate-900 border-slate-900' : 'font-medium text-slate-700 border-transparent'} hover:bg-slate-50`}
                       onClick={() => openEditorKey(section.key)}
                     >
                       {label}
                     </button>
-                    {idx < visibleSections.length - 1 ? <span className="px-2 text-slate-400">|</span> : null}
-                  </div>
-                )
-              })}
-            </div>
 
-            <div className="space-y-2">
-              {visibleSections.map((section) => {
-                const children = (submenus[section.key] || []).filter((row) => row.visible !== false)
-                if (children.length === 0) return null
-                const label = menuLabels[section.key]?.trim() || section.label
-                return (
-                  <div key={`submenu-${section.key}`} className="space-y-1">
-                    <p className="text-xs text-slate-500 font-medium">{label} 하위메뉴</p>
-                    <div className="flex flex-wrap items-center gap-1">
+                    <div className="pt-1 min-h-[34px] flex flex-wrap items-center gap-1 justify-center">
                       {children.map((child, idx) => {
                         const targetKey = normalizeKeyFromHref(child.href)
                         const isDisabled = !targetKey
