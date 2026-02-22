@@ -52,6 +52,26 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Script id="chunk-recovery" strategy="beforeInteractive">
+          {`(function(){
+            if (typeof window === 'undefined') return;
+            var KEY = '__mrtk_chunk_reload_once__';
+            function isChunkErr(msg){
+              if(!msg) return false;
+              var s = String(msg);
+              return s.includes('ChunkLoadError') || s.includes('Loading chunk') || s.includes('Failed to fetch dynamically imported module');
+            }
+            function recover(){
+              try {
+                if (sessionStorage.getItem(KEY)) return;
+                sessionStorage.setItem(KEY, '1');
+                location.reload();
+              } catch(_) {}
+            }
+            window.addEventListener('error', function(e){ if (isChunkErr(e && (e.message || (e.error && e.error.message)))) recover(); });
+            window.addEventListener('unhandledrejection', function(e){ if (isChunkErr(e && e.reason && e.reason.message)) recover(); });
+          })();`}
+        </Script>
         {children}
         <AnalyticsTracker />
         {plausibleDomain ? (
