@@ -277,6 +277,20 @@ export default function AdminMenuPage() {
                       >
                         {row.visible ? '표시' : '숨김'}
                       </button>
+                      {(() => {
+                        const href = String(row.href || '').trim()
+                        const canEdit = href.startsWith('/') && !href.includes('#') && href.split('/').filter(Boolean).length === 1
+                        const editKey = canEdit ? href.replace(/^\//, '') : ''
+                        return (
+                          <a
+                            href={canEdit && parentVisible ? `/admin?key=${encodeURIComponent(editKey)}` : '#'}
+                            className={`px-2 py-1 text-xs rounded border text-center whitespace-nowrap ${canEdit && parentVisible ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-slate-400 border-slate-200 bg-slate-50 pointer-events-none'}`}
+                            title={canEdit ? '이 하위메뉴 페이지 내용 편집' : '단일 경로(/notice 형태)일 때만 편집 가능'}
+                          >
+                            내용편집
+                          </a>
+                        )
+                      })()}
                       <button
                         type="button"
                         className="px-2 py-1 text-xs rounded border text-red-600"
