@@ -86,7 +86,7 @@ export default async function MapPage() {
         </div>
 
         {embedUrl ? (
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="max-w-7xl mx-auto px-4 md:px-6 mt-4">
             <div className="relative w-full overflow-hidden rounded-xl border border-slate-200/80" style={{ height: '420px' }}>
               <iframe
                 src={embedUrl}
@@ -101,7 +101,7 @@ export default async function MapPage() {
             </div>
           </div>
         ) : (
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="max-w-7xl mx-auto px-4 md:px-6 mt-4">
             <div className="ui-card min-h-[260px] flex items-center justify-center text-slate-400">메인 이미지 업로드 영역</div>
           </div>
         )}
