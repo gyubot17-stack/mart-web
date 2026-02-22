@@ -791,13 +791,21 @@ export default function AdminPage() {
               <button type="button" className="px-2 py-1 text-xs rounded border" onClick={() => applyBodyFormat('bold')}><b>B</b></button>
               <button type="button" className="px-2 py-1 text-xs rounded border" onClick={() => applyBodyFormat('italic')}><i>I</i></button>
               <button type="button" className="px-2 py-1 text-xs rounded border" onClick={() => applyBodyFormat('underline')}><u>U</u></button>
-              <button type="button" className="px-2 py-1 text-xs rounded border" onClick={() => applyBodyFormat('insertUnorderedList')}>• 목록</button>
-              <button type="button" className="px-2 py-1 text-xs rounded border" onClick={() => applyBodyFormat('insertOrderedList')}>1. 목록</button>
-              <button type="button" className="px-2 py-1 text-xs rounded border" onClick={() => {
-                const url = window.prompt('링크 URL을 입력하세요')
-                if (url) applyBodyFormat('createLink', url)
-              }}>링크</button>
-              <button type="button" className="px-2 py-1 text-xs rounded border" onClick={() => applyBodyFormat('removeFormat')}>서식해제</button>
+              <label className="px-2 py-1 text-xs rounded border inline-flex items-center gap-2">
+                글자색
+                <input type="color" className="w-6 h-6 p-0 border-0 bg-transparent" onChange={(e) => applyBodyFormat('foreColor', e.target.value)} />
+              </label>
+              <select
+                className="px-2 py-1 text-xs rounded border"
+                defaultValue="3"
+                onChange={(e) => applyBodyFormat('fontSize', e.target.value)}
+              >
+                <option value="2">작게</option>
+                <option value="3">기본</option>
+                <option value="4">약간 크게</option>
+                <option value="5">크게</option>
+                <option value="6">아주 크게</option>
+              </select>
             </div>
             <div
               ref={bodyEditorRef}
