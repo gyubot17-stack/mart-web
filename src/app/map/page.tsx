@@ -120,11 +120,14 @@ export default async function MapPage() {
           href={naverSearchUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#03C75A] bg-[#03C75A] text-white shadow-sm hover:brightness-95"
+          className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#03C75A] bg-white text-white shadow-sm hover:brightness-95"
           title="네이버지도에서 열기"
           aria-label="네이버지도에서 열기"
         >
-          <span className="text-lg font-black leading-none">N</span>
+          <svg viewBox="0 0 24 24" className="w-6 h-6" aria-hidden="true">
+            <path d="M12 2.5c-4.1 0-7.4 3.2-7.4 7.2 0 4.9 6.1 11.1 7 11.9a.6.6 0 0 0 .8 0c.9-.8 7-7 7-11.9 0-4-3.3-7.2-7.4-7.2z" fill="#03C75A"/>
+            <path d="M9 8h2l2 3V8h2v7h-2l-2-3v3H9V8z" fill="#fff"/>
+          </svg>
         </a>
       </section>
 
