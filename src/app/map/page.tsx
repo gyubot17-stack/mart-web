@@ -51,8 +51,8 @@ export default async function MapPage() {
   if (mapConfigRow?.body) {
     try {
       const parsed = JSON.parse(mapConfigRow.body)
-      address = String(parsed?.address || defaultAddress)
-      embedUrl = String(parsed?.embedUrl || '')
+      address = typeof parsed?.address === 'string' ? parsed.address : defaultAddress
+      embedUrl = typeof parsed?.embedUrl === 'string' ? parsed.embedUrl : ''
     } catch {}
   }
 

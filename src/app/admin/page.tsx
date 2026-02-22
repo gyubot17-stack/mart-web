@@ -309,8 +309,8 @@ export default function AdminPage() {
     try {
       const parsed = JSON.parse(mapJson?.data?.body || '{}')
       setMapConfig({
-        address: String(parsed?.address || defaultMapConfig.address),
-        embedUrl: String(parsed?.embedUrl || ''),
+        address: typeof parsed?.address === 'string' ? parsed.address : defaultMapConfig.address,
+        embedUrl: typeof parsed?.embedUrl === 'string' ? parsed.embedUrl : '',
       })
     } catch {
       setMapConfig(defaultMapConfig)
