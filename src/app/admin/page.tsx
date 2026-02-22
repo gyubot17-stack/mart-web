@@ -127,6 +127,8 @@ export default function AdminPage() {
   const [menuLabels, setMenuLabels] = useState<Record<string, string>>({})
   const [menuVisibility, setMenuVisibility] = useState<Record<string, boolean>>({})
   const [submenus, setSubmenus] = useState<Record<string, EditorSubmenuItem[]>>({})
+  const [pageTypes, setPageTypes] = useState<Record<string, string>>({})
+  const [typeSaving, setTypeSaving] = useState(false)
 
   const editableSections = useMemo(() => {
     if (allowedContentKeys.includes('*')) return sections
@@ -138,6 +140,13 @@ export default function AdminPage() {
   const isHome = useMemo(() => selectedKey === 'home', [selectedKey])
   const isCustomPage = useMemo(() => !sections.some((sec) => sec.key === selectedKey), [selectedKey])
 
+  const currentPageType = useMemo(() => {
+    const configured = pageTypes[selectedKey]
+    if (configured) return configured
+    if (selectedKey === 'map') return 'map'
+    if (selectedKey === 'support') return 'inquiry'
+    return 'general'
+  }, [pageTypes, selectedKey])
 
   function normalizeKeyFromHref(href: string) {
     const clean = String(href || '').trim()
@@ -159,10 +168,11 @@ export default function AdminPage() {
   }
 
   async function loadEditorMenu() {
-    const [menuRes, visibilityRes, submenuRes] = await Promise.all([
+    const [menuRes, visibilityRes, submenuRes, pageTypeRes] = await Promise.all([
       fetch('/api/content?key=menu_config', { cache: 'no-store' }),
       fetch('/api/content?key=menu_visibility', { cache: 'no-store' }),
       fetch('/api/content?key=submenu_config', { cache: 'no-store' }),
+      fetch('/api/content?key=page_type_config', { cache: 'no-store' }),
     ])
 
     const menuJson = await menuRes.json()
@@ -201,6 +211,15 @@ export default function AdminPage() {
     } catch {
       setSubmenus({})
     }
+
+    const pageTypeJson = await pageTypeRes.json()
+    try {
+      const parsed = JSON.parse(pageTypeJson?.data?.body || '{}')
+      setPageTypes(parsed && typeof parsed === 'object' ? parsed : {})
+    } catch {
+      setPageTypes({})
+    }
+
   }
 
   async function loadContent(key: string) {
@@ -363,6 +382,34 @@ export default function AdminPage() {
     setStyleSaving(false)
   }
 
+
+
+  async function savePageType() {
+    setTypeSaving(true)
+    if (!(await runAutoBackupIfNeeded())) { setTypeSaving(false); return }
+    const next = { ...pageTypes, [selectedKey]: currentPageType }
+    const res = await fetch('/api/content', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        key: 'page_type_config',
+        title: 'page type config',
+        subtitle: '',
+        body: JSON.stringify(next),
+        hero_image_url: '',
+      }),
+    })
+
+    if (res.ok) {
+      setPageTypes(next)
+      setMessage('페이지 타입 저장 완료 ✅')
+    } else {
+      const json = await res.json()
+      setMessage(`페이지 타입 저장 실패: ${json?.error ?? 'unknown'}`)
+    }
+    setTypeSaving(false)
+  }
+
   async function handleUpload(file: File, target: 'hero' | 'gallery' | 'product', index?: number) {
     if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
       setMessage(`업로드 실패: 파일 용량은 ${MAX_UPLOAD_MB}MB 이하만 가능합니다.`)
@@ -507,6 +554,28 @@ export default function AdminPage() {
               })}
             </div>
           </div>
+        </div>
+
+        <div className="border rounded-lg p-3 space-y-2">
+          <label className="text-sm font-medium">페이지 타입</label>
+          <div className="flex items-center gap-2 flex-wrap">
+            <select
+              className="border rounded px-3 py-2 text-sm"
+              value={currentPageType}
+              onChange={(e) => setPageTypes((prev) => ({ ...prev, [selectedKey]: e.target.value }))}
+            >
+              <option value="general">일반형 (소개/제품)</option>
+              <option value="inquiry">문의형 (문의하기 중심)</option>
+              <option value="map">지도형 (찾아오시는 길)</option>
+              <option value="gallery">갤러리형</option>
+              <option value="news">공지/소식형</option>
+              <option value="custom">커스텀</option>
+            </select>
+            <button className="px-3 py-2 rounded border text-sm" disabled={typeSaving} onClick={savePageType}>
+              {typeSaving ? '타입 저장 중...' : '페이지 타입 저장'}
+            </button>
+          </div>
+          <p className="text-xs text-gray-500">페이지별 목적을 타입으로 저장해두면 이후 커스텀 편집 UI를 더 쉽게 자동 분기할 수 있습니다.</p>
         </div>
 
         <div className="space-y-2">
