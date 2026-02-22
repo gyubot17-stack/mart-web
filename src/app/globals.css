@@ -144,7 +144,7 @@ body {
 .ui-nav-item-active {
   color: #0f172a;
   border-bottom-color: transparent;
-  background: #eff6ff;
+  background: transparent;
 }
 
 .ui-nav-item-active::after {
