@@ -5,6 +5,12 @@ import { buildSiteSections, parseMenuLabels } from '@/lib/site-sections'
 
 export const dynamic = 'force-dynamic'
 
+function renderBodyContent(body: string, className: string) {
+  const hasHtml = /<[^>]+>/.test(body)
+  if (hasHtml) return <div className={className} dangerouslySetInnerHTML={{ __html: body }} />
+  return <div className={`${className} whitespace-pre-wrap`}>{renderBodyContent(body, "p-1 md:p-2 text-slate-700 leading-7")}</div>
+}
+
 export default async function PrivacyPage() {
   const [{ data }, { data: menuConfig }, { data: submenuConfig }, { data: footerConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('*').eq('key', 'privacy_policy').maybeSingle(),
@@ -48,7 +54,7 @@ export default async function PrivacyPage() {
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-12">
         <div className="ui-card p-6 md:p-8 space-y-4">
           <h1 className="ui-page-title">{title}</h1>
-          <article className="whitespace-pre-wrap leading-7 text-slate-700">{body}</article>
+          <article>{renderBodyContent(body, "leading-7 text-slate-700")}</article>
         </div>
       </section>
       <SiteFooter footer={footer} />
