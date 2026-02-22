@@ -206,9 +206,10 @@ export default function AdminMenuPage() {
                     className="grid gap-x-2 border-b border-slate-200 pb-1"
                     style={{ gridTemplateColumns: `repeat(${Math.max(visibleSections.length, 1)}, minmax(0, 1fr))` }}
                   >
-                    {visibleSections.map((sec) => (
-                      <div key={`preview-top-${sec.key}`} className="min-w-0">
-                        <span className="h-10 w-full inline-flex items-center justify-center text-sm font-semibold text-slate-800">{menuLabels[sec.key] ?? sec.label}</span>
+                    {visibleSections.map((sec, idx) => (
+                      <div key={`preview-top-${sec.key}`} className="min-w-0 flex items-center justify-center">
+                        <span className="h-10 inline-flex items-center justify-center text-sm font-semibold text-slate-800">{menuLabels[sec.key] ?? sec.label}</span>
+                        {idx < visibleSections.length - 1 ? <span className="px-2 text-slate-300">|</span> : null}
                       </div>
                     ))}
                   </div>
