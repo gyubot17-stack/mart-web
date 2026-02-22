@@ -552,6 +552,7 @@ export default function AdminPage() {
           <textarea className="w-full border rounded px-3 py-2 min-h-40" value={content.body} onChange={(e) => setContent({ ...content, body: e.target.value })} />
         </div>
 
+        {!isHome ? (
         <div className="space-y-2">
           <div className="flex items-center gap-4">
             <label className="text-sm font-medium">대표 이미지</label>
@@ -575,6 +576,7 @@ export default function AdminPage() {
             <p className="text-sm text-gray-500">이미지 없음</p>
           )}
         </div>
+        ) : null}
 
         <button className="px-4 py-2 rounded border" disabled={saving || uploading} onClick={handleSave}>
           {saving ? '저장 중...' : '저장'}
