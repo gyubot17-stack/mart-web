@@ -34,6 +34,11 @@ type StyleConfig = {
   productHeight: number
 }
 
+type MapConfig = {
+  address: string
+  embedUrl: string
+}
+
 type EditorSubmenuItem = {
   label: string
   href: string
@@ -71,6 +76,11 @@ const defaultStyle: StyleConfig = {
   heroHeight: 420,
   galleryHeight: 160,
   productHeight: 128,
+}
+
+const defaultMapConfig: MapConfig = {
+  address: '경남 함안군 법수면 법정로 114',
+  embedUrl: '',
 }
 
 function createEmptyProduct(): Product {
@@ -123,6 +133,8 @@ export default function AdminPage() {
   const [extraSaving, setExtraSaving] = useState(false)
   const [style, setStyle] = useState<StyleConfig>(defaultStyle)
   const [styleSaving, setStyleSaving] = useState(false)
+  const [mapConfig, setMapConfig] = useState<MapConfig>(defaultMapConfig)
+  const [mapSaving, setMapSaving] = useState(false)
   const [autoBackup, setAutoBackup] = useState(true)
   const [menuLabels, setMenuLabels] = useState<Record<string, string>>({})
   const [menuVisibility, setMenuVisibility] = useState<Record<string, boolean>>({})
@@ -246,9 +258,10 @@ export default function AdminPage() {
       })
     }
 
-    const [extraRes, styleRes] = await Promise.all([
+    const [extraRes, styleRes, mapRes] = await Promise.all([
       fetch(`/api/content?key=${encodeURIComponent(`${key}_extra`)}`, { cache: 'no-store' }),
       fetch(`/api/content?key=${encodeURIComponent(`${key}_style`)}`, { cache: 'no-store' }),
+      fetch('/api/content?key=map_config', { cache: 'no-store' }),
     ])
 
     const extraJson = await extraRes.json()
@@ -267,6 +280,17 @@ export default function AdminPage() {
         setStyle(defaultStyle)
       }
     }
+    const mapJson = await mapRes.json()
+    try {
+      const parsed = JSON.parse(mapJson?.data?.body || '{}')
+      setMapConfig({
+        address: String(parsed?.address || defaultMapConfig.address),
+        embedUrl: String(parsed?.embedUrl || ''),
+      })
+    } catch {
+      setMapConfig(defaultMapConfig)
+    }
+
   }
 
 
@@ -413,6 +437,29 @@ export default function AdminPage() {
       setMessage(`페이지 타입 저장 실패: ${json?.error ?? 'unknown'}`)
     }
     setTypeSaving(false)
+  }
+
+  async function saveMapConfig() {
+    setMapSaving(true)
+    if (!(await runAutoBackupIfNeeded())) { setMapSaving(false); return }
+    const res = await fetch('/api/content', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        key: 'map_config',
+        title: 'map config',
+        subtitle: '',
+        body: JSON.stringify(mapConfig),
+        hero_image_url: '',
+      }),
+    })
+
+    if (res.ok) setMessage('지도/주소 설정 저장 완료 ✅')
+    else {
+      const json = await res.json()
+      setMessage(`지도/주소 설정 저장 실패: ${json?.error ?? 'unknown'}`)
+    }
+    setMapSaving(false)
   }
 
   async function handleUpload(file: File, target: 'hero' | 'gallery' | 'product', index?: number) {
@@ -583,8 +630,27 @@ export default function AdminPage() {
           <p className="text-xs text-gray-500">페이지별 목적을 타입으로 저장해두면 이후 커스텀 편집 UI를 더 쉽게 자동 분기할 수 있습니다.</p>
 
           {currentPageType === 'map' ? (
-            <div className="rounded border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
-              지도형 페이지입니다. 지도/주소는 <a href="/admin/common" className="underline font-medium">공통 관리 &gt; 찾아오시는길(/map) 설정</a>에서 관리하세요.
+            <div className="rounded border border-blue-200 bg-blue-50 p-3 space-y-2 text-sm text-blue-900">
+              <p className="font-medium">지도형 페이지 설정</p>
+              <input
+                className="w-full border rounded px-3 py-2 bg-white text-slate-800"
+                placeholder="기본 주소"
+                value={mapConfig.address}
+                onChange={(e) => setMapConfig((prev) => ({ ...prev, address: e.target.value }))}
+              />
+              <textarea
+                className="w-full border rounded px-3 py-2 min-h-24 bg-white text-slate-800"
+                placeholder="네이버지도 iframe src URL"
+                value={mapConfig.embedUrl}
+                onChange={(e) => setMapConfig((prev) => ({ ...prev, embedUrl: e.target.value }))}
+              />
+              <div className="flex items-center gap-2">
+                <button className="px-3 py-2 rounded border bg-white text-sm" disabled={mapSaving} onClick={saveMapConfig}>
+                  {mapSaving ? '지도 설정 저장 중...' : '지도 설정 저장'}
+                </button>
+                <a href="/map" target="_blank" className="px-3 py-2 rounded border bg-white text-sm">/map 미리보기</a>
+              </div>
+              <p className="text-xs text-blue-800">네이버지도 공유 &gt; 퍼가기에서 iframe src만 붙여넣으세요.</p>
             </div>
           ) : null}
 

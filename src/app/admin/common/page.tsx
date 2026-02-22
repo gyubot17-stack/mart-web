@@ -18,10 +18,6 @@ type Inquiry = {
   status: 'new' | 'done'
 }
 
-type MapConfig = {
-  address: string
-  embedUrl: string
-}
 
 const defaultFooter: FooterConfig = {
   companyName: 'mrtc.kr',
@@ -29,17 +25,12 @@ const defaultFooter: FooterConfig = {
   addressInfo: '주소: (입력 예정) | 연락처: (입력 예정)',
 }
 
-const defaultMapConfig: MapConfig = {
-  address: '경남 함안군 법수면 법정로 114',
-  embedUrl: '',
-}
 
 export default function AdminCommonPage() {
   const [loading, setLoading] = useState(true)
   const [footer, setFooter] = useState<FooterConfig>(defaultFooter)
   const [homeIconUrl, setHomeIconUrl] = useState('')
   const [homeIconSize, setHomeIconSize] = useState(28)
-  const [mapConfig, setMapConfig] = useState<MapConfig>(defaultMapConfig)
   const [inquiries, setInquiries] = useState<Inquiry[]>([])
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'done'>('all')
@@ -48,7 +39,6 @@ export default function AdminCommonPage() {
   const [iconSaving, setIconSaving] = useState(false)
   const [iconUploading, setIconUploading] = useState(false)
   const [privacySaving, setPrivacySaving] = useState(false)
-  const [mapSaving, setMapSaving] = useState(false)
   const [privacyText, setPrivacyText] = useState('')
   const [message, setMessage] = useState('')
   const [analyticsFrom, setAnalyticsFrom] = useState('')
@@ -94,10 +84,9 @@ export default function AdminCommonPage() {
 
   useEffect(() => {
     ;(async () => {
-      const [footerRes, headerIconRes, mapRes, privacyRes, inquiriesRes, analyticsRes] = await Promise.all([
+      const [footerRes, headerIconRes, privacyRes, inquiriesRes, analyticsRes] = await Promise.all([
         fetch('/api/content?key=footer_config', { cache: 'no-store' }),
         fetch('/api/content?key=header_icon', { cache: 'no-store' }),
-        fetch('/api/content?key=map_config', { cache: 'no-store' }),
         fetch('/api/content?key=privacy_policy', { cache: 'no-store' }),
         fetch('/api/admin/inquiries', { cache: 'no-store' }),
         fetch('/api/admin/analytics', { cache: 'no-store' }),
@@ -125,19 +114,6 @@ export default function AdminCommonPage() {
         } catch {
           setHomeIconUrl(String(headerIconJson?.data?.body || ''))
           setHomeIconSize(28)
-        }
-      }
-
-      const mapJson = await mapRes.json()
-      if (mapRes.ok) {
-        try {
-          const parsed = JSON.parse(mapJson?.data?.body || '{}')
-          setMapConfig({
-            address: String(parsed?.address || defaultMapConfig.address),
-            embedUrl: String(parsed?.embedUrl || ''),
-          })
-        } catch {
-          setMapConfig(defaultMapConfig)
         }
       }
 
@@ -247,30 +223,6 @@ export default function AdminCommonPage() {
     }
     setPrivacySaving(false)
   }
-
-  async function saveMapConfig() {
-    setMapSaving(true)
-    const res = await fetch('/api/content', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        key: 'map_config',
-        title: 'map config',
-        subtitle: '',
-        body: JSON.stringify(mapConfig),
-        hero_image_url: '',
-      }),
-    })
-
-    if (res.ok) {
-      setMessage('찾아오시는길 설정 저장 완료 ✅')
-    } else {
-      const json = await res.json()
-      setMessage(`찾아오시는길 설정 저장 실패: ${json?.error ?? 'unknown'}`)
-    }
-    setMapSaving(false)
-  }
-
   async function toggleInquiryStatus(key: string, status: 'new' | 'done') {
     const res = await fetch('/api/admin/inquiries', {
       method: 'PATCH',
@@ -405,27 +357,6 @@ export default function AdminCommonPage() {
           </button>
         </div>
       </section>
-
-      <section className="border rounded-xl p-5 space-y-4">
-        <h2 className="text-lg font-semibold">찾아오시는길(/map) 설정</h2>
-        <input
-          className="w-full border rounded px-3 py-2"
-          placeholder="기본 주소"
-          value={mapConfig.address}
-          onChange={(e) => setMapConfig((prev) => ({ ...prev, address: e.target.value }))}
-        />
-        <textarea
-          className="w-full border rounded px-3 py-2 min-h-24"
-          placeholder="네이버지도 iframe src URL 입력"
-          value={mapConfig.embedUrl}
-          onChange={(e) => setMapConfig((prev) => ({ ...prev, embedUrl: e.target.value }))}
-        />
-        <p className="text-xs text-gray-500">네이버지도 공유 &gt; 퍼가기에서 iframe src만 붙여넣으세요.</p>
-        <button className="px-4 py-2 rounded border" disabled={mapSaving} onClick={saveMapConfig}>
-          {mapSaving ? '지도 설정 저장 중...' : '지도 설정 저장'}
-        </button>
-      </section>
-
       <section className="border rounded-xl p-5 space-y-4">
         <h2 className="text-lg font-semibold">푸터 정보 편집</h2>
         <input
