@@ -27,11 +27,14 @@ const defaultFooter: FooterConfig = {
 export default function AdminCommonPage() {
   const [loading, setLoading] = useState(true)
   const [footer, setFooter] = useState<FooterConfig>(defaultFooter)
+  const [homeIconUrl, setHomeIconUrl] = useState('')
   const [inquiries, setInquiries] = useState<Inquiry[]>([])
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'done'>('all')
   const [menuSaving, setMenuSaving] = useState(false)
   const [footerSaving, setFooterSaving] = useState(false)
+  const [iconSaving, setIconSaving] = useState(false)
+  const [iconUploading, setIconUploading] = useState(false)
   const [privacySaving, setPrivacySaving] = useState(false)
   const [privacyText, setPrivacyText] = useState('')
   const [message, setMessage] = useState('')
@@ -78,8 +81,9 @@ export default function AdminCommonPage() {
 
   useEffect(() => {
     ;(async () => {
-      const [footerRes, privacyRes, inquiriesRes, analyticsRes] = await Promise.all([
+      const [footerRes, headerIconRes, privacyRes, inquiriesRes, analyticsRes] = await Promise.all([
         fetch('/api/content?key=footer_config', { cache: 'no-store' }),
+        fetch('/api/content?key=header_icon', { cache: 'no-store' }),
         fetch('/api/content?key=privacy_policy', { cache: 'no-store' }),
         fetch('/api/admin/inquiries', { cache: 'no-store' }),
         fetch('/api/admin/analytics', { cache: 'no-store' }),
@@ -97,6 +101,17 @@ export default function AdminCommonPage() {
         setFooter(defaultFooter)
       }
 
+
+      const headerIconJson = await headerIconRes.json()
+      if (headerIconRes.ok) {
+        try {
+          const parsed = JSON.parse(headerIconJson?.data?.body || '{}')
+          setHomeIconUrl(String(parsed?.url || ''))
+        } catch {
+          setHomeIconUrl(String(headerIconJson?.data?.body || ''))
+        }
+      }
+
       const privacyJson = await privacyRes.json()
       if (privacyRes.ok) {
         setPrivacyText(privacyJson?.data?.body || '')
@@ -111,6 +126,47 @@ export default function AdminCommonPage() {
       setLoading(false)
     })()
   }, [])
+
+
+  async function saveHeaderIcon(url?: string) {
+    const finalUrl = typeof url === 'string' ? url : homeIconUrl
+    setIconSaving(true)
+    const res = await fetch('/api/content', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        key: 'header_icon',
+        title: 'header icon',
+        subtitle: '',
+        body: JSON.stringify({ url: finalUrl }),
+        hero_image_url: '',
+      }),
+    })
+
+    if (res.ok) {
+      setMessage('홈 아이콘 저장 완료 ✅')
+    } else {
+      const json = await res.json()
+      setMessage(`홈 아이콘 저장 실패: ${json?.error ?? 'unknown'}`)
+    }
+    setIconSaving(false)
+  }
+
+  async function uploadHeaderIcon(file: File) {
+    setIconUploading(true)
+    const fd = new FormData()
+    fd.append('file', file)
+    const up = await fetch('/api/upload', { method: 'POST', body: fd })
+    const upJson = await up.json()
+    if (!up.ok) {
+      setMessage(`아이콘 업로드 실패: ${upJson?.error ?? 'unknown'}`)
+      setIconUploading(false)
+      return
+    }
+    setHomeIconUrl(upJson.url)
+    await saveHeaderIcon(upJson.url)
+    setIconUploading(false)
+  }
 
   async function saveFooter() {
     setFooterSaving(true)
@@ -245,6 +301,38 @@ export default function AdminCommonPage() {
       </div>
 
       <div className="px-8 pt-6 space-y-6">
+
+      <section className="border rounded-xl p-5 space-y-4">
+        <h2 className="text-lg font-semibold">홈 아이콘 설정</h2>
+        <p className="text-sm text-gray-600">업로드한 아이콘은 본페이지 좌측 상단 '홈' 텍스트 대신 표시됩니다.</p>
+        <div className="flex items-center gap-3">
+          <label className="inline-flex items-center gap-3 px-3 py-2 rounded border bg-white text-sm font-medium cursor-pointer hover:bg-slate-50">
+            아이콘 이미지 업로드
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) uploadHeaderIcon(file)
+              }}
+            />
+          </label>
+          <button className="px-3 py-2 rounded border text-sm" disabled={iconSaving} onClick={() => saveHeaderIcon()}>
+            {iconSaving ? '아이콘 저장 중...' : '아이콘 저장'}
+          </button>
+        </div>
+        <input
+          className="w-full border rounded px-3 py-2 text-sm"
+          placeholder="아이콘 URL"
+          value={homeIconUrl}
+          onChange={(e) => setHomeIconUrl(e.target.value)}
+        />
+        <p className="text-xs text-gray-500">권장: 배경 투명 PNG / 높이 28~40px</p>
+        {homeIconUrl ? <img src={homeIconUrl} alt="home icon" className="h-10 w-auto object-contain" /> : <p className="text-sm text-gray-500">아이콘 미설정</p>}
+        {iconUploading ? <p className="text-xs text-blue-600">업로드 중...</p> : null}
+      </section>
+
       <section className="border rounded-xl p-5 space-y-4">
         <h2 className="text-lg font-semibold">푸터 정보 편집</h2>
         <input

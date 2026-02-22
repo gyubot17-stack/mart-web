@@ -8,12 +8,13 @@ import { buildSiteSections, parseMenuLabels, parseMenuVisibility } from '@/lib/s
 export const dynamic = 'force-dynamic'
 
 export default async function Home() {
-  const [{ data }, { data: homeExtra }, { data: menuConfig }, { data: menuVisibilityConfig }, { data: submenuConfig }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
+  const [{ data }, { data: homeExtra }, { data: menuConfig }, { data: menuVisibilityConfig }, { data: submenuConfig }, { data: headerIconConfig }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('*').eq('key', 'home').single(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'home_extra').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_visibility').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'submenu_config').maybeSingle(),
+    supabaseAdmin.from('site_content').select('body').eq('key', 'header_icon').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'footer_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'home_style').maybeSingle(),
   ])
@@ -42,6 +43,17 @@ export default async function Home() {
           .filter(Boolean)
       }
     } catch {}
+  }
+
+
+  let homeIconUrl = ''
+  if (headerIconConfig?.body) {
+    try {
+      const parsed = JSON.parse(headerIconConfig.body)
+      homeIconUrl = String(parsed?.url || '')
+    } catch {
+      homeIconUrl = String(headerIconConfig.body || '')
+    }
   }
 
   let footer = {
@@ -82,7 +94,7 @@ export default async function Home() {
     <main id="top" className="min-h-screen bg-white text-gray-900">
       <a href="#top" className="fixed right-4 md:right-6 bottom-4 md:bottom-6 z-50 rounded-full bg-black text-white px-4 py-3 text-sm font-semibold shadow-lg hover:bg-gray-800">맨위로 ↑</a>
 
-      <SiteHeader items={siteSections} submenus={submenus} />
+      <SiteHeader items={siteSections} submenus={submenus} homeIconUrl={homeIconUrl} />
 
       <HeroBlock title={title} subtitle={subtitle} image={image} images={homeSlides} heroHeight={style.heroHeight} />
 

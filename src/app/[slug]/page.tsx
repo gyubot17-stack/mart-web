@@ -91,10 +91,11 @@ function parseExtra(raw?: string | null): SectionExtra {
 export default async function SectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const [{ data: menuConfig }, { data: menuVisibilityConfig }, { data: submenuConfig }, { data }, { data: extraData }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
+  const [{ data: menuConfig }, { data: menuVisibilityConfig }, { data: submenuConfig }, { data: headerIconConfig }, { data }, { data: extraData }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_visibility').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'submenu_config').maybeSingle(),
+    supabaseAdmin.from('site_content').select('body').eq('key', 'header_icon').maybeSingle(),
     supabaseAdmin.from('site_content').select('*').eq('key', slug).maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', `${slug}_extra`).maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'footer_config').maybeSingle(),
@@ -127,6 +128,17 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
   const extra = parseExtra(extraData?.body)
   const visibleGallery = extra.gallery.filter((g) => g.visible)
   const visibleProducts = extra.products.filter((p) => p.visible)
+
+
+  let homeIconUrl = ''
+  if (headerIconConfig?.body) {
+    try {
+      const parsed = JSON.parse(headerIconConfig.body)
+      homeIconUrl = String(parsed?.url || '')
+    } catch {
+      homeIconUrl = String(headerIconConfig.body || '')
+    }
+  }
 
   let footer = {
     companyName: 'mrtc.kr',
@@ -168,7 +180,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
         맨위로 ↑
       </a>
 
-      <SiteHeader items={siteSections} currentSlug={slug} submenus={submenus} />
+      <SiteHeader items={siteSections} currentSlug={slug} submenus={submenus} homeIconUrl={homeIconUrl} />
 
       <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 

@@ -21,10 +21,12 @@ export default function SiteHeader({
   items,
   currentSlug,
   submenus,
+  homeIconUrl,
 }: {
   items: Item[]
   currentSlug?: string
   submenus?: SubmenuMap
+  homeIconUrl?: string
 }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openedSlug, setOpenedSlug] = useState<string | null>(null)
@@ -50,7 +52,7 @@ export default function SiteHeader({
                 onMouseLeave={() => setOpenedSlug(null)}
               >
                 <Link href={entry.href} className={`ui-nav-item ui-nav-item-wide ${isActive ? 'ui-nav-item-active' : ''}`}>
-                  {entry.label}
+                  {entry.slug === '' && homeIconUrl ? <img src={homeIconUrl} alt="home" className="h-7 w-auto object-contain" /> : entry.label}
                 </Link>
 
                 {children.length > 0 && openedSlug === entry.slug ? (
@@ -78,7 +80,7 @@ export default function SiteHeader({
 
       {mobileOpen ? (
         <div className="mobile-menu-panel border-t border-slate-200 bg-white/95 px-4 py-3 space-y-2">
-          <Link href="/" className={`block ui-chip w-full text-center ${!currentSlug ? 'ui-chip-active' : ''}`}>홈</Link>
+          <Link href="/" className={`block ui-chip w-full text-center ${!currentSlug ? 'ui-chip-active' : ''}`}>{homeIconUrl ? <img src={homeIconUrl} alt="home" className="mx-auto h-6 w-auto object-contain" /> : '홈'}</Link>
           {items.map((item) => {
             const children = getChildren(item)
             const expanded = openedSlug === item.slug
