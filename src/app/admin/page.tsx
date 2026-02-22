@@ -474,7 +474,7 @@ export default function AdminPage() {
                 const label = menuLabels[section.key]?.trim() || section.label
                 const children = (submenus[section.key] || []).filter((row) => row.visible !== false)
                 return (
-                  <div key={section.key} className="px-1">
+                  <div key={section.key} className="px-1 relative">
                     <button
                       type="button"
                       className={`h-12 w-full text-sm border-b ${selectedKey === section.key ? 'font-bold text-slate-900 border-slate-900' : 'font-medium text-slate-700 border-transparent'} hover:bg-slate-50`}
@@ -482,6 +482,7 @@ export default function AdminPage() {
                     >
                       {label}
                     </button>
+                    {visibleSections.findIndex((x) => x.key === section.key) < visibleSections.length - 1 ? <span className="absolute right-0 top-5 text-slate-300">|</span> : null}
 
                     <div className="pt-1 min-h-[34px] flex flex-col items-stretch gap-1">
                       {children.map((child, idx) => {
@@ -492,7 +493,7 @@ export default function AdminPage() {
                             key={`${section.key}-${idx}-${child.href}`}
                             type="button"
                             disabled={isDisabled}
-                            className={`w-full px-2 py-2 text-sm border-0 rounded-none text-left ${selectedKey === targetKey ? 'font-bold text-slate-900 bg-slate-50' : 'font-medium text-slate-700 bg-white'} ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-50'}`}
+                            className={`w-full px-1 py-1 text-sm border-0 rounded-none text-left ${selectedKey === targetKey ? 'font-bold text-slate-900 bg-slate-50' : 'font-medium text-slate-700 bg-white'} ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-50'}`}
                             onClick={() => !isDisabled && openEditorKey(targetKey)}
                             title={isDisabled ? '단일 페이지 링크만 편집 가능합니다' : child.href}
                           >
