@@ -45,7 +45,7 @@ export default function SiteHeader({
             return (
               <div
                 key={`${entry.href}-${idx}`}
-                className={`relative flex-1 min-w-0 ${idx === 0 ? 'mr-[120px]' : ''}`}
+                className={`relative flex-1 min-w-0 ${idx === 0 ? 'mr-[240px]' : ''}`}
                 onMouseEnter={() => children.length > 0 && setOpenedSlug(entry.slug)}
                 onMouseLeave={() => setOpenedSlug(null)}
               >
