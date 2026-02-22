@@ -239,10 +239,11 @@ export default function AdminMenuPage() {
               )
             })()}
 
-            <div className="flex items-center gap-2 pt-2">
-              <a href="#parent-editor" className="px-3 py-1.5 text-xs rounded border">상위메뉴 편집으로 이동</a>
-              <a href="#submenu-editor" className="px-3 py-1.5 text-xs rounded border">하위메뉴 편집으로 이동</a>
-            </div>
+          </div>
+
+          <div className="flex items-center gap-2 pt-1">
+            <a href="#parent-editor" className="px-3 py-1.5 text-xs rounded border">상위메뉴 편집으로 이동</a>
+            <a href="#submenu-editor" className="px-3 py-1.5 text-xs rounded border">하위메뉴 편집으로 이동</a>
           </div>
         </section>
 
