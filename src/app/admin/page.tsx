@@ -466,7 +466,10 @@ export default function AdminPage() {
         <div className="space-y-3">
           <label className="text-sm font-medium">편집할 페이지 (사이트 메뉴 구조)</label>
           <div className="border rounded-lg p-3 bg-white">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-3">
+            <div
+              className="grid gap-x-2 gap-y-3"
+              style={{ gridTemplateColumns: `repeat(${Math.max(visibleSections.length, 1)}, minmax(0, 1fr))` }}
+            >
               {visibleSections.map((section) => {
                 const label = menuLabels[section.key]?.trim() || section.label
                 const children = (submenus[section.key] || []).filter((row) => row.visible !== false)
