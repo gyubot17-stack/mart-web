@@ -1,5 +1,6 @@
 import SiteHeader from '@/components/SiteHeader'
 import SiteFooter from '@/components/SiteFooter'
+import HeroBlock from '@/components/HeroBlock'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { buildSiteSections, parseMenuLabels, parseMenuVisibility } from '@/lib/site-sections'
 
@@ -77,9 +78,9 @@ export default async function MapPage() {
     <main className="min-h-screen bg-white text-gray-900">
       <SiteHeader items={siteSections} currentSlug="map" submenus={submenus} homeIconUrl={homeIconUrl} homeIconSize={homeIconSize} />
 
-      <section className="max-w-7xl mx-auto px-4 md:px-6 py-8 space-y-4">
-        <h1 className="ui-page-title">{title}</h1>
-        {subtitle ? <p className="text-base text-gray-700">{subtitle}</p> : null}
+      <HeroBlock title={title} subtitle={subtitle} image="" heroHeight={420} />
+
+      <section className="max-w-7xl mx-auto px-4 md:px-6 pb-12 space-y-4 ui-fade-in">
         <p className="text-sm text-gray-700">{address}</p>
         {body ? <div className="text-sm text-gray-700 whitespace-pre-wrap">{body}</div> : null}
         <a href={naverSearchUrl} target="_blank" rel="noreferrer" className="inline-flex px-3 py-2 rounded border text-sm">네이버지도에서 열기</a>
