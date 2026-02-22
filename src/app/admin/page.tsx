@@ -480,7 +480,7 @@ export default function AdminPage() {
                       {label}
                     </button>
 
-                    <div className="pt-1 min-h-[34px] flex flex-col items-start gap-0.5">
+                    <div className="pt-1 min-h-[34px] flex flex-col items-stretch gap-1">
                       {children.map((child, idx) => {
                         const targetKey = normalizeKeyFromHref(child.href)
                         const isDisabled = !targetKey
@@ -489,7 +489,7 @@ export default function AdminPage() {
                             key={`${section.key}-${idx}-${child.href}`}
                             type="button"
                             disabled={isDisabled}
-                            className={`px-1 py-0.5 text-sm border-0 bg-transparent rounded-none text-left ${selectedKey === targetKey ? 'font-bold text-slate-900 underline underline-offset-2' : 'font-medium text-slate-700'} ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:text-slate-900'}`}
+                            className={`w-full px-2 py-2 text-sm border rounded-md text-left ${selectedKey === targetKey ? 'font-bold text-slate-900 border-slate-900 bg-slate-50' : 'font-medium text-slate-700 border-slate-200 bg-white'} ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-50'}`}
                             onClick={() => !isDisabled && openEditorKey(targetKey)}
                             title={isDisabled ? '단일 페이지 링크만 편집 가능합니다' : child.href}
                           >
