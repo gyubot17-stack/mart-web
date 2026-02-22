@@ -7,6 +7,12 @@ export const dynamic = 'force-dynamic'
 
 const defaultAddress = '경남 함안군 법수면 법정로 114'
 
+function renderBodyContent(body: string, className: string) {
+  const hasHtml = /<[^>]+>/.test(body)
+  if (hasHtml) return <div className={className} dangerouslySetInnerHTML={{ __html: body }} />
+  return <div className={`${className} whitespace-pre-wrap`}>{body}</div>
+}
+
 export default async function MapPage() {
   const [{ data: menuConfig }, { data: menuVisibilityConfig }, { data: submenuConfig }, { data: headerIconConfig }, { data: mapPageContent }, { data: mapConfigRow }, { data: footerConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
@@ -109,7 +115,7 @@ export default async function MapPage() {
 
       <section className="max-w-7xl mx-auto px-4 md:px-6 pb-12 space-y-4 ui-fade-in">
         <p className="text-sm text-gray-700">{address}</p>
-        {body ? <div className="text-sm text-gray-700 whitespace-pre-wrap">{body}</div> : null}
+        {body ? renderBodyContent(body, "text-sm text-gray-700") : null}
         <a href={naverSearchUrl} target="_blank" rel="noreferrer" className="inline-flex px-3 py-2 rounded border text-sm">네이버지도에서 열기</a>
       </section>
 

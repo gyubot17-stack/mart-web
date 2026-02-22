@@ -7,6 +7,12 @@ import { buildSiteSections, parseMenuLabels, parseMenuVisibility } from '@/lib/s
 
 export const dynamic = 'force-dynamic'
 
+function renderBodyContent(body: string, className: string) {
+  const hasHtml = /<[^>]+>/.test(body)
+  if (hasHtml) return <div className={className} dangerouslySetInnerHTML={{ __html: body }} />
+  return <div className={`${className} whitespace-pre-wrap`}>{body}</div>
+}
+
 export default async function Home() {
   const [{ data }, { data: homeExtra }, { data: menuConfig }, { data: menuVisibilityConfig }, { data: submenuConfig }, { data: headerIconConfig }, { data: footerConfig }, { data: styleConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('*').eq('key', 'home').single(),
@@ -102,7 +108,7 @@ export default async function Home() {
       <HeroBlock title={title} subtitle={subtitle} image={image} images={homeSlides} heroHeight={style.heroHeight} />
 
       <section className="max-w-7xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
-        <div className="p-1 md:p-2 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
+        {renderBodyContent(body, "p-1 md:p-2 text-slate-700 leading-7")}
       </section>
 
       <section className="max-w-7xl mx-auto px-4 md:px-6 pb-16 grid md:grid-cols-2 gap-4 md:gap-6 ui-fade-in">
