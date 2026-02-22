@@ -125,6 +125,7 @@ export default function AdminPage() {
   }, [allowedContentKeys])
 
   const isHome = useMemo(() => selectedKey === 'home', [selectedKey])
+  const isCustomPage = useMemo(() => !sections.some((sec) => sec.key === selectedKey), [selectedKey])
 
   async function loadContent(key: string) {
     const res = await fetch(`/api/content?key=${encodeURIComponent(key)}`, { cache: 'no-store' })
@@ -179,9 +180,15 @@ export default function AdminPage() {
         const keys = Array.isArray(meJson?.allowedContentKeys) ? meJson.allowedContentKeys : ['*']
         setAllowedContentKeys(keys)
 
-        const firstKey = keys.includes('*')
-          ? 'home'
-          : (sections.find((s) => keys.includes(s.key))?.key ?? 'home')
+        const urlKey = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('key') : null
+        const requestedKey = (urlKey || '').trim().replace(/^\/+/, '').replace(/\/+$/, '')
+        const canUseRequested = !!requestedKey && !requestedKey.includes('/')
+
+        const firstKey = canUseRequested
+          ? requestedKey
+          : (keys.includes('*')
+              ? 'home'
+              : (sections.find((s) => keys.includes(s.key))?.key ?? 'home'))
 
         setSelectedKey(firstKey)
         await loadContent(firstKey)
@@ -189,7 +196,11 @@ export default function AdminPage() {
         return
       }
 
-      await loadContent('home')
+      const urlKey = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('key') : null
+      const requestedKey = (urlKey || '').trim().replace(/^\/+/, '').replace(/\/+$/, '')
+      const firstKey = requestedKey && !requestedKey.includes('/') ? requestedKey : 'home'
+      setSelectedKey(firstKey)
+      await loadContent(firstKey)
       setLoading(false)
     })()
   }, [])
@@ -395,6 +406,9 @@ export default function AdminPage() {
                 {section.label}
               </option>
             ))}
+            {isCustomPage ? (
+              <option value={selectedKey}>{selectedKey} (하위메뉴 페이지)</option>
+            ) : null}
           </select>
         </div>
 

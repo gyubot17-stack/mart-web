@@ -241,7 +241,7 @@ export default function AdminMenuPage() {
                   {rows.length === 0 ? <p className="text-xs text-gray-500">하위 메뉴 없음</p> : null}
 
                   {rows.map((row, idx) => (
-                    <div key={`${section.key}-${idx}`} className="grid md:grid-cols-[1fr_1.5fr_auto_auto] gap-2 items-center">
+                    <div key={`${section.key}-${idx}`} className="grid md:grid-cols-[1fr_1.5fr_auto_auto_auto] gap-2 items-center">
                       <input
                         className="w-full border rounded px-3 py-2 text-sm"
                         placeholder="메뉴명"
