@@ -65,7 +65,7 @@ export default function SiteHeader({
                   </div>
                 ) : null}
 
-                {idx < arr.length - 1 ? <span className="ui-nav-sep ui-nav-sep-abs">|</span> : null}
+                {idx > 0 && idx < arr.length - 1 ? <span className="ui-nav-sep ui-nav-sep-abs">|</span> : null}
               </div>
             )
           })}
