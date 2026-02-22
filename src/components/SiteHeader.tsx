@@ -38,7 +38,7 @@ export default function SiteHeader({
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-        <div className="hidden md:flex items-stretch w-full">
+        <div className="hidden sm:flex items-stretch w-full">
           {([{ label: '홈', href: '/', slug: '' }, ...items.map((it) => ({ label: it.label, href: `/${it.slug}`, slug: it.slug }))] as const).map((entry, idx, arr) => {
             const isActive = entry.slug ? currentSlug === entry.slug : !currentSlug
             const children = entry.slug ? getChildren({ label: entry.label, slug: entry.slug }) : []
@@ -71,13 +71,13 @@ export default function SiteHeader({
           })}
         </div>
 
-        <button className="md:hidden ui-chip" onClick={() => setMobileOpen((v) => !v)}>
+        <button className="sm:hidden ui-chip" onClick={() => setMobileOpen((v) => !v)}>
           메뉴
         </button>
       </div>
 
       {mobileOpen ? (
-        <div className="md:hidden border-t border-slate-200 bg-white/95 px-4 py-3 space-y-2">
+        <div className="sm:hidden border-t border-slate-200 bg-white/95 px-4 py-3 space-y-2">
           <Link href="/" className={`block ui-chip w-full text-center ${!currentSlug ? 'ui-chip-active' : ''}`}>홈</Link>
           {items.map((item) => {
             const children = getChildren(item)
