@@ -37,6 +37,9 @@ type StyleConfig = {
 type MapConfig = {
   address: string
   embedUrl: string
+  naverUrl?: string
+  kakaoUrl?: string
+  googleUrl?: string
 }
 
 type Inquiry = {
@@ -91,6 +94,9 @@ const defaultStyle: StyleConfig = {
 const defaultMapConfig: MapConfig = {
   address: '경남 함안군 법수면 법정로 114',
   embedUrl: '',
+  naverUrl: '',
+  kakaoUrl: '',
+  googleUrl: '',
 }
 
 function createEmptyProduct(): Product {
@@ -311,6 +317,9 @@ export default function AdminPage() {
       setMapConfig({
         address: typeof parsed?.address === 'string' ? parsed.address : defaultMapConfig.address,
         embedUrl: typeof parsed?.embedUrl === 'string' ? parsed.embedUrl : '',
+        naverUrl: typeof parsed?.naverUrl === 'string' ? parsed.naverUrl : '',
+        kakaoUrl: typeof parsed?.kakaoUrl === 'string' ? parsed.kakaoUrl : '',
+        googleUrl: typeof parsed?.googleUrl === 'string' ? parsed.googleUrl : '',
       })
     } catch {
       setMapConfig(defaultMapConfig)
@@ -761,6 +770,9 @@ export default function AdminPage() {
                 value={mapConfig.embedUrl}
                 onChange={(e) => setMapConfig((prev) => ({ ...prev, embedUrl: e.target.value }))}
               />
+              <input className="w-full border rounded px-3 py-2 bg-white text-slate-800" placeholder="네이버지도 링크(선택, 버튼용)" value={mapConfig.naverUrl || ''} onChange={(e)=>setMapConfig((prev)=>({ ...prev, naverUrl: e.target.value }))} />
+              <input className="w-full border rounded px-3 py-2 bg-white text-slate-800" placeholder="카카오맵 링크(선택, 버튼용)" value={mapConfig.kakaoUrl || ''} onChange={(e)=>setMapConfig((prev)=>({ ...prev, kakaoUrl: e.target.value }))} />
+              <input className="w-full border rounded px-3 py-2 bg-white text-slate-800" placeholder="구글맵 링크(선택, 버튼용)" value={mapConfig.googleUrl || ''} onChange={(e)=>setMapConfig((prev)=>({ ...prev, googleUrl: e.target.value }))} />
               <div className="flex items-center gap-2">
                 <button className="px-3 py-2 rounded border bg-white text-sm" disabled={mapSaving} onClick={saveMapConfig}>
                   {mapSaving ? '지도 설정 저장 중...' : '지도 설정 저장'}

@@ -48,11 +48,17 @@ export default async function MapPage() {
 
   let address = defaultAddress
   let embedUrl = ''
+  let naverUrl = ''
+  let kakaoUrl = ''
+  let googleUrl = ''
   if (mapConfigRow?.body) {
     try {
       const parsed = JSON.parse(mapConfigRow.body)
       address = typeof parsed?.address === 'string' ? parsed.address : defaultAddress
       embedUrl = typeof parsed?.embedUrl === 'string' ? parsed.embedUrl : ''
+      naverUrl = typeof parsed?.naverUrl === 'string' ? parsed.naverUrl : ''
+      kakaoUrl = typeof parsed?.kakaoUrl === 'string' ? parsed.kakaoUrl : ''
+      googleUrl = typeof parsed?.googleUrl === 'string' ? parsed.googleUrl : ''
     } catch {}
   }
 
@@ -77,9 +83,9 @@ export default async function MapPage() {
   const subtitle = mapPageContent?.subtitle || ''
   const body = mapPageContent?.body || ''
 
-  const naverSearchUrl = `https://map.naver.com/v5/search/${encodeURIComponent(address)}`
-  const kakaoSearchUrl = `https://map.kakao.com/link/search/${encodeURIComponent(address)}`
-  const googleSearchUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+  const naverSearchUrl = naverUrl || `https://map.naver.com/v5/search/${encodeURIComponent(address)}`
+  const kakaoSearchUrl = kakaoUrl || `https://map.kakao.com/link/search/${encodeURIComponent(address)}`
+  const googleSearchUrl = googleUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
 
   return (
     <main className="min-h-screen bg-white text-gray-900">
@@ -127,10 +133,7 @@ export default async function MapPage() {
             title="네이버지도에서 열기"
             aria-label="네이버지도에서 열기"
           >
-            <svg viewBox="0 0 24 24" className="w-6 h-6" aria-hidden="true">
-              <path d="M12 2.5c-4.1 0-7.4 3.2-7.4 7.2 0 4.9 6.1 11.1 7 11.9a.6.6 0 0 0 .8 0c.9-.8 7-7 7-11.9 0-4-3.3-7.2-7.4-7.2z" fill="#03C75A"/>
-              <path d="M9 8h2l2 3V8h2v7h-2l-2-3v3H9V8z" fill="#fff"/>
-            </svg>
+            <img src="https://map.naver.com/favicon.ico" alt="네이버지도" className="w-5 h-5" />
           </a>
 
           <a
@@ -152,13 +155,7 @@ export default async function MapPage() {
             title="구글맵에서 열기"
             aria-label="구글맵에서 열기"
           >
-            <svg viewBox="0 0 24 24" className="w-6 h-6" aria-hidden="true">
-              <path d="M12 2.2c-4 0-7.2 3.1-7.2 7 0 4.7 5.8 10.6 6.6 11.4a.8.8 0 0 0 1.1 0c.8-.8 6.6-6.7 6.6-11.4 0-3.9-3.2-7-7.1-7z" fill="#EA4335"/>
-              <path d="M12 6.1a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4z" fill="#fff"/>
-              <path d="M12 2.2a7.1 7.1 0 0 0-7.1 7c0 2.2 1.2 4.7 2.8 6.8l5.1-9.9c-.3 0-.5.1-.8.1z" fill="#FBBC04" opacity=".95"/>
-              <path d="M19.1 9.2a7.1 7.1 0 0 0-6.3-7l-2.4 4.7a3.2 3.2 0 0 1 4.2 4.4l3.2 6.2c.8-1.1 1.3-2.3 1.3-3.5z" fill="#4285F4" opacity=".9"/>
-              <path d="M8 16c1.5 2 3.1 3.7 3.5 4.2a.8.8 0 0 0 1.1 0c.3-.3 1.3-1.3 2.4-2.6L12 11.8 8 16z" fill="#34A853" opacity=".95"/>
-            </svg>
+            <img src="https://maps.gstatic.com/favicon3.ico" alt="구글맵" className="w-5 h-5" />
           </a>
         </div>
       </section>
