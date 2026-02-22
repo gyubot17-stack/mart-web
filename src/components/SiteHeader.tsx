@@ -38,9 +38,10 @@ export default function SiteHeader({
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-        <div className="hidden md:flex items-center gap-2">
-          <Link href="/" className={`ui-chip ${!currentSlug ? 'ui-chip-active' : ''}`}>홈</Link>
-          {items.map((item) => {
+        <div className="hidden md:flex items-stretch gap-0">
+          <Link href="/" className={`ui-nav-item ${!currentSlug ? 'ui-nav-item-active' : ''}`}>홈</Link>
+          <span className="px-2 self-center ui-nav-sep">|</span>
+          {items.map((item, idx) => {
             const isActive = currentSlug === item.slug
             const children = getChildren(item)
             return (
@@ -50,7 +51,7 @@ export default function SiteHeader({
                 onMouseEnter={() => children.length > 0 && setOpenedSlug(item.slug)}
                 onMouseLeave={() => setOpenedSlug(null)}
               >
-                <Link href={`/${item.slug}`} className={`ui-chip ${isActive ? 'ui-chip-active' : ''}`}>
+                <Link href={`/${item.slug}`} className={`ui-nav-item ${isActive ? 'ui-nav-item-active' : ''}`}>
                   {item.label}
                 </Link>
 
@@ -65,6 +66,7 @@ export default function SiteHeader({
                     </div>
                   </div>
                 ) : null}
+                {idx < items.length - 1 ? <span className="absolute -right-2 top-1/2 -translate-y-1/2 ui-nav-sep">|</span> : null}
               </div>
             )
           })}
