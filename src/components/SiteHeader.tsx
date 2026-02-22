@@ -22,11 +22,13 @@ export default function SiteHeader({
   currentSlug,
   submenus,
   homeIconUrl,
+  homeIconSize,
 }: {
   items: Item[]
   currentSlug?: string
   submenus?: SubmenuMap
   homeIconUrl?: string
+  homeIconSize?: number
 }) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openedSlug, setOpenedSlug] = useState<string | null>(null)
@@ -52,7 +54,7 @@ export default function SiteHeader({
                 onMouseLeave={() => setOpenedSlug(null)}
               >
                 <Link href={entry.href} className={`ui-nav-item ui-nav-item-wide ${isActive ? 'ui-nav-item-active' : ''}`}>
-                  {entry.slug === '' && homeIconUrl ? <img src={homeIconUrl} alt="home" className="h-7 w-auto object-contain" /> : entry.label}
+                  {entry.slug === '' && homeIconUrl ? <img src={homeIconUrl} alt="home" className="w-auto object-contain" style={{ height: `${Math.max(16, Math.min(80, Number(homeIconSize) || 28))}px` }} /> : entry.label}
                 </Link>
 
                 {children.length > 0 && openedSlug === entry.slug ? (
@@ -80,7 +82,7 @@ export default function SiteHeader({
 
       {mobileOpen ? (
         <div className="mobile-menu-panel border-t border-slate-200 bg-white/95 px-4 py-3 space-y-2">
-          <Link href="/" className={`block ui-chip w-full text-center ${!currentSlug ? 'ui-chip-active' : ''}`}>{homeIconUrl ? <img src={homeIconUrl} alt="home" className="mx-auto h-6 w-auto object-contain" /> : '홈'}</Link>
+          <Link href="/" className={`block ui-chip w-full text-center ${!currentSlug ? 'ui-chip-active' : ''}`}>{homeIconUrl ? <img src={homeIconUrl} alt="home" className="mx-auto w-auto object-contain" style={{ height: `${Math.max(14, Math.min(64, Math.round((Number(homeIconSize) || 28) * 0.86)))}px` }} /> : '홈'}</Link>
           {items.map((item) => {
             const children = getChildren(item)
             const expanded = openedSlug === item.slug

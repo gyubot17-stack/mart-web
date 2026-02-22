@@ -28,6 +28,7 @@ export default function AdminCommonPage() {
   const [loading, setLoading] = useState(true)
   const [footer, setFooter] = useState<FooterConfig>(defaultFooter)
   const [homeIconUrl, setHomeIconUrl] = useState('')
+  const [homeIconSize, setHomeIconSize] = useState(28)
   const [inquiries, setInquiries] = useState<Inquiry[]>([])
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'done'>('all')
@@ -107,8 +108,10 @@ export default function AdminCommonPage() {
         try {
           const parsed = JSON.parse(headerIconJson?.data?.body || '{}')
           setHomeIconUrl(String(parsed?.url || ''))
+          setHomeIconSize(Number(parsed?.size) || 28)
         } catch {
           setHomeIconUrl(String(headerIconJson?.data?.body || ''))
+          setHomeIconSize(28)
         }
       }
 
@@ -138,7 +141,7 @@ export default function AdminCommonPage() {
         key: 'header_icon',
         title: 'header icon',
         subtitle: '',
-        body: JSON.stringify({ url: finalUrl }),
+        body: JSON.stringify({ url: finalUrl, size: homeIconSize }),
         hero_image_url: '',
       }),
     })
@@ -328,8 +331,19 @@ export default function AdminCommonPage() {
           value={homeIconUrl}
           onChange={(e) => setHomeIconUrl(e.target.value)}
         />
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-700">아이콘 크기(px)</label>
+          <input
+            type="number"
+            min={16}
+            max={80}
+            className="w-24 border rounded px-3 py-2 text-sm"
+            value={homeIconSize}
+            onChange={(e) => setHomeIconSize(Math.max(16, Math.min(80, Number(e.target.value) || 28)))}
+          />
+        </div>
         <p className="text-xs text-gray-500">권장: 배경 투명 PNG / 높이 28~40px</p>
-        {homeIconUrl ? <img src={homeIconUrl} alt="home icon" className="h-10 w-auto object-contain" /> : <p className="text-sm text-gray-500">아이콘 미설정</p>}
+        {homeIconUrl ? <img src={homeIconUrl} alt="home icon" className="w-auto object-contain" style={{ height: `${homeIconSize}px` }} /> : <p className="text-sm text-gray-500">아이콘 미설정</p>}
         {iconUploading ? <p className="text-xs text-blue-600">업로드 중...</p> : null}
       </section>
 

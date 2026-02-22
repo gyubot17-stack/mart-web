@@ -47,12 +47,15 @@ export default async function Home() {
 
 
   let homeIconUrl = ''
+  let homeIconSize = 28
   if (headerIconConfig?.body) {
     try {
       const parsed = JSON.parse(headerIconConfig.body)
       homeIconUrl = String(parsed?.url || '')
+      homeIconSize = Number(parsed?.size) || 28
     } catch {
       homeIconUrl = String(headerIconConfig.body || '')
+      homeIconSize = 28
     }
   }
 
@@ -94,7 +97,7 @@ export default async function Home() {
     <main id="top" className="min-h-screen bg-white text-gray-900">
       <a href="#top" className="fixed right-4 md:right-6 bottom-4 md:bottom-6 z-50 rounded-full bg-black text-white px-4 py-3 text-sm font-semibold shadow-lg hover:bg-gray-800">맨위로 ↑</a>
 
-      <SiteHeader items={siteSections} submenus={submenus} homeIconUrl={homeIconUrl} />
+      <SiteHeader items={siteSections} submenus={submenus} homeIconUrl={homeIconUrl} homeIconSize={homeIconSize} />
 
       <HeroBlock title={title} subtitle={subtitle} image={image} images={homeSlides} heroHeight={style.heroHeight} />
 

@@ -131,12 +131,15 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
 
 
   let homeIconUrl = ''
+  let homeIconSize = 28
   if (headerIconConfig?.body) {
     try {
       const parsed = JSON.parse(headerIconConfig.body)
       homeIconUrl = String(parsed?.url || '')
+      homeIconSize = Number(parsed?.size) || 28
     } catch {
       homeIconUrl = String(headerIconConfig.body || '')
+      homeIconSize = 28
     }
   }
 
@@ -180,7 +183,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
         맨위로 ↑
       </a>
 
-      <SiteHeader items={siteSections} currentSlug={slug} submenus={submenus} homeIconUrl={homeIconUrl} />
+      <SiteHeader items={siteSections} currentSlug={slug} submenus={submenus} homeIconUrl={homeIconUrl} homeIconSize={homeIconSize} />
 
       <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 
