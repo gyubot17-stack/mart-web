@@ -203,7 +203,7 @@ export default function AdminMenuPage() {
               return (
                 <>
                   <div
-                    className="grid gap-x-2 border-b border-slate-200 pb-1"
+                    className="grid gap-x-2 pb-1"
                     style={{ gridTemplateColumns: `repeat(${Math.max(visibleSections.length, 1)}, minmax(0, 1fr))` }}
                   >
                     {visibleSections.map((sec, idx) => (
