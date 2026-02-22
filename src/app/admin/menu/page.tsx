@@ -377,6 +377,12 @@ export default function AdminMenuPage() {
         </section>
 
         {message ? <p className="text-sm text-gray-700">{message}</p> : null}
+
+      {message ? (
+        <div className="fixed right-6 bottom-6 z-50 max-w-md rounded-lg border border-slate-300 bg-white px-4 py-3 shadow-xl">
+          <p className="text-sm font-medium text-slate-800">{message}</p>
+        </div>
+      ) : null}
       </div>
     </main>
   )
