@@ -78,6 +78,7 @@ export default async function MapPage() {
   const body = mapPageContent?.body || ''
 
   const naverSearchUrl = `https://map.naver.com/v5/search/${encodeURIComponent(address)}`
+  const kakaoSearchUrl = `https://map.kakao.com/link/search/${encodeURIComponent(address)}`
 
   return (
     <main className="min-h-screen bg-white text-gray-900">
@@ -116,19 +117,35 @@ export default async function MapPage() {
       <section className="max-w-7xl mx-auto px-4 md:px-6 pb-12 space-y-4 ui-fade-in">
         <p className="text-sm text-gray-700">{address}</p>
         {body ? renderBodyContent(body, "text-sm text-gray-700") : null}
-        <a
-          href={naverSearchUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#03C75A] bg-white text-white shadow-sm hover:brightness-95"
-          title="네이버지도에서 열기"
-          aria-label="네이버지도에서 열기"
-        >
-          <svg viewBox="0 0 24 24" className="w-6 h-6" aria-hidden="true">
-            <path d="M12 2.5c-4.1 0-7.4 3.2-7.4 7.2 0 4.9 6.1 11.1 7 11.9a.6.6 0 0 0 .8 0c.9-.8 7-7 7-11.9 0-4-3.3-7.2-7.4-7.2z" fill="#03C75A"/>
-            <path d="M9 8h2l2 3V8h2v7h-2l-2-3v3H9V8z" fill="#fff"/>
-          </svg>
-        </a>
+        <div className="flex items-center gap-2">
+          <a
+            href={naverSearchUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#03C75A] bg-white text-white shadow-sm hover:brightness-95"
+            title="네이버지도에서 열기"
+            aria-label="네이버지도에서 열기"
+          >
+            <svg viewBox="0 0 24 24" className="w-6 h-6" aria-hidden="true">
+              <path d="M12 2.5c-4.1 0-7.4 3.2-7.4 7.2 0 4.9 6.1 11.1 7 11.9a.6.6 0 0 0 .8 0c.9-.8 7-7 7-11.9 0-4-3.3-7.2-7.4-7.2z" fill="#03C75A"/>
+              <path d="M9 8h2l2 3V8h2v7h-2l-2-3v3H9V8z" fill="#fff"/>
+            </svg>
+          </a>
+
+          <a
+            href={kakaoSearchUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#FEE500] bg-[#FEE500] text-[#191919] shadow-sm hover:brightness-95"
+            title="카카오맵에서 열기"
+            aria-label="카카오맵에서 열기"
+          >
+            <svg viewBox="0 0 24 24" className="w-6 h-6" aria-hidden="true">
+              <path d="M12 3.2c-4.6 0-8.3 2.9-8.3 6.6 0 2.3 1.5 4.3 3.9 5.5l-.8 3.1a.4.4 0 0 0 .6.4l3.7-2.5c.3 0 .6.1.9.1 4.6 0 8.3-2.9 8.3-6.6s-3.7-6.6-8.3-6.6z" fill="#191919"/>
+              <path d="M9.4 8.2h1.3l1.2 2 1.2-2h1.3v5.4h-1.2v-3.3l-1.1 1.9h-.5l-1.1-1.9v3.3H9.4V8.2z" fill="#FEE500"/>
+            </svg>
+          </a>
+        </div>
       </section>
 
       <SiteFooter footer={footer} />
