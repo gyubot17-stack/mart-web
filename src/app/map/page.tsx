@@ -8,11 +8,12 @@ export const dynamic = 'force-dynamic'
 const defaultAddress = '경남 함안군 법수면 법정로 114'
 
 export default async function MapPage() {
-  const [{ data: menuConfig }, { data: menuVisibilityConfig }, { data: submenuConfig }, { data: headerIconConfig }, { data: mapConfigRow }, { data: footerConfig }] = await Promise.all([
+  const [{ data: menuConfig }, { data: menuVisibilityConfig }, { data: submenuConfig }, { data: headerIconConfig }, { data: mapPageContent }, { data: mapConfigRow }, { data: footerConfig }] = await Promise.all([
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'menu_visibility').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'submenu_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'header_icon').maybeSingle(),
+    supabaseAdmin.from('site_content').select('title,subtitle,body').eq('key', 'map').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'map_config').maybeSingle(),
     supabaseAdmin.from('site_content').select('body').eq('key', 'footer_config').maybeSingle(),
   ])
@@ -66,6 +67,10 @@ export default async function MapPage() {
     } catch {}
   }
 
+  const title = mapPageContent?.title || '찾아오시는 길'
+  const subtitle = mapPageContent?.subtitle || ''
+  const body = mapPageContent?.body || ''
+
   const naverSearchUrl = `https://map.naver.com/v5/search/${encodeURIComponent(address)}`
 
   return (
@@ -73,8 +78,10 @@ export default async function MapPage() {
       <SiteHeader items={siteSections} currentSlug="map" submenus={submenus} homeIconUrl={homeIconUrl} homeIconSize={homeIconSize} />
 
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-8 space-y-4">
-        <h1 className="text-2xl font-bold">찾아오시는 길</h1>
+        <h1 className="text-2xl font-bold">{title}</h1>
+        {subtitle ? <p className="text-base text-gray-700">{subtitle}</p> : null}
         <p className="text-sm text-gray-700">{address}</p>
+        {body ? <div className="text-sm text-gray-700 whitespace-pre-wrap">{body}</div> : null}
         <a href={naverSearchUrl} target="_blank" rel="noreferrer" className="inline-flex px-3 py-2 rounded border text-sm">네이버지도에서 열기</a>
 
         {embedUrl ? (
@@ -92,7 +99,7 @@ export default async function MapPage() {
           </div>
         ) : (
           <div className="w-full rounded-xl border p-6 text-sm text-gray-600">
-            지도 임베드 URL이 아직 설정되지 않았습니다. 관리자 &gt; 공통 관리에서 설정해주세요.
+            지도 임베드 URL이 아직 설정되지 않았습니다. 관리자 &gt; 콘텐츠 관리에서 map 페이지를 선택해 지도형 설정을 저장해주세요.
           </div>
         )}
       </section>
