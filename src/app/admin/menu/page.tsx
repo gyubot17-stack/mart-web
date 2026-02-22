@@ -214,11 +214,10 @@ export default function AdminMenuPage() {
                 return (
                   <div key={`preview-sub-${sec.key}`} className="space-y-1">
                     <p className="text-xs text-slate-500">{menuLabels[sec.key] ?? sec.label}</p>
-                    <div className="flex flex-wrap items-center gap-1">
+                    <div className="flex flex-col items-start gap-1">
                       {rows.map((row, idx) => (
                         <div key={`preview-row-${sec.key}-${idx}`} className="flex items-center">
                           <span className="px-1 py-0.5 text-sm text-slate-700">{row.label}</span>
-                          {idx < rows.length - 1 ? <span className="px-1 text-slate-300">|</span> : null}
                         </div>
                       ))}
                     </div>
