@@ -2,19 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-const sections = [
-  { key: 'company', label: '회사소개' },
-  { key: 'compressor', label: '콤프레샤' },
-  { key: 'air-cleaning', label: '에어크리닝시스템' },
-  { key: 'generator', label: '발전기' },
-  { key: 'eco-energy', label: '친환경에너지' },
-  { key: 'industrial', label: '산업기계' },
-  { key: 'records', label: '거래실적' },
-  { key: 'special-sale', label: '특가판매' },
-  { key: 'as', label: '제품AS' },
-  { key: 'support', label: '고객센터' },
-]
-
 type FooterConfig = {
   companyName: string
   companyInfo: string
@@ -39,7 +26,6 @@ const defaultFooter: FooterConfig = {
 
 export default function AdminCommonPage() {
   const [loading, setLoading] = useState(true)
-  const [menuLabels, setMenuLabels] = useState<Record<string, string>>({})
   const [footer, setFooter] = useState<FooterConfig>(defaultFooter)
   const [inquiries, setInquiries] = useState<Inquiry[]>([])
   const [query, setQuery] = useState('')
@@ -92,21 +78,12 @@ export default function AdminCommonPage() {
 
   useEffect(() => {
     ;(async () => {
-      const [menuRes, footerRes, privacyRes, inquiriesRes, analyticsRes] = await Promise.all([
-        fetch('/api/content?key=menu_config', { cache: 'no-store' }),
+      const [footerRes, privacyRes, inquiriesRes, analyticsRes] = await Promise.all([
         fetch('/api/content?key=footer_config', { cache: 'no-store' }),
         fetch('/api/content?key=privacy_policy', { cache: 'no-store' }),
         fetch('/api/admin/inquiries', { cache: 'no-store' }),
         fetch('/api/admin/analytics', { cache: 'no-store' }),
       ])
-
-      const menuJson = await menuRes.json()
-      try {
-        const parsed = JSON.parse(menuJson?.data?.body || '{}')
-        setMenuLabels(parsed && typeof parsed === 'object' ? parsed : {})
-      } catch {
-        setMenuLabels({})
-      }
 
       const footerJson = await footerRes.json()
       try {
@@ -134,29 +111,6 @@ export default function AdminCommonPage() {
       setLoading(false)
     })()
   }, [])
-
-  async function saveMenuLabels() {
-    setMenuSaving(true)
-    const res = await fetch('/api/content', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        key: 'menu_config',
-        title: 'menu config',
-        subtitle: '',
-        body: JSON.stringify(menuLabels),
-        hero_image_url: '',
-      }),
-    })
-
-    if (res.ok) {
-      setMessage('메뉴명 저장 완료 ✅')
-    } else {
-      const json = await res.json()
-      setMessage(`메뉴명 저장 실패: ${json?.error ?? 'unknown'}`)
-    }
-    setMenuSaving(false)
-  }
 
   async function saveFooter() {
     setFooterSaving(true)
@@ -275,6 +229,7 @@ export default function AdminCommonPage() {
         <h1 className="text-2xl font-bold">Admin - 공통 관리</h1>
         <div className="flex items-center gap-2">
           <a href="/admin" className="admin-btn px-3 py-2 text-sm rounded border">콘텐츠 관리</a>
+          <a href="/admin/menu" className="admin-btn px-3 py-2 text-sm rounded border">메뉴관리</a>
           <a href="/admin/common" className="admin-btn px-3 py-2 text-sm rounded border">공통 관리</a>
           <a href="/admin/system" className="admin-btn px-3 py-2 text-sm rounded border">시스템/계정 관리</a>
           <button
@@ -290,25 +245,6 @@ export default function AdminCommonPage() {
       </div>
 
       <div className="px-8 pt-6 space-y-6">
-      <section className="border rounded-xl p-5 space-y-4">
-        <h2 className="text-lg font-semibold">상단 메뉴명 편집</h2>
-        <div className="grid md:grid-cols-2 gap-3">
-          {sections.map((section) => (
-            <label key={section.key} className="space-y-1 block">
-              <span className="text-sm text-gray-600">{section.key}</span>
-              <input
-                className="w-full border rounded px-3 py-2"
-                value={menuLabels[section.key] ?? section.label}
-                onChange={(e) => setMenuLabels((prev) => ({ ...prev, [section.key]: e.target.value }))}
-              />
-            </label>
-          ))}
-        </div>
-        <button className="px-4 py-2 rounded border" disabled={menuSaving} onClick={saveMenuLabels}>
-          {menuSaving ? '메뉴 저장 중...' : '메뉴명 저장'}
-        </button>
-      </section>
-
       <section className="border rounded-xl p-5 space-y-4">
         <h2 className="text-lg font-semibold">푸터 정보 편집</h2>
         <input
