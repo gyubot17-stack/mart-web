@@ -110,7 +110,14 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
     if (parsed && typeof parsed === 'object') submenus = parsed
   } catch {}
 
-  const exists = siteSections.some((s) => s.slug === slug)
+  const submenuSlugs = Object.values(submenus)
+    .flat()
+    .map((item: any) => String(item?.href || '').trim())
+    .filter((href) => href.startsWith('/') && !href.includes('#'))
+    .map((href) => href.slice(1))
+    .filter((path) => path.length > 0 && !path.includes('/'))
+
+  const exists = siteSections.some((s) => s.slug === slug) || submenuSlugs.includes(slug)
   if (!exists) notFound()
 
   const title = data?.title || getSectionLabel(slug, menuLabels)
