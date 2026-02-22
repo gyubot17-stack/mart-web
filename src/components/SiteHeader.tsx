@@ -38,25 +38,23 @@ export default function SiteHeader({
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-        <div className="hidden md:flex items-stretch gap-0">
-          <Link href="/" className={`ui-nav-item ${!currentSlug ? 'ui-nav-item-active' : ''}`}>홈</Link>
-          <span className="px-2 self-center ui-nav-sep">|</span>
-          {items.map((item, idx) => {
-            const isActive = currentSlug === item.slug
-            const children = getChildren(item)
+        <div className="hidden md:flex items-stretch w-full">
+          {([{ label: '홈', href: '/', slug: '' }, ...items.map((it) => ({ label: it.label, href: `/${it.slug}`, slug: it.slug }))] as const).map((entry, idx, arr) => {
+            const isActive = entry.slug ? currentSlug === entry.slug : !currentSlug
+            const children = entry.slug ? getChildren({ label: entry.label, slug: entry.slug }) : []
             return (
               <div
-                key={item.slug}
-                className="relative group"
-                onMouseEnter={() => children.length > 0 && setOpenedSlug(item.slug)}
+                key={`${entry.href}-${idx}`}
+                className="relative flex-1 min-w-0"
+                onMouseEnter={() => children.length > 0 && setOpenedSlug(entry.slug)}
                 onMouseLeave={() => setOpenedSlug(null)}
               >
-                <Link href={`/${item.slug}`} className={`ui-nav-item ${isActive ? 'ui-nav-item-active' : ''}`}>
-                  {item.label}
+                <Link href={entry.href} className={`ui-nav-item ui-nav-item-wide ${isActive ? 'ui-nav-item-active' : ''}`}>
+                  {entry.label}
                 </Link>
 
-                {children.length > 0 && openedSlug === item.slug ? (
-                  <div className="absolute left-0 top-full pt-2 min-w-48">
+                {children.length > 0 && openedSlug === entry.slug ? (
+                  <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 min-w-52 z-20">
                     <div className="ui-card p-2 space-y-1">
                       {children.map((child) => (
                         <Link key={child.href} href={child.href} className="block rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
@@ -66,7 +64,8 @@ export default function SiteHeader({
                     </div>
                   </div>
                 ) : null}
-                {idx < items.length - 1 ? <span className="absolute -right-2 top-1/2 -translate-y-1/2 ui-nav-sep">|</span> : null}
+
+                {idx < arr.length - 1 ? <span className="ui-nav-sep ui-nav-sep-abs">|</span> : null}
               </div>
             )
           })}
