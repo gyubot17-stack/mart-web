@@ -107,6 +107,7 @@ function parseExtra(raw?: string | null): SectionExtra {
 export default function AdminPage() {
   const [content, setContent] = useState<Content>(initial)
   const [selectedKey, setSelectedKey] = useState('home')
+  const [customSlug, setCustomSlug] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -125,6 +126,7 @@ export default function AdminPage() {
   }, [allowedContentKeys])
 
   const isHome = useMemo(() => selectedKey === 'home', [selectedKey])
+  const isCustomPage = useMemo(() => !sections.some((s) => s.key === selectedKey), [selectedKey])
 
   async function loadContent(key: string) {
     const res = await fetch(`/api/content?key=${encodeURIComponent(key)}`, { cache: 'no-store' })
@@ -395,7 +397,41 @@ export default function AdminPage() {
                 {section.label}
               </option>
             ))}
+            {isCustomPage ? (
+              <option value={selectedKey}>{selectedKey} (사용자 정의)</option>
+            ) : null}
           </select>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">사용자 정의 페이지(slug) 불러오기</label>
+          <div className="flex items-center gap-2">
+            <input
+              className="w-full border rounded px-3 py-2"
+              placeholder="예: notice (슬래시 없이)"
+              value={customSlug}
+              onChange={(e) => setCustomSlug(e.target.value)}
+            />
+            <button
+              type="button"
+              className="px-3 py-2 rounded border text-sm whitespace-nowrap"
+              onClick={async () => {
+                const slug = customSlug.trim().replace(/^\/+/, '').replace(/\/+$/, '')
+                if (!slug || slug.includes('/')) {
+                  setMessage('슬래시는 제외한 단일 slug만 입력해주세요. 예: notice')
+                  return
+                }
+                setSelectedKey(slug)
+                setLoading(true)
+                await loadContent(slug)
+                setMessage(`사용자 정의 페이지 (${slug}) 불러옴`)
+                setLoading(false)
+              }}
+            >
+              불러오기/생성
+            </button>
+          </div>
+          <p className="text-xs text-gray-500">하위메뉴 링크로 추가한 slug를 입력하면 같은 화면에서 바로 편집할 수 있습니다.</p>
         </div>
 
         <div className="space-y-2">
