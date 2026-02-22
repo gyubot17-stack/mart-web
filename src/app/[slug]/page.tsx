@@ -88,12 +88,6 @@ function parseExtra(raw?: string | null): SectionExtra {
   }
 }
 
-function renderBodyContent(body: string, className: string) {
-  const hasHtml = /<[^>]+>/.test(body)
-  if (hasHtml) return <div className={className} dangerouslySetInnerHTML={{ __html: body }} />
-  return <div className={`${className} whitespace-pre-wrap`}>{body}</div>
-}
-
 export default async function SectionPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
@@ -194,7 +188,7 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
       <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 
       <section className="max-w-7xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
-        <div className="p-1 md:p-2 text-slate-700 leading-7 whitespace-pre-wrap">{renderBodyContent(body, "p-1 md:p-2 text-slate-700 leading-7")}</div>
+        <div className="p-1 md:p-2 text-slate-700 leading-7 whitespace-pre-wrap">{body}</div>
       </section>
 
       {visibleGallery.length > 0 ? (

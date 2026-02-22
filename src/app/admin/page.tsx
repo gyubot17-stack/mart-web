@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 type Content = {
   key: string
@@ -150,7 +150,6 @@ export default function AdminPage() {
   const [inquiryStatusFilter, setInquiryStatusFilter] = useState<'all' | 'new' | 'done'>('all')
   const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null)
   const [inquiryNote, setInquiryNote] = useState('')
-  const bodyEditorRef = useRef<HTMLDivElement | null>(null)
   const [autoBackup, setAutoBackup] = useState(true)
   const [menuLabels, setMenuLabels] = useState<Record<string, string>>({})
   const [menuVisibility, setMenuVisibility] = useState<Record<string, boolean>>({})
@@ -363,27 +362,6 @@ export default function AdminPage() {
   useEffect(() => {
     if (currentPageType === 'inquiry') refreshInquiries()
   }, [currentPageType])
-
-
-  useEffect(() => {
-    const el = bodyEditorRef.current
-    if (!el) return
-    const value = String(content.body || '')
-    const looksHtml = /<[^>]+>/.test(value)
-    if (looksHtml) {
-      if (el.innerHTML !== value) el.innerHTML = value
-    } else {
-      if (el.innerText !== value) el.innerText = value
-    }
-  }, [content.body, selectedKey])
-
-  function applyBodyFormat(command: string, value?: string) {
-    const el = bodyEditorRef.current
-    if (!el) return
-    el.focus()
-    document.execCommand(command, false, value)
-    setContent((prev) => ({ ...prev, body: el.innerHTML }))
-  }
 
   async function runAutoBackupIfNeeded() {
     if (!autoBackup || role !== 'super') return true
@@ -786,35 +764,7 @@ export default function AdminPage() {
 
         <div className="space-y-2">
           <label className="text-sm font-medium">본문</label>
-          <div className="border rounded p-2 space-y-2 bg-white">
-            <div className="flex flex-wrap items-center gap-1">
-              <button type="button" className="px-2 py-1 text-xs rounded border" onClick={() => applyBodyFormat('bold')}><b>B</b></button>
-              <button type="button" className="px-2 py-1 text-xs rounded border" onClick={() => applyBodyFormat('italic')}><i>I</i></button>
-              <button type="button" className="px-2 py-1 text-xs rounded border" onClick={() => applyBodyFormat('underline')}><u>U</u></button>
-              <label className="px-2 py-1 text-xs rounded border inline-flex items-center gap-2">
-                글자색
-                <input type="color" className="w-6 h-6 p-0 border-0 bg-transparent" onChange={(e) => applyBodyFormat('foreColor', e.target.value)} />
-              </label>
-              <select
-                className="px-2 py-1 text-xs rounded border"
-                defaultValue="3"
-                onChange={(e) => applyBodyFormat('fontSize', e.target.value)}
-              >
-                <option value="2">작게</option>
-                <option value="3">기본</option>
-                <option value="4">약간 크게</option>
-                <option value="5">크게</option>
-                <option value="6">아주 크게</option>
-              </select>
-            </div>
-            <div
-              ref={bodyEditorRef}
-              contentEditable
-              suppressContentEditableWarning
-              className="min-h-52 w-full rounded border px-3 py-2 text-sm leading-7 focus:outline-none"
-              onInput={(e) => setContent((prev) => ({ ...prev, body: (e.currentTarget as HTMLDivElement).innerHTML }))}
-            />
-          </div>
+          <textarea className="w-full border rounded px-3 py-2 min-h-40" value={content.body} onChange={(e) => setContent({ ...content, body: e.target.value })} />
         </div>
 
         {showHeroImageEditor ? (
