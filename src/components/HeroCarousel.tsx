@@ -18,7 +18,7 @@ export default function HeroCarousel({
     if (images.length <= 1) return
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % images.length)
-    }, 3500)
+    }, 5000)
     return () => clearInterval(timer)
   }, [images.length])
 
