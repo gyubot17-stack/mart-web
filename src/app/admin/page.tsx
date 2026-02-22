@@ -466,15 +466,15 @@ export default function AdminPage() {
         <div className="space-y-3">
           <label className="text-sm font-medium">편집할 페이지 (사이트 메뉴 구조)</label>
           <div className="border rounded-lg p-3 bg-white">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-2 gap-y-3">
+            <div className="grid grid-cols-6 gap-x-1 gap-y-2">
               {visibleSections.map((section) => {
                 const label = menuLabels[section.key]?.trim() || section.label
                 const children = (submenus[section.key] || []).filter((row) => row.visible !== false)
                 return (
-                  <div key={section.key} className="px-1">
+                  <div key={section.key} className="px-0.5">
                     <button
                       type="button"
-                      className={`h-12 w-full text-sm border-b ${selectedKey === section.key ? 'font-bold text-slate-900 border-slate-900' : 'font-medium text-slate-700 border-transparent'} hover:bg-slate-50`}
+                      className={`h-11 w-full text-[13px] border-b ${selectedKey === section.key ? 'font-bold text-slate-900 border-slate-900' : 'font-medium text-slate-700 border-transparent'} hover:bg-slate-50`}
                       onClick={() => openEditorKey(section.key)}
                     >
                       {label}
@@ -489,7 +489,7 @@ export default function AdminPage() {
                             key={`${section.key}-${idx}-${child.href}`}
                             type="button"
                             disabled={isDisabled}
-                            className={`w-full px-2 py-2 text-sm border-0 rounded-none text-left ${selectedKey === targetKey ? 'font-bold text-slate-900 bg-slate-50' : 'font-medium text-slate-700 bg-white'} ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-50'}`}
+                            className={`w-full px-1 py-1 text-[12px] border-0 rounded-none text-left ${selectedKey === targetKey ? 'font-bold text-slate-900 bg-slate-50' : 'font-medium text-slate-700 bg-white'} ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-50'}`}
                             onClick={() => !isDisabled && openEditorKey(targetKey)}
                             title={isDisabled ? '단일 페이지 링크만 편집 가능합니다' : child.href}
                           >
