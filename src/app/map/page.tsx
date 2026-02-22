@@ -116,7 +116,16 @@ export default async function MapPage() {
       <section className="max-w-7xl mx-auto px-4 md:px-6 pb-12 space-y-4 ui-fade-in">
         <p className="text-sm text-gray-700">{address}</p>
         {body ? renderBodyContent(body, "text-sm text-gray-700") : null}
-        <a href={naverSearchUrl} target="_blank" rel="noreferrer" className="inline-flex px-3 py-2 rounded border text-sm">네이버지도에서 열기</a>
+        <a
+          href={naverSearchUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center justify-center w-11 h-11 rounded-full border border-[#03C75A] bg-[#03C75A] text-white shadow-sm hover:brightness-95"
+          title="네이버지도에서 열기"
+          aria-label="네이버지도에서 열기"
+        >
+          <span className="text-lg font-black leading-none">N</span>
+        </a>
       </section>
 
       <SiteFooter footer={footer} />
