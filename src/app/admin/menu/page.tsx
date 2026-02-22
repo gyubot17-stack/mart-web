@@ -198,33 +198,45 @@ export default function AdminMenuPage() {
           <p className="text-sm text-gray-600">실제 사이트 상단 구조와 동일하게 보입니다. 항목 확인 후 아래 상위/하위 편집 영역에서 바로 수정하세요.</p>
 
           <div className="border rounded-lg p-3 bg-white space-y-2">
-            <div className="flex flex-wrap items-center gap-0 border-b border-slate-200 pb-1">
-              {sections.filter((sec) => menuVisibility[sec.key] !== false).map((sec, idx, arr) => (
-                <div key={`preview-top-${sec.key}`} className="flex items-center">
-                  <span className="h-10 px-3 inline-flex items-center text-sm font-semibold text-slate-800">{menuLabels[sec.key] ?? sec.label}</span>
-                  {idx < arr.length - 1 ? <span className="px-1 text-slate-300">|</span> : null}
-                </div>
-              ))}
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-3">
-              {sections.filter((sec) => menuVisibility[sec.key] !== false).map((sec) => {
-                const rows = (submenus[sec.key] || []).filter((row) => row.visible !== false)
-                if (rows.length === 0) return null
-                return (
-                  <div key={`preview-sub-${sec.key}`} className="space-y-1">
-                    <p className="text-xs text-slate-500">{menuLabels[sec.key] ?? sec.label}</p>
-                    <div className="flex flex-col items-start gap-1">
-                      {rows.map((row, idx) => (
-                        <div key={`preview-row-${sec.key}-${idx}`} className="flex items-center">
-                          <span className="px-1 py-0.5 text-sm text-slate-700">{row.label}</span>
-                        </div>
-                      ))}
-                    </div>
+            {(() => {
+              const visibleSections = sections.filter((sec) => menuVisibility[sec.key] !== false)
+              return (
+                <>
+                  <div
+                    className="grid gap-x-2 border-b border-slate-200 pb-1"
+                    style={{ gridTemplateColumns: `repeat(${Math.max(visibleSections.length, 1)}, minmax(0, 1fr))` }}
+                  >
+                    {visibleSections.map((sec) => (
+                      <div key={`preview-top-${sec.key}`} className="min-w-0">
+                        <span className="h-10 w-full inline-flex items-center justify-center text-sm font-semibold text-slate-800">{menuLabels[sec.key] ?? sec.label}</span>
+                      </div>
+                    ))}
                   </div>
-                )
-              })}
-            </div>
+
+                  <div
+                    className="grid gap-x-2 gap-y-2 pt-2"
+                    style={{ gridTemplateColumns: `repeat(${Math.max(visibleSections.length, 1)}, minmax(0, 1fr))` }}
+                  >
+                    {visibleSections.map((sec) => {
+                      const rows = (submenus[sec.key] || []).filter((row) => row.visible !== false)
+                      return (
+                        <div key={`preview-sub-${sec.key}`} className="space-y-1 min-w-0">
+                          <div className="flex flex-col items-start gap-1">
+                            {rows.length === 0 ? (
+                              <span className="px-1 py-0.5 text-xs text-slate-400">하위메뉴 없음</span>
+                            ) : rows.map((row, idx) => (
+                              <div key={`preview-row-${sec.key}-${idx}`} className="flex items-center">
+                                <span className="px-1 py-0.5 text-sm text-slate-700">{row.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>
+              )
+            })()}
 
             <div className="flex items-center gap-2 pt-2">
               <a href="#parent-editor" className="px-3 py-1.5 text-xs rounded border">상위메뉴 편집으로 이동</a>
