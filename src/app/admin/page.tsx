@@ -148,6 +148,11 @@ export default function AdminPage() {
     return 'general'
   }, [pageTypes, selectedKey])
 
+
+  const showHeroImageEditor = useMemo(() => !isHome && currentPageType !== 'map', [isHome, currentPageType])
+  const showStyleEditor = useMemo(() => ['general', 'gallery', 'custom'].includes(currentPageType), [currentPageType])
+  const showExtraEditor = useMemo(() => ['general', 'gallery', 'custom'].includes(currentPageType), [currentPageType])
+
   function normalizeKeyFromHref(href: string) {
     const clean = String(href || '').trim()
     if (!clean.startsWith('/')) return ''
@@ -576,6 +581,18 @@ export default function AdminPage() {
             </button>
           </div>
           <p className="text-xs text-gray-500">페이지별 목적을 타입으로 저장해두면 이후 커스텀 편집 UI를 더 쉽게 자동 분기할 수 있습니다.</p>
+
+          {currentPageType === 'map' ? (
+            <div className="rounded border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
+              지도형 페이지입니다. 지도/주소는 <a href="/admin/common" className="underline font-medium">공통 관리 &gt; 찾아오시는길(/map) 설정</a>에서 관리하세요.
+            </div>
+          ) : null}
+
+          {currentPageType === 'inquiry' ? (
+            <div className="rounded border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+              문의형 페이지입니다. 본문/CTA 문구 위주로 관리하는 것을 권장합니다.
+            </div>
+          ) : null}
         </div>
 
         <div className="space-y-2">
@@ -593,7 +610,7 @@ export default function AdminPage() {
           <textarea className="w-full border rounded px-3 py-2 min-h-40" value={content.body} onChange={(e) => setContent({ ...content, body: e.target.value })} />
         </div>
 
-        {!isHome ? (
+        {showHeroImageEditor ? (
         <div className="space-y-2">
           <div className="flex items-center gap-4">
             <label className="text-sm font-medium">대표 이미지</label>
@@ -624,6 +641,7 @@ export default function AdminPage() {
         </button>
       </section>
 
+{showStyleEditor ? (
       <section className="border rounded-xl p-5 space-y-4">
         <h2 className="text-lg font-semibold">이미지 크기 조절</h2>
         <div className="grid md:grid-cols-3 gap-3">
@@ -647,7 +665,9 @@ export default function AdminPage() {
           {styleSaving ? '크기 저장 중...' : '이미지 크기 저장'}
         </button>
       </section>
+      ) : null}
 
+      {showExtraEditor ? (
       <section className="border rounded-xl p-5 space-y-6">
           <h2 className="text-lg font-semibold">{isHome ? '메인 슬라이드 이미지 편집 (home)' : `갤러리 / 제품 카드 편집 (${selectedKey})`}</h2>
           {isHome ? <p className="text-sm text-gray-600">갤러리 이미지를 2장 이상 넣으면 홈 메인 이미지가 자동으로 슬라이드됩니다.</p> : null}
@@ -751,7 +771,7 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {!isHome ? (
+          {showHeroImageEditor ? (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="font-medium">제품 카드 ({extra.products.length}개)</h3>
@@ -895,6 +915,7 @@ export default function AdminPage() {
             {extraSaving ? (isHome ? '메인 슬라이드 저장 중...' : '갤러리/제품카드 저장 중...') : (isHome ? '메인 슬라이드 저장' : '갤러리/제품카드 저장')}
           </button>
         </section>
+      ) : null}
 
       {message ? <p className="text-sm text-gray-700">{message}</p> : null}
 
