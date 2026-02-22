@@ -22,7 +22,7 @@ export default function HeroBlock({
     <section className="w-full pt-12 md:pt-14 pb-8 md:pb-10 ui-fade-in">
       <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-8">
       <div className="space-y-3">
-        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">{title}</h1>
+        <h1 className="text-3xl md:text-5xl font-semibold tracking-tight text-slate-900 leading-tight">{title}</h1>
         {subtitle ? <p className="text-lg text-slate-600 max-w-3xl">{subtitle}</p> : null}
       </div>
 
