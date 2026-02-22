@@ -171,9 +171,9 @@ export default function AdminCommonPage() {
     setIconUploading(false)
   }
 
-  async function clearHeaderIcon() {
+  function clearHeaderIcon() {
     setHomeIconUrl('')
-    await saveHeaderIcon('')
+    setMessage('아이콘 삭제 상태로 변경됨 (저장 버튼을 눌러 반영)')
   }
 
   async function saveFooter() {
