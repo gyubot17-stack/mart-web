@@ -28,6 +28,15 @@ const defaultSubmenus: Record<string, SubmenuItem[]> = {
   ],
 }
 
+function getLinkType(href: string) {
+  const clean = String(href || '').trim()
+  if (!clean.startsWith('/')) return { ok: false, label: '링크 형식 오류' }
+  if (clean.includes('#')) return { ok: false, label: '앵커 링크' }
+  const path = clean.replace(/^\/+/, '').replace(/\/+$/, '')
+  if (!path || path.includes('/')) return { ok: false, label: '다단 경로' }
+  return { ok: true, label: '페이지 편집 가능' }
+}
+
 export default function AdminMenuPage() {
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
@@ -184,7 +193,7 @@ export default function AdminMenuPage() {
 
       <div className="px-8 pt-6 space-y-6">
         <section className="border rounded-xl p-5 space-y-4">
-          <h2 className="text-lg font-semibold">상단 메뉴명 편집</h2>
+          <h2 className="text-lg font-semibold">상위메뉴 편집</h2>
           <div className="grid md:grid-cols-2 gap-3">
             {sections.map((section) => {
               const visible = menuVisibility[section.key] !== false
@@ -208,14 +217,14 @@ export default function AdminMenuPage() {
               </div>
             )})}
           </div>
-          <button className="px-4 py-2 rounded border" disabled={menuSaving} onClick={saveMenuLabels}>
+          <div className="flex justify-end"><button className="px-4 py-2 rounded border" disabled={menuSaving} onClick={saveMenuLabels}>
             {menuSaving ? '메뉴 저장 중...' : '메뉴명 저장'}
-          </button>
+          </button></div>
         </section>
 
         <section className="border rounded-xl p-5 space-y-4">
-          <h2 className="text-lg font-semibold">상단 하위 메뉴 편집</h2>
-          <p className="text-sm text-gray-600">각 상단 메뉴별로 하위 메뉴를 추가/수정/삭제할 수 있습니다.</p>
+          <h2 className="text-lg font-semibold">하위메뉴 편집</h2>
+          <p className="text-sm text-gray-600">각 상단 메뉴별로 하위 메뉴를 추가/수정/삭제할 수 있습니다. 링크 형식에 따라 편집 가능 여부를 배지로 안내합니다.</p>
 
           <div className="space-y-4">
             {editableSections.map((section) => {
@@ -309,9 +318,9 @@ export default function AdminMenuPage() {
             })}
           </div>
 
-          <button className="px-4 py-2 rounded border" disabled={submenuSaving} onClick={saveSubmenus}>
+          <div className="flex justify-end"><button className="px-4 py-2 rounded border" disabled={submenuSaving} onClick={saveSubmenus}>
             {submenuSaving ? '하위 메뉴 저장 중...' : '하위 메뉴 저장'}
-          </button>
+          </button></div>
         </section>
 
         {message ? <p className="text-sm text-gray-700">{message}</p> : null}
