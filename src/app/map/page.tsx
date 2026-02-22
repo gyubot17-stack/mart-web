@@ -86,17 +86,19 @@ export default async function MapPage() {
         </div>
 
         {embedUrl ? (
-          <div className="relative w-full overflow-hidden border-y border-slate-200/80" style={{ height: '420px' }}>
-            <iframe
-              src={embedUrl}
-              width="100%"
-              height="420"
-              style={{ border: 0 }}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              allowFullScreen
-              title="네이버지도"
-            />
+          <div className="max-w-7xl mx-auto px-4 md:px-6">
+            <div className="relative w-full overflow-hidden rounded-xl border border-slate-200/80" style={{ height: '420px' }}>
+              <iframe
+                src={embedUrl}
+                width="100%"
+                height="420"
+                style={{ border: 0 }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+                title="네이버지도"
+              />
+            </div>
           </div>
         ) : (
           <div className="max-w-7xl mx-auto px-4 md:px-6">
