@@ -140,10 +140,7 @@ export default async function MapPage() {
             title="카카오맵에서 열기"
             aria-label="카카오맵에서 열기"
           >
-            <svg viewBox="0 0 24 24" className="w-6 h-6" aria-hidden="true">
-              <path d="M12 3.2c-4.6 0-8.3 2.9-8.3 6.6 0 2.3 1.5 4.3 3.9 5.5l-.8 3.1a.4.4 0 0 0 .6.4l3.7-2.5c.3 0 .6.1.9.1 4.6 0 8.3-2.9 8.3-6.6s-3.7-6.6-8.3-6.6z" fill="#191919"/>
-              <path d="M9.4 8.2h1.3l1.2 2 1.2-2h1.3v5.4h-1.2v-3.3l-1.1 1.9h-.5l-1.1-1.9v3.3H9.4V8.2z" fill="#FEE500"/>
-            </svg>
+            <img src="https://map.kakao.com/favicon.ico" alt="카카오맵" className="w-5 h-5" />
           </a>
         </div>
       </section>
