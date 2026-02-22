@@ -133,6 +133,8 @@ export default function AdminPage() {
     return sections.filter((s) => allowedContentKeys.includes(s.key))
   }, [allowedContentKeys])
 
+  const visibleSections = useMemo(() => editableSections.filter((s) => menuVisibility[s.key] !== false), [editableSections, menuVisibility])
+
   const isHome = useMemo(() => selectedKey === 'home', [selectedKey])
   const isCustomPage = useMemo(() => !sections.some((sec) => sec.key === selectedKey), [selectedKey])
 
@@ -465,7 +467,7 @@ export default function AdminPage() {
           <label className="text-sm font-medium">편집할 페이지 (사이트 메뉴 구조)</label>
           <div className="border rounded-lg p-3 space-y-3 bg-white">
             <div className="flex flex-wrap items-center gap-0 border-b border-slate-200">
-              {editableSections.map((section, idx) => {
+              {visibleSections.map((section, idx) => {
                 const visible = menuVisibility[section.key] !== false
                 const label = menuLabels[section.key]?.trim() || section.label
                 return (
@@ -478,35 +480,37 @@ export default function AdminPage() {
                     >
                       {label}
                     </button>
-                    {idx < editableSections.length - 1 ? <span className="px-2 text-slate-400">|</span> : null}
+                    {idx < visibleSections.length - 1 ? <span className="px-2 text-slate-400">|</span> : null}
                   </div>
                 )
               })}
             </div>
 
             <div className="space-y-2">
-              {editableSections.map((section) => {
+              {visibleSections.map((section) => {
                 const children = (submenus[section.key] || []).filter((row) => row.visible !== false)
                 if (children.length === 0) return null
                 const label = menuLabels[section.key]?.trim() || section.label
                 return (
                   <div key={`submenu-${section.key}`} className="space-y-1">
                     <p className="text-xs text-slate-500 font-medium">{label} 하위메뉴</p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap items-center gap-1">
                       {children.map((child, idx) => {
                         const targetKey = normalizeKeyFromHref(child.href)
                         const isDisabled = !targetKey
                         return (
-                          <button
-                            key={`${section.key}-${idx}-${child.href}`}
-                            type="button"
-                            disabled={isDisabled}
-                            className={`h-11 px-4 rounded-md border text-sm ${selectedKey === targetKey ? 'font-bold text-slate-900 border-slate-900 bg-white' : 'font-medium text-slate-700 border-slate-200 bg-white'} ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-50'}`}
-                            onClick={() => !isDisabled && openEditorKey(targetKey)}
-                            title={isDisabled ? '단일 페이지 링크만 편집 가능합니다' : child.href}
-                          >
-                            {child.label}
-                          </button>
+                          <div key={`${section.key}-${idx}-${child.href}`} className="flex items-center">
+                            <button
+                              type="button"
+                              disabled={isDisabled}
+                              className={`px-1 py-1 text-sm border-0 bg-transparent rounded-none ${selectedKey === targetKey ? 'font-bold text-slate-900 underline underline-offset-2' : 'font-medium text-slate-700'} ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:text-slate-900'}`}
+                              onClick={() => !isDisabled && openEditorKey(targetKey)}
+                              title={isDisabled ? '단일 페이지 링크만 편집 가능합니다' : child.href}
+                            >
+                              {child.label}
+                            </button>
+                            {idx < children.length - 1 ? <span className="px-1 text-slate-300">|</span> : null}
+                          </div>
                         )
                       })}
                     </div>
