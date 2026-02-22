@@ -34,6 +34,12 @@ type StyleConfig = {
   productHeight: number
 }
 
+type EditorSubmenuItem = {
+  label: string
+  href: string
+  visible: boolean
+}
+
 const sections = [
   { key: 'home', label: '홈' },
   { key: 'company', label: '회사소개' },
@@ -118,6 +124,9 @@ export default function AdminPage() {
   const [style, setStyle] = useState<StyleConfig>(defaultStyle)
   const [styleSaving, setStyleSaving] = useState(false)
   const [autoBackup, setAutoBackup] = useState(true)
+  const [menuLabels, setMenuLabels] = useState<Record<string, string>>({})
+  const [menuVisibility, setMenuVisibility] = useState<Record<string, boolean>>({})
+  const [submenus, setSubmenus] = useState<Record<string, EditorSubmenuItem[]>>({})
 
   const editableSections = useMemo(() => {
     if (allowedContentKeys.includes('*')) return sections
@@ -126,6 +135,71 @@ export default function AdminPage() {
 
   const isHome = useMemo(() => selectedKey === 'home', [selectedKey])
   const isCustomPage = useMemo(() => !sections.some((sec) => sec.key === selectedKey), [selectedKey])
+
+
+  function normalizeKeyFromHref(href: string) {
+    const clean = String(href || '').trim()
+    if (!clean.startsWith('/')) return ''
+    const withoutHash = clean.split('#')[0]
+    const path = withoutHash.replace(/^\/+/, '').replace(/\/+$/, '')
+    if (!path || path.includes('/')) return ''
+    return path
+  }
+
+  async function openEditorKey(key: string) {
+    const target = key.trim().replace(/^\/+/, '').replace(/\/+$/, '')
+    if (!target || target.includes('/')) return
+    setSelectedKey(target)
+    setLoading(true)
+    await loadContent(target)
+    setMessage('')
+    setLoading(false)
+  }
+
+  async function loadEditorMenu() {
+    const [menuRes, visibilityRes, submenuRes] = await Promise.all([
+      fetch('/api/content?key=menu_config', { cache: 'no-store' }),
+      fetch('/api/content?key=menu_visibility', { cache: 'no-store' }),
+      fetch('/api/content?key=submenu_config', { cache: 'no-store' }),
+    ])
+
+    const menuJson = await menuRes.json()
+    try {
+      const parsed = JSON.parse(menuJson?.data?.body || '{}')
+      setMenuLabels(parsed && typeof parsed === 'object' ? parsed : {})
+    } catch {
+      setMenuLabels({})
+    }
+
+    const visibilityJson = await visibilityRes.json()
+    try {
+      const parsed = JSON.parse(visibilityJson?.data?.body || '{}')
+      setMenuVisibility(parsed && typeof parsed === 'object' ? parsed : {})
+    } catch {
+      setMenuVisibility({})
+    }
+
+    const submenuJson = await submenuRes.json()
+    try {
+      const parsed = JSON.parse(submenuJson?.data?.body || '{}')
+      const mapped = parsed && typeof parsed === 'object' ? parsed : {}
+      const normalized = Object.fromEntries(
+        Object.entries(mapped).map(([key, rows]) => [
+          key,
+          Array.isArray(rows)
+            ? rows.map((row: any) => ({
+                label: String(row?.label || ''),
+                href: String(row?.href || ''),
+                visible: row?.visible !== false,
+              }))
+            : [],
+        ]),
+      ) as Record<string, EditorSubmenuItem[]>
+      setSubmenus(normalized)
+    } catch {
+      setSubmenus({})
+    }
+  }
 
   async function loadContent(key: string) {
     const res = await fetch(`/api/content?key=${encodeURIComponent(key)}`, { cache: 'no-store' })
@@ -191,7 +265,7 @@ export default function AdminPage() {
               : (sections.find((s) => keys.includes(s.key))?.key ?? 'home'))
 
         setSelectedKey(firstKey)
-        await loadContent(firstKey)
+        await Promise.all([loadContent(firstKey), loadEditorMenu()])
         setLoading(false)
         return
       }
@@ -200,7 +274,7 @@ export default function AdminPage() {
       const requestedKey = (urlKey || '').trim().replace(/^\/+/, '').replace(/\/+$/, '')
       const firstKey = requestedKey && !requestedKey.includes('/') ? requestedKey : 'home'
       setSelectedKey(firstKey)
-      await loadContent(firstKey)
+      await Promise.all([loadContent(firstKey), loadEditorMenu()])
       setLoading(false)
     })()
   }, [])
@@ -387,29 +461,58 @@ export default function AdminPage() {
 
       <section className="border rounded-xl p-5 space-y-4">
         <h2 className="text-lg font-semibold">페이지 콘텐츠 편집</h2>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">편집할 페이지</label>
-          <select
-            className="w-full border rounded px-3 py-2"
-            value={selectedKey}
-            onChange={async (e) => {
-              const key = e.target.value
-              setSelectedKey(key)
-              setLoading(true)
-              await loadContent(key)
-              setMessage('')
-              setLoading(false)
-            }}
-          >
-            {editableSections.map((section) => (
-              <option key={section.key} value={section.key}>
-                {section.label}
-              </option>
-            ))}
-            {isCustomPage ? (
-              <option value={selectedKey}>{selectedKey} (하위메뉴 페이지)</option>
-            ) : null}
-          </select>
+        <div className="space-y-3">
+          <label className="text-sm font-medium">편집할 페이지 (사이트 메뉴 구조)</label>
+          <div className="border rounded-lg p-3 space-y-3 bg-white">
+            <div className="flex flex-wrap items-center gap-2">
+              {editableSections.map((section) => {
+                const visible = menuVisibility[section.key] !== false
+                const label = menuLabels[section.key]?.trim() || section.label
+                return (
+                  <button
+                    key={section.key}
+                    type="button"
+                    disabled={!visible}
+                    className={`px-3 py-2 rounded border text-sm ${selectedKey === section.key ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700'} ${!visible ? 'opacity-40 cursor-not-allowed' : ''}`}
+                    onClick={() => openEditorKey(section.key)}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
+
+            <div className="space-y-2">
+              {editableSections.map((section) => {
+                const children = (submenus[section.key] || []).filter((row) => row.visible !== false)
+                if (children.length === 0) return null
+                const label = menuLabels[section.key]?.trim() || section.label
+                return (
+                  <div key={`submenu-${section.key}`} className="space-y-1">
+                    <p className="text-xs text-slate-500">{label} 하위메뉴</p>
+                    <div className="flex flex-wrap gap-2">
+                      {children.map((child, idx) => {
+                        const targetKey = normalizeKeyFromHref(child.href)
+                        const isDisabled = !targetKey
+                        return (
+                          <button
+                            key={`${section.key}-${idx}-${child.href}`}
+                            type="button"
+                            disabled={isDisabled}
+                            className={`px-3 py-2 rounded border text-sm ${selectedKey === targetKey ? 'bg-slate-900 text-white border-slate-900' : 'bg-slate-50 text-slate-700'} ${isDisabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                            onClick={() => !isDisabled && openEditorKey(targetKey)}
+                            title={isDisabled ? '단일 페이지 링크만 편집 가능합니다' : child.href}
+                          >
+                            {child.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
         </div>
 
         <div className="space-y-2">
