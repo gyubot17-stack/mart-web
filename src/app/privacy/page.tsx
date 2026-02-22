@@ -47,7 +47,7 @@ export default async function PrivacyPage() {
       <SiteHeader items={siteSections} submenus={submenus} />
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-12">
         <div className="ui-card p-6 md:p-8 space-y-4">
-          <h1 className="text-3xl font-bold text-slate-900">{title}</h1>
+          <h1 className="ui-page-title">{title}</h1>
           <article className="whitespace-pre-wrap leading-7 text-slate-700">{body}</article>
         </div>
       </section>

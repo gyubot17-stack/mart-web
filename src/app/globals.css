@@ -185,3 +185,11 @@ body {
     display: block;
   }
 }
+
+.ui-page-title {
+  font-size: clamp(1.875rem, 3.6vw, 3rem);
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}

@@ -78,7 +78,7 @@ export default async function MapPage() {
       <SiteHeader items={siteSections} currentSlug="map" submenus={submenus} homeIconUrl={homeIconUrl} homeIconSize={homeIconSize} />
 
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-8 space-y-4">
-        <h1 className="text-2xl font-bold">{title}</h1>
+        <h1 className="ui-page-title">{title}</h1>
         {subtitle ? <p className="text-base text-gray-700">{subtitle}</p> : null}
         <p className="text-sm text-gray-700">{address}</p>
         {body ? <div className="text-sm text-gray-700 whitespace-pre-wrap">{body}</div> : null}
