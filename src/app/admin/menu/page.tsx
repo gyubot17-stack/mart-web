@@ -220,13 +220,15 @@ export default function AdminMenuPage() {
           <div className="space-y-4">
             {editableSections.map((section) => {
               const rows = submenus[section.key] ?? []
+              const parentVisible = menuVisibility[section.key] !== false
               return (
-                <div key={section.key} className="border rounded p-3 space-y-2">
+                <div key={section.key} className={`border rounded p-3 space-y-2 ${parentVisible ? '' : 'bg-slate-50 opacity-70'}`}>
                   <div className="flex items-center justify-between">
-                    <p className="font-medium text-sm">{section.label} ({section.key})</p>
+                    <p className="font-medium text-sm">{section.label} ({section.key}) {!parentVisible ? <span className="ml-2 text-xs text-slate-500">(상위 메뉴 숨김 상태)</span> : null}</p>
                     <button
                       type="button"
                       className="px-2 py-1 text-xs rounded border"
+                      disabled={!parentVisible}
                       onClick={() => setSubmenus((prev) => ({
                         ...prev,
                         [section.key]: [...(prev[section.key] ?? []), { label: '', href: '', visible: true }],
@@ -243,6 +245,7 @@ export default function AdminMenuPage() {
                       <input
                         className="w-full border rounded px-3 py-2 text-sm"
                         placeholder="메뉴명"
+                        disabled={!parentVisible}
                         value={row.label}
                         onChange={(e) => setSubmenus((prev) => {
                           const next = [...(prev[section.key] ?? [])]
@@ -253,6 +256,7 @@ export default function AdminMenuPage() {
                       <input
                         className="w-full border rounded px-3 py-2 text-sm"
                         placeholder="링크 (예: /support#inquiry)"
+                        disabled={!parentVisible}
                         value={row.href}
                         onChange={(e) => setSubmenus((prev) => {
                           const next = [...(prev[section.key] ?? [])]
@@ -263,6 +267,7 @@ export default function AdminMenuPage() {
 
                       <button
                         type="button"
+                        disabled={!parentVisible}
                         className={`px-2 py-1 text-xs rounded border ${row.visible ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-slate-100 text-slate-500 border-slate-300'}`}
                         onClick={() => setSubmenus((prev) => {
                           const next = [...(prev[section.key] ?? [])]
@@ -275,6 +280,7 @@ export default function AdminMenuPage() {
                       <button
                         type="button"
                         className="px-2 py-1 text-xs rounded border text-red-600"
+                        disabled={!parentVisible}
                         onClick={() => setSubmenus((prev) => ({
                           ...prev,
                           [section.key]: (prev[section.key] ?? []).filter((_, i) => i !== idx),
