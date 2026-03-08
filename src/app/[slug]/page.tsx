@@ -58,6 +58,25 @@ const defaultExtra: SectionExtra = {
   products: [],
 }
 
+const draftDefaults: Record<string, { subtitle: string; body: string }> = {
+  company: {
+    subtitle: '신뢰를 기반으로 산업 현장과 함께 성장해온 MRTK 소개',
+    body: '회사연혁과 주요 프로젝트를 통해 MRTK의 기술 축적 과정을 소개합니다.\n현장 중심 대응과 사후 지원 체계를 핵심 가치로 운영합니다.',
+  },
+  compressor: {
+    subtitle: '현장 목적에 맞춰 구성하는 프로덕트 라인업',
+    body: '프로덕트A/B/C를 중심으로 용량, 운전 환경, 유지보수 조건을 고려해 최적의 구성을 제안합니다.',
+  },
+  as: {
+    subtitle: '기술자료부터 A/S까지 운영 지원',
+    body: '기술자료, 카탈로그, 설치사례를 기반으로 빠른 대응을 제공합니다.\n장애 접수 후 진단-조치-이력관리까지 표준 프로세스로 진행합니다.',
+  },
+  support: {
+    subtitle: '빠른 문의 접수와 정확한 안내',
+    body: '공지사항과 견적문의를 통해 필요한 정보를 빠르게 전달합니다.\n문의 내용은 운영자가 확인 후 순차적으로 답변드립니다.',
+  },
+}
+
 function parseExtra(raw?: string | null): SectionExtra {
   if (!raw) return defaultExtra
   try {
@@ -128,12 +147,20 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
   if (!exists) notFound()
 
   const title = data?.title || getSectionLabel(slug, menuLabels)
-  const subtitle = data?.subtitle || ''
-  const body = data?.body || '이 섹션의 상세 내용은 관리자 페이지에서 입력할 수 있습니다.'
+  const subtitle = data?.subtitle || draftDefaults[slug]?.subtitle || ''
+  const body = data?.body || draftDefaults[slug]?.body || '이 섹션의 상세 내용은 관리자 페이지에서 입력할 수 있습니다.'
   const image = data?.hero_image_url || ''
   const extra = parseExtra(extraData?.body)
   const visibleGallery = extra.gallery.filter((g) => g.visible)
-  const visibleProducts = extra.products.filter((p) => p.visible)
+  const visibleProducts = (extra.products.filter((p) => p.visible).length > 0
+    ? extra.products.filter((p) => p.visible)
+    : slug === 'compressor'
+      ? [
+          { name: '프로덕트A', desc: '고효율 표준형 라인업', image: '', link: '', visible: true },
+          { name: '프로덕트B', desc: '저소음·안정 운전형 라인업', image: '', link: '', visible: true },
+          { name: '프로덕트C', desc: '고부하 현장 대응형 라인업', image: '', link: '', visible: true },
+        ]
+      : [])
 
 
   let homeIconUrl = ''

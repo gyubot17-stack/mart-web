@@ -34,9 +34,9 @@ export default async function Home() {
     if (parsed && typeof parsed === 'object') submenus = parsed
   } catch {}
 
-  const title = data?.title ?? 'mrtc.kr'
-  const subtitle = data?.subtitle ?? ''
-  const body = data?.body ?? ''
+  const title = data?.title ?? '산업용 압축기 솔루션 파트너'
+  const subtitle = data?.subtitle ?? '현장에 맞는 공기압축 시스템을 제안하고 설치·유지보수까지 책임집니다.'
+  const body = data?.body ?? 'MRTK는 산업 현장에 최적화된 압축기/건조기/부대설비를 공급합니다.\n상담부터 시공, 운영 지원까지 한 번에 제공합니다.'
   const image = data?.hero_image_url ?? ''
 
   let homeSlides: string[] = []
@@ -111,12 +111,30 @@ export default async function Home() {
         {renderBodyContent(body, "p-1 md:p-2 text-slate-700 leading-7")}
       </section>
 
+      <section className="max-w-7xl mx-auto px-4 md:px-6 pb-6 ui-fade-in">
+        <h2 className="text-2xl font-bold text-slate-900">주요 제품 라인업</h2>
+        <p className="mt-2 text-slate-600">프로덕트A/B/C 중심으로 현장 환경에 맞춘 구성을 제공합니다.</p>
+      </section>
+
+      <section className="max-w-7xl mx-auto px-4 md:px-6 pb-10 grid md:grid-cols-3 gap-4 md:gap-6 ui-fade-in">
+        {[
+          { name: '프로덕트A', desc: '고효율 표준형, 범용 산업 라인 대응' },
+          { name: '프로덕트B', desc: '저소음·안정 운전 중심의 중형 라인업' },
+          { name: '프로덕트C', desc: '고부하/연속 가동 환경용 프리미엄 구성' },
+        ].map((p) => (
+          <article key={p.name} className="ui-card p-5 md:p-6 space-y-3">
+            <div className="w-full min-h-36 rounded-lg border border-dashed flex items-center justify-center text-gray-400">제품 이미지</div>
+            <h3 className="text-xl font-semibold text-slate-900">{p.name}</h3>
+            <p className="text-gray-600 text-sm leading-6">{p.desc}</p>
+          </article>
+        ))}
+      </section>
+
       <section className="max-w-7xl mx-auto px-4 md:px-6 pb-16 grid md:grid-cols-2 gap-4 md:gap-6 ui-fade-in">
         {siteSections.map((item) => (
           <Link key={item.slug} href={`/${item.slug}`} className="ui-card ui-card-hover p-5 md:p-6 space-y-4">
             <h2 className="text-2xl font-bold text-slate-900">{item.label}</h2>
-            <div className="w-full min-h-44 rounded-lg border border-dashed flex items-center justify-center text-gray-400">이미지 영역 (추후 업로드)</div>
-            <p className="text-gray-600 text-sm leading-6">클릭하면 {item.label} 상세 페이지로 이동합니다.</p>
+            <p className="text-gray-600 text-sm leading-6">{item.label} 상세 페이지로 이동합니다.</p>
           </Link>
         ))}
       </section>
