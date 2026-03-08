@@ -10,20 +10,36 @@ type SubmenuItem = {
 
 const sections = [
   { key: 'company', label: '회사소개' },
-  { key: 'compressor', label: '콤프레샤' },
-  { key: 'air-cleaning', label: '에어크리닝시스템' },
-  { key: 'generator', label: '발전기' },
-  { key: 'eco-energy', label: '친환경에너지' },
-  { key: 'industrial', label: '산업기계' },
-  { key: 'records', label: '거래실적' },
-  { key: 'special-sale', label: '특가판매' },
-  { key: 'as', label: '제품AS' },
-  { key: 'support', label: '고객센터' },
+  { key: 'compressor', label: '제품소개' },
+  { key: 'records', label: '적용사례' },
+  { key: 'as', label: '기술지원' },
+  { key: 'support', label: '문의하기' },
 ]
 
 const defaultSubmenus: Record<string, SubmenuItem[]> = {
+  company: [
+    { label: 'CEO 인사말', href: '/company', visible: true },
+    { label: '품질인증서', href: '/certification', visible: true },
+    { label: '찾아오시는길', href: '/map', visible: true },
+  ],
+  compressor: [
+    { label: '급유식 스크류', href: '/oil-screw', visible: true },
+    { label: '공냉식 피스톤', href: '/air-piston', visible: true },
+    { label: '오일프리 스크류', href: '/oilfree-screw', visible: true },
+    { label: '에어 드라이어', href: '/air-dryer', visible: true },
+  ],
+  records: [
+    { label: '시공사례', href: '/records', visible: true },
+    { label: '도입사례', href: '/case-study', visible: true },
+  ],
+  as: [
+    { label: '기술자료', href: '/tech', visible: true },
+    { label: '카탈로그', href: '/catalog', visible: true },
+    { label: '제품 A/S', href: '/as', visible: true },
+  ],
   support: [
-    { label: '문의하기', href: '/support#inquiry', visible: true },
+    { label: '견적문의', href: '/support', visible: true },
+    { label: '찾아오시는길', href: '/map', visible: true },
     { label: '개인정보처리방침', href: '/privacy', visible: true },
   ],
 }
