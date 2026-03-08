@@ -107,34 +107,64 @@ export default async function Home() {
 
       <HeroBlock title={title} subtitle={subtitle} image={image} images={homeSlides} heroHeight={style.heroHeight} />
 
-      <section className="max-w-7xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
-        {renderBodyContent(body, "p-1 md:p-2 text-slate-700 leading-7")}
+      <section className="max-w-7xl mx-auto px-4 md:px-6 py-14 md:py-20 grid md:grid-cols-[260px_1fr] gap-8 border-t border-slate-200 ui-fade-in">
+        <div>
+          <p className="text-sm tracking-[0.18em] text-slate-500">COMPANY</p>
+          <h2 className="mt-2 text-3xl md:text-4xl font-bold text-slate-900">회사소개</h2>
+        </div>
+        <div className="space-y-4">
+          <p className="text-xl md:text-2xl font-semibold leading-relaxed text-slate-900">
+            한 번 설치로 끝나는 장비가 아니라,
+            <br />
+            오래 운영되는 시스템을 만듭니다.
+          </p>
+          {renderBodyContent(body, 'text-slate-700 leading-8')}
+        </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 md:px-6 pb-6 ui-fade-in">
-        <h2 className="text-2xl font-bold text-slate-900">주요 제품 라인업</h2>
-        <p className="mt-2 text-slate-600">프로덕트A/B/C 중심으로 현장 환경에 맞춘 구성을 제공합니다.</p>
+      <section className="max-w-7xl mx-auto px-4 md:px-6 py-14 md:py-20 border-t border-slate-200 ui-fade-in">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm tracking-[0.18em] text-slate-500">PRODUCT</p>
+            <h2 className="mt-2 text-3xl md:text-4xl font-bold text-slate-900">제품소개</h2>
+          </div>
+        </div>
+
+        <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
+          {[
+            { no: '01', name: '프로덕트A', desc: '고효율 표준형 라인업' },
+            { no: '02', name: '프로덕트B', desc: '저소음·안정 운전형 라인업' },
+            { no: '03', name: '프로덕트C', desc: '고부하 현장 대응형 라인업' },
+          ].map((p) => (
+            <article key={p.name} className="space-y-3 border-b border-slate-200 pb-6">
+              <p className="text-sm text-slate-400">{p.no}</p>
+              <h3 className="text-2xl font-semibold text-slate-900">{p.name}</h3>
+              <p className="text-sm text-slate-600">{p.desc}</p>
+              <Link href="/compressor" className="inline-flex items-center text-xs font-semibold tracking-[0.12em] text-slate-700 border-b border-slate-700">
+                MORE
+              </Link>
+            </article>
+          ))}
+        </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 md:px-6 pb-10 grid md:grid-cols-3 gap-4 md:gap-6 ui-fade-in">
-        {[
-          { name: '프로덕트A', desc: '고효율 표준형, 범용 산업 라인 대응' },
-          { name: '프로덕트B', desc: '저소음·안정 운전 중심의 중형 라인업' },
-          { name: '프로덕트C', desc: '고부하/연속 가동 환경용 프리미엄 구성' },
-        ].map((p) => (
-          <article key={p.name} className="ui-card p-5 md:p-6 space-y-3">
-            <div className="w-full min-h-36 rounded-lg border border-dashed flex items-center justify-center text-gray-400">제품 이미지</div>
-            <h3 className="text-xl font-semibold text-slate-900">{p.name}</h3>
-            <p className="text-gray-600 text-sm leading-6">{p.desc}</p>
-          </article>
-        ))}
+      <section className="bg-slate-900 text-white py-14 md:py-16 ui-fade-in">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div>
+            <p className="text-sm tracking-[0.18em] text-slate-300">TECH SUPPORT</p>
+            <h2 className="mt-2 text-2xl md:text-3xl font-bold">기술자료와 설치사례를 확인해보세요</h2>
+          </div>
+          <Link href="/as" className="inline-flex items-center justify-center px-5 py-3 border border-white text-sm font-semibold hover:bg-white hover:text-slate-900 transition-colors">
+            기술지원 바로가기
+          </Link>
+        </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 md:px-6 pb-16 grid md:grid-cols-2 gap-4 md:gap-6 ui-fade-in">
+      <section className="max-w-7xl mx-auto px-4 md:px-6 py-14 md:py-16 grid md:grid-cols-2 gap-4 md:gap-6 ui-fade-in">
         {siteSections.map((item) => (
-          <Link key={item.slug} href={`/${item.slug}`} className="ui-card ui-card-hover p-5 md:p-6 space-y-4">
+          <Link key={item.slug} href={`/${item.slug}`} className="ui-card ui-card-hover p-5 md:p-6 space-y-2">
             <h2 className="text-2xl font-bold text-slate-900">{item.label}</h2>
-            <p className="text-gray-600 text-sm leading-6">{item.label} 상세 페이지로 이동합니다.</p>
+            <p className="text-gray-600 text-sm leading-6">{item.label} 페이지로 이동</p>
           </Link>
         ))}
       </section>
