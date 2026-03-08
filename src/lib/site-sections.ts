@@ -5,15 +5,10 @@ export type SiteSection = {
 
 export const defaultSiteSections: SiteSection[] = [
   { label: '회사소개', slug: 'company' },
-  { label: '콤프레샤', slug: 'compressor' },
-  { label: '에어크리닝시스템', slug: 'air-cleaning' },
-  { label: '발전기', slug: 'generator' },
-  { label: '친환경에너지', slug: 'eco-energy' },
-  { label: '산업기계', slug: 'industrial' },
-  { label: '거래실적', slug: 'records' },
-  { label: '특가판매', slug: 'special-sale' },
-  { label: '제품AS', slug: 'as' },
-  { label: '고객센터', slug: 'support' },
+  { label: '제품소개', slug: 'compressor' },
+  { label: '적용사례', slug: 'records' },
+  { label: '기술지원', slug: 'as' },
+  { label: '문의하기', slug: 'support' },
 ]
 
 export function buildSiteSections(menuLabels?: Record<string, string>, menuVisibility?: Record<string, boolean>): SiteSection[] {
