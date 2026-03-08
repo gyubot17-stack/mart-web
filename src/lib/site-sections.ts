@@ -6,9 +6,8 @@ export type SiteSection = {
 export const defaultSiteSections: SiteSection[] = [
   { label: '회사소개', slug: 'company' },
   { label: '제품소개', slug: 'compressor' },
-  { label: '적용사례', slug: 'records' },
   { label: '기술지원', slug: 'as' },
-  { label: '문의하기', slug: 'support' },
+  { label: '고객센터', slug: 'support' },
 ]
 
 export function buildSiteSections(menuLabels?: Record<string, string>, menuVisibility?: Record<string, boolean>): SiteSection[] {

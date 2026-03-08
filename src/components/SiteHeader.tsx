@@ -10,36 +10,29 @@ type SubmenuMap = Record<string, Child[]>
 function fallbackChildren(item: Item): Child[] {
   if (item.slug === 'company') {
     return [
-      { label: 'CEO 인사말', href: '/company', visible: true },
-      { label: '품질인증서', href: '/certification', visible: true },
+      { label: '회사연혁', href: '/history', visible: true },
       { label: '찾아오시는길', href: '/map', visible: true },
     ]
   }
   if (item.slug === 'compressor') {
     return [
-      { label: '급유식 스크류', href: '/oil-screw', visible: true },
-      { label: '공냉식 피스톤', href: '/air-piston', visible: true },
-      { label: '오일프리 스크류', href: '/oilfree-screw', visible: true },
-      { label: '에어 드라이어', href: '/air-dryer', visible: true },
-    ]
-  }
-  if (item.slug === 'records') {
-    return [
-      { label: '시공사례', href: '/records', visible: true },
-      { label: '도입사례', href: '/case-study', visible: true },
+      { label: '프로덕트A', href: '/product-a', visible: true },
+      { label: '프로덕트B', href: '/product-b', visible: true },
+      { label: '프로덕트C', href: '/product-c', visible: true },
     ]
   }
   if (item.slug === 'as') {
     return [
       { label: '기술자료', href: '/tech', visible: true },
+      { label: '설치사례', href: '/records', visible: true },
       { label: '카탈로그', href: '/catalog', visible: true },
       { label: '제품 A/S', href: '/as', visible: true },
     ]
   }
   if (item.slug === 'support') {
     return [
+      { label: '공지사항', href: '/notice', visible: true },
       { label: '견적문의', href: '/support', visible: true },
-      { label: '찾아오시는길', href: '/map', visible: true },
       { label: '개인정보처리방침', href: '/privacy', visible: true },
     ]
   }
