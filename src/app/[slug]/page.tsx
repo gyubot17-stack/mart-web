@@ -220,20 +220,29 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
 
       <HeroBlock title={title} subtitle={subtitle} image={image} heroHeight={style.heroHeight} />
 
-      <section className="max-w-7xl mx-auto px-4 md:px-6 pb-8 ui-fade-in">
-        {renderBodyContent(body, "p-1 md:p-2 text-slate-700 leading-7")}
+      <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16 border-t border-slate-200 ui-fade-in">
+        <div className="grid md:grid-cols-[240px_1fr] gap-8">
+          <div>
+            <p className="text-sm tracking-[0.18em] text-slate-500">{slug.toUpperCase()}</p>
+            <h2 className="mt-2 text-3xl font-bold text-slate-900">{title}</h2>
+          </div>
+          <div>{renderBodyContent(body, "text-slate-700 leading-8")}</div>
+        </div>
       </section>
 
       {visibleGallery.length > 0 ? (
-        <section className="max-w-7xl mx-auto px-4 md:px-6 pb-8 space-y-4 ui-fade-in">
-          <h2 className="text-2xl font-bold">갤러리</h2>
+        <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16 border-t border-slate-200 space-y-5 ui-fade-in">
+          <div className="flex items-end justify-between gap-4">
+            <h2 className="text-3xl font-bold">설치사례</h2>
+            <p className="text-sm text-slate-500">현장 적용 사례를 확인하세요</p>
+          </div>
           <div className="grid md:grid-cols-3 gap-4">
             {visibleGallery.map((item, i) => (
-              <div key={i} className="ui-card min-h-40 overflow-hidden flex items-center justify-center text-slate-400">
+              <div key={i} className="min-h-40 overflow-hidden border border-slate-200 bg-white flex items-center justify-center text-slate-400">
                 {item.url ? (
                   <Image src={item.url} alt={`gallery-${i + 1}`} width={480} height={style.galleryHeight} className="w-full object-cover" style={{ height: `${style.galleryHeight}px` }} sizes="(max-width: 768px) 100vw, 33vw" />
                 ) : (
-                  `갤러리 이미지 ${i + 1}`
+                  `사례 이미지 ${i + 1}`
                 )}
               </div>
             ))}
@@ -242,21 +251,15 @@ export default async function SectionPage({ params }: { params: Promise<{ slug: 
       ) : null}
 
       {visibleProducts.length > 0 ? (
-        <section className="max-w-7xl mx-auto px-4 md:px-6 pb-16 space-y-4 ui-fade-in">
-          <h2 className="text-2xl font-bold">제품 카드</h2>
-          <div className="grid md:grid-cols-3 gap-4">
+        <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-16 border-t border-slate-200 space-y-6 ui-fade-in">
+          <h2 className="text-3xl font-bold">제품소개</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
             {visibleProducts.map((product, i) => (
-              <article key={i} className="ui-card ui-card-hover p-4 space-y-3">
-                <div className="ui-card min-h-32 overflow-hidden flex items-center justify-center text-slate-400">
-                  {product.image ? (
-                    <Image src={product.image} alt={product.name} width={400} height={style.productHeight} className="w-full object-cover" style={{ height: `${style.productHeight}px` }} sizes="(max-width: 768px) 100vw, 33vw" />
-                  ) : (
-                    `제품 이미지 ${i + 1}`
-                  )}
-                </div>
-                <h3 className="font-semibold">{product.name || `제품명 ${i + 1}`}</h3>
+              <article key={i} className="space-y-3 border-b border-slate-200 pb-6">
+                <p className="text-sm text-slate-400">{String(i + 1).padStart(2, '0')}</p>
+                <h3 className="text-2xl font-semibold">{product.name || `제품명 ${i + 1}`}</h3>
                 <p className="text-sm text-gray-600">{product.desc || '제품 설명을 입력할 수 있는 영역입니다.'}</p>
-                {/* 문의하기 버튼 제거 요청 반영 */}
+                <a href={product.link || '#'} className="inline-flex items-center text-xs font-semibold tracking-[0.12em] text-slate-700 border-b border-slate-700">MORE</a>
               </article>
             ))}
           </div>
